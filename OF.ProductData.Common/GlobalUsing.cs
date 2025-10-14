@@ -1,0 +1,17 @@
+global using MassTransit;
+global using Microsoft.Data.SqlClient;
+global using Microsoft.Extensions.Configuration;
+global using Newtonsoft.Json;
+global using Newtonsoft.Json.Linq;
+global using NLog;
+global using System.Data;
+global using System.Diagnostics;
+global using System.Net.Security;
+global using System.Security.Authentication;
+global using System.Security.Cryptography;
+global using System.Security.Cryptography.X509Certificates;
+global using System.Text;
+global using System.Text.Json;
+global using System.Text.RegularExpressions;
+global using System.Xml.Linq;
+global using LogLevel = NLog.LogLevel;

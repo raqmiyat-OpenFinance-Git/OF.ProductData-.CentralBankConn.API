@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
+		<PackageReference Include="MassTransit.RabbitMQ" Version="8.4.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.6" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.12.0" />
+		<PackageReference Include="OpenTelemetry.Exporter.Jaeger" Version="1.5.1" />
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.0.0-rc9.9" />
+		<PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="Dapper" Version="2.1.66" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
+		<PackageReference Include="NLog" Version="5.4.0" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\OF.ProductData.Model\OF.ProductData.Model.csproj" />
+	</ItemGroup>
+</Project>

@@ -1,0 +1,478 @@
+﻿using OF.ProductData.Model.CentralBank.Products;
+using OF.ProductData.Model.EFModel.Products;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
+{
+    public static class CbPostProductMapper
+    {
+        //public static List<ProductDatas> MapCbPostProductResponsetToEF(CbProductResponseWrapper requestDto)
+        //{
+        //    var lfiList = new List<ProductDatas>();
+
+        //    if (requestDto?.centralBankProductByIdResponse?.Data == null)
+        //        return lfiList;
+
+        //    foreach (var lfiData in requestDto.centralBankProductByIdResponse.Data)
+        //    {
+
+
+        //        if (lfiData.Products == null) continue;
+
+        //        foreach (var prod in lfiData.Products)
+        //        {
+        //            var productData = new ProductDatas
+        //            {
+        //                LFIId = lfiData.LFIId,
+        //                LFIBrandId = lfiData.LFIBrandId,
+        //                ProductId = prod.ProductId,
+        //                ProductName = prod.ProductName,
+        //                ProductCategory = prod.ProductCategory,
+        //                Description = prod.Description,
+        //                EffectiveFromDateTime = prod.EffectiveFromDateTime,
+        //                EffectiveToDateTime = prod.EffectiveToDateTime,
+        //                LastUpdatedDateTime = prod.LastUpdatedDateTime,
+        //                IsShariaCompliant = prod.IsShariaCompliant,
+        //                ShariaInformation = prod.ShariaInformation,
+        //                IsSalaryTransferRequired = prod.IsSalaryTransferRequired,
+
+        //                // Flattened Links
+        //                ApplicationUri = prod.Links?.ApplicationUri,
+        //                ApplicationEmail = prod.Links?.ApplicationEmail,
+        //                ApplicationPhoneNumber = prod.Links?.ApplicationPhoneNumber,
+        //                KfsUri = prod.Links?.KfsUri,
+        //                TermsUri = prod.Links?.TermsUri,
+        //                OverviewUri = prod.Links?.OverviewUri,
+        //                FeesAndPricingUri = prod.Links?.FeesAndPricingUri,
+        //                ScheduleOfChargesUri = prod.Links?.ScheduleOfChargesUri,
+        //                EligibilityUri = prod.Links?.EligibilityUri,
+        //                CardImageUri = prod.Links?.CardImageUri,
+        //                ApplicationDescription = prod.Links?.ApplicationDescription,
+
+        //                // Eligibility
+
+        //                ResidenceStatusType = prod.Eligibility?.ResidenceStatus?.FirstOrDefault()?.Type,
+        //                ResidenceStatusDescription = prod.Eligibility?.ResidenceStatus?.FirstOrDefault()?.Description,
+        //                EmploymentStatusType = prod.Eligibility?.EmploymentStatus?.FirstOrDefault()?.Type,
+        //                EmploymentStatusDescription = prod.Eligibility?.EmploymentStatus?.FirstOrDefault()?.Description,
+        //                AgeEligibilityType = prod.Eligibility?.Age?.FirstOrDefault()?.Type,
+        //                AgeEligibilityValue = prod.Eligibility?.Age?.FirstOrDefault()?.Value ?? 0,
+        //                AgeEligibilityDescription = prod.Eligibility?.Age?.FirstOrDefault()?.Description,
+
+        //                AdditionalEligibilityType = prod.Eligibility?.AdditionalEligibility?.FirstOrDefault()?.Type,
+        //                AdditionalEligibilityDescription = prod.Eligibility?.AdditionalEligibility?.FirstOrDefault() ?.Description,
+
+        //                CurrentAccount = MapCurrentAccount(prod.Product?.CurrentAccount),
+        //                SavingsAccount = MapSavingsAccount(prod.Product?.SavingsAccount),
+        //                CreditCard = MapCreditCard(prod.Product?.CreditCard),
+        //                PersonalLoan = MapPersonalLoan(prod.Product?.PersonalLoan),
+        //                Mortgage = MapMortgage(prod.Product?.Mortgage),
+        //                ProfitSharingRate = MapProfitSharingRate(prod.Product?.ProfitSharingRate),
+        //                FinanceProfitRate = MapFinanceProfitRate(prod.Product?.FinanceProfitRate)
+        //            };
+
+        //            lfi.Products.Add(productData);
+        //        }
+
+        //        lfiList.Add(lfi);
+        //    }
+
+        //    return lfiList;
+        //}
+        public static List<ProductResponse> MapCbPostProductResponsetToEF(CbProductResponseWrapper requestDto)
+        {
+            var productList = new List<ProductResponse>();
+
+            if (requestDto?.centralBankProductResponse?.Data == null)
+                return productList;
+
+            foreach (var lfiData in requestDto.centralBankProductResponse.Data)
+            {
+                if (lfiData.Products == null) continue;
+
+                foreach (var prod in lfiData.Products)
+                {
+                    var productData = new ProductResponse
+                    {
+                        LFIId = lfiData.LFIId,
+                        LFIBrandId = lfiData.LFIBrandId,
+                        ProductId = prod.ProductId,
+                        ProductName = prod.ProductName,
+                        ProductCategory = prod.ProductCategory,
+                        Description = prod.Description,
+                        EffectiveFromDateTime = prod.EffectiveFromDateTime,
+                        EffectiveToDateTime = prod.EffectiveToDateTime,
+                        LastUpdatedDateTime = prod.LastUpdatedDateTime,
+                        IsShariaCompliant = prod.IsShariaCompliant,
+                        ShariaInformation = prod.ShariaInformation,
+                        IsSalaryTransferRequired = prod.IsSalaryTransferRequired,
+
+                        // Flattened Links
+                        ApplicationUri = prod.Links?.ApplicationUri,
+                        ApplicationEmail = prod.Links?.ApplicationEmail,
+                        ApplicationPhoneNumber = prod.Links?.ApplicationPhoneNumber,
+                        KfsUri = prod.Links?.KfsUri,
+                        TermsUri = prod.Links?.TermsUri,
+                        OverviewUri = prod.Links?.OverviewUri,
+                        FeesAndPricingUri = prod.Links?.FeesAndPricingUri,
+                        ScheduleOfChargesUri = prod.Links?.ScheduleOfChargesUri,
+                        EligibilityUri = prod.Links?.EligibilityUri,
+                        CardImageUri = prod.Links?.CardImageUri,
+                        ApplicationDescription = prod.Links?.ApplicationDescription,
+
+                        // Eligibility
+                        ResidenceStatusType = prod.Eligibility?.ResidenceStatus?.FirstOrDefault()?.Type,
+                        ResidenceStatusDescription = prod.Eligibility?.ResidenceStatus?.FirstOrDefault()?.Description,
+                        EmploymentStatusType = prod.Eligibility?.EmploymentStatus?.FirstOrDefault()?.Type,
+                        EmploymentStatusDescription = prod.Eligibility?.EmploymentStatus?.FirstOrDefault()?.Description,
+                        AgeEligibilityType = prod.Eligibility?.Age?.FirstOrDefault()?.Type,
+                        AgeEligibilityValue = prod.Eligibility?.Age?.FirstOrDefault()?.Value ?? 0,
+                        AgeEligibilityDescription = prod.Eligibility?.Age?.FirstOrDefault()?.Description,
+                        AdditionalEligibilityType = prod.Eligibility?.AdditionalEligibility?.FirstOrDefault()?.Type,
+                        AdditionalEligibilityDescription = prod.Eligibility?.AdditionalEligibility?.FirstOrDefault()?.Description,
+
+                        // Nested product types
+                        CurrentAccount = MapCurrentAccount(prod.Product?.CurrentAccount),
+                        SavingsAccount = MapSavingsAccount(prod.Product?.SavingsAccount),
+                        CreditCard = MapCreditCard(prod.Product?.CreditCard),
+                        PersonalLoan = MapPersonalLoan(prod.Product?.PersonalLoan),
+                        Mortgage = MapMortgage(prod.Product?.Mortgage),
+                        ProfitSharingRate = MapProfitSharingRate(prod.Product?.ProfitSharingRate),
+                        FinanceProfitRate = MapFinanceProfitRate(prod.Product?.FinanceProfitRate)
+                    };
+
+                    productList.Add(productData);
+                }
+            }
+
+            return productList;
+        }
+
+        // -------------------- Helper mapping methods --------------------
+
+        private static ICollection<CurrentAccounts> MapCurrentAccount(CurrentAccountData src)
+        {
+            if (src == null) return null;
+            var fee = src.Fees?.FirstOrDefault();
+            return new List<CurrentAccounts>
+    {
+     new CurrentAccounts
+        {
+            Type = src.Type,
+            Description = src.Description,
+             IsOverdraftAvailable = src.IsOverdraftAvailable,
+              // Documentation
+                DocumentationType = src.Documentation?.FirstOrDefault()?.Type,
+                DocumentationDescription = src.Documentation?.FirstOrDefault()?.Description,
+
+                // Features
+                FeaturesType = src.Features?.FirstOrDefault()?.Type,
+                FeaturesDescription = src.Features?.FirstOrDefault()?.Description,
+
+                // Fees
+                FeesType = src.Fees?.FirstOrDefault()?.Type,
+                FeesPeriod = src.Fees?.FirstOrDefault()?.Period,
+                FeesName = src.Fees?.FirstOrDefault()?.Name,
+                FeesDescription = src.Fees?.FirstOrDefault()?.Description,
+                FeesUnit = src.Fees?.FirstOrDefault()?.Unit,
+                FeesAmount = src.Fees?.FirstOrDefault()?.Amount?.AmountValue != null
+    ? Convert.ToDecimal(src.Fees.FirstOrDefault().Amount.AmountValue)
+    : (decimal?)null,
+                FeesCurrency = src.Fees?.FirstOrDefault()?.Amount?.Currency,
+
+                FeesPercentage = (decimal?)fee?.Percentage,
+                FeesUnitValue = (decimal?)fee?.UnitValue,
+                FeesMaximumUnitValue = (decimal?)fee?.MaximumUnitValue,
+
+
+                // Limits
+                LimitsType = src.Limits?.FirstOrDefault()?.Type,
+                LimitsDescription = src.Limits?.FirstOrDefault()?.Description,
+                LimitsValue = src.Limits?.FirstOrDefault() != null ? (decimal?)src.Limits.FirstOrDefault().Value : null,
+
+                // Benefits
+                BenefitsType = src.Benefits?.FirstOrDefault()?.Type,
+                BenefitsName = src.Benefits?.FirstOrDefault()?.Name,
+                BenefitsDescription = src.Benefits?.FirstOrDefault()?.Description,
+                BenefitsValue = src.Benefits?.FirstOrDefault() != null ? (decimal?)src.Benefits.FirstOrDefault().Value : null
+     }
+    };
+        }
+
+
+        private static ICollection<SavingsAccount> MapSavingsAccount(SavingsAccountData src)
+        {
+            if (src == null) return null;
+            var fee = src.Fees?.FirstOrDefault();
+            return new List<SavingsAccount>
+    {
+       new SavingsAccount{
+            Type = src.Type,
+            Description = src.Description,
+            MinimumBalance = src.MinimumBalance != null ? decimal.Parse(src.MinimumBalance.AmountValue) : (decimal?)null,
+            AnnualReturn = (decimal?)src.AnnualReturn,
+               // Documentation
+                DocumentationType = src.Documentation?.FirstOrDefault()?.Type,
+                DocumentationDescription = src.Documentation?.FirstOrDefault()?.Description,
+
+                // Features
+                FeaturesType = src.Features?.FirstOrDefault()?.Type,
+                FeaturesDescription = src.Features?.FirstOrDefault()?.Description,
+
+                // Fees
+                FeesType = src.Fees?.FirstOrDefault()?.Type,
+                FeesPeriod = src.Fees?.FirstOrDefault()?.Period,
+                FeesName = src.Fees?.FirstOrDefault()?.Name,
+                FeesDescription = src.Fees?.FirstOrDefault()?.Description,
+                FeesUnit = src.Fees?.FirstOrDefault()?.Unit,
+                FeesAmount = src.Fees?.FirstOrDefault()?.Amount?.AmountValue != null
+    ? Convert.ToDecimal(src.Fees.FirstOrDefault().Amount.AmountValue)
+    : (decimal?)null,
+                FeesCurrency = src.Fees?.FirstOrDefault()?.Amount?.Currency,
+
+                FeesPercentage = (decimal?)fee?.Percentage,
+                FeesUnitValue = (decimal?)fee?.UnitValue,
+                FeesMaximumUnitValue = (decimal?)fee?.MaximumUnitValue,
+
+
+                // Limits
+                LimitsType = src.Limits?.FirstOrDefault()?.Type,
+                LimitsDescription = src.Limits?.FirstOrDefault()?.Description,
+                LimitsValue = src.Limits?.FirstOrDefault() != null ? (decimal?)src.Limits.FirstOrDefault().Value : null,
+
+                // Benefits
+                BenefitsType = src.Benefits?.FirstOrDefault()?.Type,
+                BenefitsName = src.Benefits?.FirstOrDefault()?.Name,
+                BenefitsDescription = src.Benefits?.FirstOrDefault()?.Description,
+                BenefitsValue = src.Benefits?.FirstOrDefault() != null ? (decimal?)src.Benefits.FirstOrDefault().Value : null
+       }
+    };
+        }
+
+
+        private static ICollection<CreditCard> MapCreditCard(CreditCardData src)
+        {
+            if (src == null) return null;
+
+            var fee = src.Fees?.FirstOrDefault();
+
+            return new List<CreditCard>
+            {
+                new CreditCard{
+                Type = src.Type,
+                Description = src.Description,
+                Rate = src.Rate,
+                DocumentationType = src.Documentation?.FirstOrDefault()?.Type,
+                DocumentationDescription = src.Documentation?.FirstOrDefault()?.Description,
+                FeaturesType = src.Features?.FirstOrDefault()?.Type,
+                FeaturesDescription = src.Features?.FirstOrDefault()?.Description,
+                FeesType = fee?.Type,
+                FeesPeriod = fee?.Period,
+                FeesName = fee?.Name,
+                FeesDescription = fee?.Description,
+                FeesUnit = fee?.Unit,
+                FeesAmount = fee?.Amount?.AmountValue != null ? decimal.Parse(fee.Amount.AmountValue) : (decimal?)null,
+                FeesCurrency = fee?.Amount?.Currency,
+                FeesPercentage = (decimal?)fee?.Percentage,
+                FeesUnitValue = (decimal?)fee?.UnitValue,
+                FeesMaximumUnitValue = (decimal?)fee?.MaximumUnitValue,
+                LimitsType = src.Limits?.FirstOrDefault()?.Type,
+                LimitsDescription = src.Limits?.FirstOrDefault()?.Description,
+                LimitsValue = src.Limits?.FirstOrDefault() != null ? (decimal?)src.Limits.FirstOrDefault().Value : null,
+                BenefitsType = src.Benefits?.FirstOrDefault()?.Type,
+                BenefitsName = src.Benefits?.FirstOrDefault()?.Name,
+                BenefitsDescription = src.Benefits?.FirstOrDefault()?.Description,
+                BenefitsValue = src.Benefits?.FirstOrDefault() != null ? (decimal?)src.Benefits.FirstOrDefault().Value : null
+                }
+            };
+        }
+
+
+
+
+
+        private static ICollection<PersonalLoan> MapPersonalLoan(PersonalLoanData src)
+        {
+            if (src == null) return null;
+            var firstBenefit = src.Benefits?.FirstOrDefault();
+            return new List<PersonalLoan>
+    {
+                new PersonalLoan{
+
+
+            Type = src.Type,
+            Description = src.Description,
+            MinimumLoanAmount = src.MinimumLoanAmount != null ? decimal.Parse(src.MinimumLoanAmount.AmountValue) : (decimal?)null,
+            MaximumLoanAmount = src.MaximumLoanAmount != null ? decimal.Parse(src.MaximumLoanAmount.AmountValue) : (decimal?)null,
+            MaxTenure = src.Tenure.MaximumLoanTenure,
+            MinTenure = src.Tenure.MaximumLoanTenure,
+            CalculationMethod = src.CalculationMethod,
+            RateType = src?.Type,
+            RateDescription = src?.Description,
+            ReviewFrequency = src?.Rate.ReviewFrequency,
+            IndicativeRateFrom = src?.Rate.IndicativeRate?.From,
+            IndicativeRateTo = src?.Rate.IndicativeRate?.To,
+            ProfitRateFrom = src?.Rate.ProfitRate?.From,
+            ProfitRateTo = src?.Rate.ProfitRate?.To,
+            //APRFrom =src.Rate.ap?.From,
+            //APRTo = aprRange?.To,
+            AnnualPercentageRateFrom = src.AnnualPercentageRateRange.From,
+            AnnualPercentageRateTo   = src.AnnualPercentageRateRange.To,
+
+
+            AdditionalInfoType = src.AdditionalInformation?.FirstOrDefault()?.Type,
+            AdditionalInfoDescription = src.AdditionalInformation?.FirstOrDefault()?.Description,
+            DocumentationType = src.Documentation?.FirstOrDefault()?.Type,
+            DocumentationDescription = src.Documentation?.FirstOrDefault()?.Description,
+            FeaturesType = src.Features?.FirstOrDefault()?.Type,
+            FeaturesDescription = src.Features?.FirstOrDefault()?.Description,
+            FeesType = src.Fees?.FirstOrDefault()?.Type,
+            FeesName = src.Fees?.FirstOrDefault()?.Name,
+            FeesAmount = src.Fees?.FirstOrDefault()?.Amount != null ? decimal.Parse(src.Fees.First().Amount.AmountValue) : (decimal?)null,
+            //Limits = src.Limits?.Take(1).Select(l => new Limit
+            //{
+            //    Type = l.Type,
+            //    Description = l.Description,
+            //    Value = (decimal)l.Value,
+            //    Percentage = (decimal?)l.Percentage
+            //}).ToList(),
+              
+                BenefitsName = firstBenefit?.Name,
+                BenefitsType = firstBenefit?.Type,
+                BenefitsDescription = firstBenefit?.Description,
+                BenefitsValue = firstBenefit != null ? (decimal)firstBenefit.Value : (decimal?)null
+                }
+
+        
+    };
+        }
+
+
+        private static ICollection<Mortgage> MapMortgage(MortgageData src)
+        {
+            if (src == null) return null;
+            var firstBenefit = src.Benefits?.FirstOrDefault();
+            return new List<Mortgage>
+    {
+        new Mortgage{
+            Type = src.Type,
+            Description = src.Description,
+            MinimumLoanAmount = src.MinimumLoanAmount != null ? decimal.Parse(src.MinimumLoanAmount.AmountValue) : (decimal?)null,
+            MaximumLoanAmount = src.MaximumLoanAmount != null ? decimal.Parse(src.MaximumLoanAmount.AmountValue) : (decimal?)null,
+            MaxTenure = src.Tenure.MaximumLoanTenure,
+            MinTenure = src.Tenure.MaximumLoanTenure,
+            CalculationMethod = src.CalculationMethod,
+            RateType = src?.Type,
+            RateDescription = src?.Description,
+            ReviewFrequency = src?.Rate.ReviewFrequency,
+            IndicativeRateFrom = src?.Rate.IndicativeRate?.From,
+            IndicativeRateTo = src?.Rate.IndicativeRate?.To,
+            ProfitRateFrom = src?.Rate.ProfitRate?.From,
+            ProfitRateTo = src?.Rate.ProfitRate?.To,
+            //APRFrom =src.Rate.ap?.From,
+            //APRTo = aprRange?.To,
+            AnnualPercentageRateFrom = src.AnnualPercentageRateRange.From,
+            AnnualPercentageRateTo   = src.AnnualPercentageRateRange.To,
+
+
+            AdditionalInfoType = src.AdditionalInformation?.FirstOrDefault()?.Type,
+            AdditionalInfoDescription = src.AdditionalInformation?.FirstOrDefault()?.Description,
+            DocumentationType = src.Documentation?.FirstOrDefault()?.Type,
+            DocumentationDescription = src.Documentation?.FirstOrDefault()?.Description,
+            FeaturesType = src.Features?.FirstOrDefault()?.Type,
+            FeaturesDescription = src.Features?.FirstOrDefault()?.Description,
+            FeesType = src.Fees?.FirstOrDefault()?.Type,
+            FeesName = src.Fees?.FirstOrDefault()?.Name,
+            FeesAmount = src.Fees?.FirstOrDefault()?.Amount != null ? decimal.Parse(src.Fees.First().Amount.AmountValue) : (decimal?)null,
+            //Limits = src.Limits?.Take(1).Select(l => new Limit
+            //{
+            //    Type = l.Type,
+            //    Description = l.Description,
+            //    Value = (decimal)l.Value,
+            //    Percentage = (decimal?)l.Percentage
+            //}).ToList(),
+              
+                BenefitsName = firstBenefit?.Name,
+                BenefitsType = firstBenefit?.Type,
+                BenefitsDescription = firstBenefit?.Description,
+                BenefitsValue = firstBenefit != null ? (decimal)firstBenefit.Value : (decimal?)null
+        }
+
+        
+    };
+        }
+
+        private static ICollection<ProfitSharingRate> MapProfitSharingRate(ProfitSharingRateData src)
+        {
+            if (src == null) return null;
+
+            return new List<ProfitSharingRate>
+    {
+       new ProfitSharingRate{
+            Name = src.Name,
+            Description = src.Description,
+            MinimumDepositAmount = src.MinimumDepositAmount?.AmountValue != null
+                                    ? decimal.Parse(src.MinimumDepositAmount.AmountValue)
+                                    : (decimal?)null,
+            Currency = src.MinimumDepositAmount?.Currency,
+
+            AnnualReturn = src.AnnualReturn,
+
+            // InvestmentPeriod
+            InvestmentPeriodName = src.InvestmentPeriod?.Name,
+            InvestmentPeriodDescription = src.InvestmentPeriod?.Description,
+
+            // AnnualReturnOptions - take first option if available
+            AnnualReturnName = src.AnnualReturnOptions?.FirstOrDefault()?.Name,
+            AnnualReturnDescription = src.AnnualReturnOptions?.FirstOrDefault()?.Description,
+
+            // Additional Information - take first option if available
+            AdditionalInfoType = src.AdditionalInformation?.FirstOrDefault()?.Type,
+            AdditionalInfoDescription = src.AdditionalInformation?.FirstOrDefault()?.Description
+       }
+    };
+        }
+
+
+        private static ICollection<FinanceProfitRate> MapFinanceProfitRate(FinanceProfitRateData src)
+        {
+            if (src == null) return null;
+
+            var tier = src.Tiers?.FirstOrDefault(); // take first tier if exists
+            var additionalInfo = src.AdditionalInformation?.FirstOrDefault();
+
+            var entity = new FinanceProfitRate
+            {
+                Name = src.Name,
+                Description = src.Description,
+                CalculationMethod = src.CalculationMethod,
+                Rate = src.Rate,
+                Frequency = src.Frequency,
+
+                // Flatten Tier
+                TiersType = tier?.Type,
+                TiersDescription = tier?.Description,
+                TiersName = tier?.Name,
+                TiersUnit = tier?.Unit,
+                TiersMinimumTierValue = tier?.MinimumTierValue?.AmountValue != null
+                    ? decimal.Parse(tier.MinimumTierValue.AmountValue)
+                    : (decimal?)null,
+                TiersMaximumTierValue = tier?.MaximumTierValue?.AmountValue != null
+                    ? decimal.Parse(tier.MaximumTierValue.AmountValue)
+                    : (decimal?)null,
+                TiersMinimumTierRate = tier?.MinimumTierRate,
+                TiersMaximumTierRate = tier?.MaximumTierRate,
+                TiersCondition = tier?.Condition,
+
+                // Flatten Additional Information
+                AdditionalInfoType = additionalInfo?.Type,
+                AdditionalInfoDescription = additionalInfo?.Description
+            };
+
+            return new List<FinanceProfitRate> { entity };
+        }
+
+    }
+}
