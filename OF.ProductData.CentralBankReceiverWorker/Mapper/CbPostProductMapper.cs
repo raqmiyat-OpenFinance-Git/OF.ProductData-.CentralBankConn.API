@@ -5,79 +5,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
 {
     public static class CbPostProductMapper
     {
-        //public static List<ProductDatas> MapCbPostProductResponsetToEF(CbProductResponseWrapper requestDto)
-        //{
-        //    var lfiList = new List<ProductDatas>();
 
-        //    if (requestDto?.centralBankProductByIdResponse?.Data == null)
-        //        return lfiList;
-
-        //    foreach (var lfiData in requestDto.centralBankProductByIdResponse.Data)
-        //    {
-
-
-        //        if (lfiData.Products == null) continue;
-
-        //        foreach (var prod in lfiData.Products)
-        //        {
-        //            var productData = new ProductDatas
-        //            {
-        //                LFIId = lfiData.LFIId,
-        //                LFIBrandId = lfiData.LFIBrandId,
-        //                ProductId = prod.ProductId,
-        //                ProductName = prod.ProductName,
-        //                ProductCategory = prod.ProductCategory,
-        //                Description = prod.Description,
-        //                EffectiveFromDateTime = prod.EffectiveFromDateTime,
-        //                EffectiveToDateTime = prod.EffectiveToDateTime,
-        //                LastUpdatedDateTime = prod.LastUpdatedDateTime,
-        //                IsShariaCompliant = prod.IsShariaCompliant,
-        //                ShariaInformation = prod.ShariaInformation,
-        //                IsSalaryTransferRequired = prod.IsSalaryTransferRequired,
-
-        //                // Flattened Links
-        //                ApplicationUri = prod.Links?.ApplicationUri,
-        //                ApplicationEmail = prod.Links?.ApplicationEmail,
-        //                ApplicationPhoneNumber = prod.Links?.ApplicationPhoneNumber,
-        //                KfsUri = prod.Links?.KfsUri,
-        //                TermsUri = prod.Links?.TermsUri,
-        //                OverviewUri = prod.Links?.OverviewUri,
-        //                FeesAndPricingUri = prod.Links?.FeesAndPricingUri,
-        //                ScheduleOfChargesUri = prod.Links?.ScheduleOfChargesUri,
-        //                EligibilityUri = prod.Links?.EligibilityUri,
-        //                CardImageUri = prod.Links?.CardImageUri,
-        //                ApplicationDescription = prod.Links?.ApplicationDescription,
-
-        //                // Eligibility
-
-        //                ResidenceStatusType = prod.Eligibility?.ResidenceStatus?.FirstOrDefault()?.Type,
-        //                ResidenceStatusDescription = prod.Eligibility?.ResidenceStatus?.FirstOrDefault()?.Description,
-        //                EmploymentStatusType = prod.Eligibility?.EmploymentStatus?.FirstOrDefault()?.Type,
-        //                EmploymentStatusDescription = prod.Eligibility?.EmploymentStatus?.FirstOrDefault()?.Description,
-        //                AgeEligibilityType = prod.Eligibility?.Age?.FirstOrDefault()?.Type,
-        //                AgeEligibilityValue = prod.Eligibility?.Age?.FirstOrDefault()?.Value ?? 0,
-        //                AgeEligibilityDescription = prod.Eligibility?.Age?.FirstOrDefault()?.Description,
-
-        //                AdditionalEligibilityType = prod.Eligibility?.AdditionalEligibility?.FirstOrDefault()?.Type,
-        //                AdditionalEligibilityDescription = prod.Eligibility?.AdditionalEligibility?.FirstOrDefault() ?.Description,
-
-        //                CurrentAccount = MapCurrentAccount(prod.Product?.CurrentAccount),
-        //                SavingsAccount = MapSavingsAccount(prod.Product?.SavingsAccount),
-        //                CreditCard = MapCreditCard(prod.Product?.CreditCard),
-        //                PersonalLoan = MapPersonalLoan(prod.Product?.PersonalLoan),
-        //                Mortgage = MapMortgage(prod.Product?.Mortgage),
-        //                ProfitSharingRate = MapProfitSharingRate(prod.Product?.ProfitSharingRate),
-        //                FinanceProfitRate = MapFinanceProfitRate(prod.Product?.FinanceProfitRate)
-        //            };
-
-        //            lfi.Products.Add(productData);
-        //        }
-
-        //        lfiList.Add(lfi);
-        //    }
-
-        //    return lfiList;
-        //}
         public static List<ProductResponse> MapCbPostProductResponsetToEF(CbProductResponseWrapper requestDto)
         {
             var productList = new List<ProductResponse>();
