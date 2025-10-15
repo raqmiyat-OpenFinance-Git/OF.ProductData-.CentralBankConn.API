@@ -24,8 +24,8 @@
         public decimal? IndicativeRateTo { get; set; }
         public decimal? ProfitRateFrom { get; set; }
         public decimal? ProfitRateTo { get; set; }
-        public decimal? APRFrom { get; set; }
-        public decimal? APRTo { get; set; }
+        public decimal? IndicativeAPRFrom { get; set; }
+        public decimal? IndicativeAPRTo { get; set; }
 
         public decimal AnnualPercentageRateFrom { get; set; }
         public decimal AnnualPercentageRateTo { get; set; }
