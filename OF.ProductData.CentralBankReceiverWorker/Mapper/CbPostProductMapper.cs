@@ -78,7 +78,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
                     productData.CreatedBy = "System";
                     productData.Status = "PROCESSED";
                     productData.CreatedOn = DateTime.UtcNow;
-                    productData.ResponsePayload = JsonConvert.SerializeObject(productData);
+                    productData.ResponsePayload = JsonConvert.SerializeObject(requestDto.centralBankProductResponse.Data);
                     productList.Add(productData);
                 }
             }

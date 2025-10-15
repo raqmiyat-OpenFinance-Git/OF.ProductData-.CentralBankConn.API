@@ -1,4 +1,6 @@
-﻿namespace OF.ProductData.Model.CentralBank.Products;
+﻿using System.Text.Json.Serialization;
+
+namespace OF.ProductData.Model.CentralBank.Products;
 public class CbProductDataResponse
 {
     public List<LFIData>? Data { get; set; }
@@ -181,6 +183,7 @@ public class Benefit : Limit
 
 public class Amount
 {
+    [JsonPropertyName("Amount")]
     public string? AmountValue { get; set; }
     public string? Currency { get; set; }
 }
@@ -207,21 +210,36 @@ public class APR
 }
 
 public class AdditionalInformation : TypeDescription { }
-
 public class NameDescription
 {
+
     public string? Name { get; set; }
+
+
     public string? Description { get; set; }
 }
 
-public class Tier : NameDescription
+public class Tier 
 {
+
     public string? Type { get; set; }
+    public string? Name { get; set; }
+    public string? Description { get; set; }
+
     public string? Unit { get; set; }
+
+
     public Amount? MinimumTierValue { get; set; }
+
+
     public Amount? MaximumTierValue { get; set; }
+
+    
     public decimal MinimumTierRate { get; set; }
+
+
     public decimal MaximumTierRate { get; set; }
+
+
     public string? Condition { get; set; }
 }
-
