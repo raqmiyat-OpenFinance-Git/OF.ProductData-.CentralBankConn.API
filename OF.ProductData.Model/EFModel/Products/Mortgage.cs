@@ -10,14 +10,13 @@
         public long RequestId { get; set; }
         public string? Type { get; set; }
         public string? Description { get; set; }
-        public decimal? MinimumBalance { get; set; }
-        public string? Currency { get; set; }
-        public decimal? AnnualReturn { get; set; }     
+       
         public decimal? MinimumLoanAmount { get; set; }
         public decimal? MaximumLoanAmount { get; set; }
         public decimal? MinTenure { get; set; }
         public decimal? MaxTenure { get; set; }      
         public string? CalculationMethod { get; set; }     
+        public string? Structure { get; set; }     
         public string? RateType { get; set; }
         public string? RateDescription { get; set; }
         public string? ReviewFrequency { get; set; }

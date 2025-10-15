@@ -1,8 +1,5 @@
 ﻿using OF.ProductData.Model.CentralBank.Products;
 using OF.ProductData.Model.EFModel.Products;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
 {
@@ -186,7 +183,6 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
                 FeesUnitValue = (decimal?)fee?.UnitValue,
                 FeesMaximumUnitValue = (decimal?)fee?.MaximumUnitValue,
 
-
                 // Limits
                 LimitsType = src.Limits?.FirstOrDefault()?.Type,
                 LimitsDescription = src.Limits?.FirstOrDefault()?.Description,
@@ -211,8 +207,8 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
        new SavingsAccount{
             Type = src.Type,
             Description = src.Description,
-            MinimumBalance = src.MinimumBalance != null ? decimal.Parse(src.MinimumBalance.AmountValue) : (decimal?)null,
-            AnnualReturn = (decimal?)src.AnnualReturn,
+          
+          
                // Documentation
                 DocumentationType = src.Documentation?.FirstOrDefault()?.Type,
                 DocumentationDescription = src.Documentation?.FirstOrDefault()?.Description,
@@ -359,11 +355,13 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
         new Mortgage{
             Type = src.Type,
             Description = src.Description,
+            CalculationMethod = src.CalculationMethod,
+            Structure=src.Structure,
             MinimumLoanAmount = src.MinimumLoanAmount != null ? decimal.Parse(src.MinimumLoanAmount.AmountValue) : (decimal?)null,
             MaximumLoanAmount = src.MaximumLoanAmount != null ? decimal.Parse(src.MaximumLoanAmount.AmountValue) : (decimal?)null,
             MaxTenure = src.Tenure.MaximumLoanTenure,
             MinTenure = src.Tenure.MaximumLoanTenure,
-            CalculationMethod = src.CalculationMethod,
+           
             RateType = src?.Type,
             RateDescription = src?.Description,
             ReviewFrequency = src?.Rate.ReviewFrequency,
@@ -373,10 +371,6 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
             ProfitRateTo = src?.Rate.ProfitRate?.To,
             //APRFrom =src.Rate.ap?.From,
             //APRTo = aprRange?.To,
-            AnnualPercentageRateFrom = src.AnnualPercentageRateRange.From,
-            AnnualPercentageRateTo   = src.AnnualPercentageRateRange.To,
-
-
             AdditionalInfoType = src.AdditionalInformation?.FirstOrDefault()?.Type,
             AdditionalInfoDescription = src.AdditionalInformation?.FirstOrDefault()?.Description,
             DocumentationType = src.Documentation?.FirstOrDefault()?.Type,

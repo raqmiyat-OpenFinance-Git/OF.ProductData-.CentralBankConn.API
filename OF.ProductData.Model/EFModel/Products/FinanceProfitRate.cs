@@ -18,7 +18,9 @@
         public string? TiersName { get; set; }
         public string? TiersUnit { get; set; }       
         public decimal? TiersMinimumTierValue { get; set; }
-        public decimal? TiersMaximumTierValue { get; set; }      
+        public decimal? TiersMaximumTierValue { get; set; }
+        public decimal? TiersMinimumTierCurrency { get; set; }
+        public decimal? TiersMaximumTierCurrency { get; set; }
         public decimal? TiersMinimumTierRate { get; set; }
         public decimal? TiersMaximumTierRate { get; set; }
         public string? TiersCondition { get; set; }       

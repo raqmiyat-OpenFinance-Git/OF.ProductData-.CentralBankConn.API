@@ -10,9 +10,6 @@
 
         public string? Type { get; set; }
         public string? Description { get; set; }
-        public decimal? MinimumBalance { get; set; }
-        public string? Currency { get; set; }
-        public decimal? AnnualReturn { get; set; }
 
         public bool IsOverdraftAvailable { get; set; }
 

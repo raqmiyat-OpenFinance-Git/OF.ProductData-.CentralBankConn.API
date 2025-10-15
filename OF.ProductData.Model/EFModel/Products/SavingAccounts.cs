@@ -9,11 +9,9 @@
         public long RequestId { get; set; }
         public string? Type { get; set; }
         public string? Description { get; set; }
-        public decimal? MinimumBalance { get; set; }
-        public string? Currency { get; set; }
-        public decimal? AnnualReturn { get; set; }
 
-      
+        public decimal? MinimumBalance { get; set; }
+
         public string? DocumentationType { get; set; }
         public string? DocumentationDescription { get; set; }
       
@@ -42,7 +40,6 @@
         public string? BenefitsName { get; set; }
         public string? BenefitsDescription { get; set; }
         public decimal? BenefitsValue { get; set; }
-        [ForeignKey("RequestId")]
 
         public virtual ProductResponse? Product { get; set; }
 
