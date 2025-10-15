@@ -242,11 +242,8 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
             IndicativeRateTo = src?.Rate.IndicativeRate?.To,
             ProfitRateFrom = src?.Rate.ProfitRate?.From,
             ProfitRateTo = src?.Rate.ProfitRate?.To,
-            //APRFrom =src.Rate.ap?.From,
-            //APRTo = aprRange?.To,
             AnnualPercentageRateFrom = src.AnnualPercentageRateRange.From,
             AnnualPercentageRateTo   = src.AnnualPercentageRateRange.To,
-
 
             AdditionalInfoType = src.AdditionalInformation?.FirstOrDefault()?.Type,
             AdditionalInfoDescription = src.AdditionalInformation?.FirstOrDefault()?.Description,
@@ -257,9 +254,9 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
             FeesType = src.Fees?.FirstOrDefault()?.Type,
             FeesName = src.Fees?.FirstOrDefault()?.Name,
             FeesAmount = src.Fees?.FirstOrDefault()?.Amount != null ? decimal.Parse(src.Fees.First().Amount.AmountValue) : (decimal?)null,
-           LimitsDescription=src.Limits.FirstOrDefault().Description,
+            LimitsDescription=src.Limits.FirstOrDefault().Description,
             LimitsType=src.Limits.FirstOrDefault().Type,
-               LimitsValue = src.Limits?.FirstOrDefault() != null ? (decimal?)src.Limits.FirstOrDefault().Value : null,
+            LimitsValue = src.Limits?.FirstOrDefault() != null ? (decimal?)src.Limits.FirstOrDefault().Value : null,
 
                 BenefitsName = firstBenefit?.Name,
                 BenefitsType = firstBenefit?.Type,

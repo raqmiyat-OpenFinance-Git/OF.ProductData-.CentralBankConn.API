@@ -7,6 +7,4 @@ public interface IProductDataService
     Task AddProductResponseAsync(long id,Guid CorrelationId, List<ProductResponse> updatedData, Logger logger);
     Task<long> GetPostProductIdAsync(Guid correlationId, Logger logger);
 
-
-
 }

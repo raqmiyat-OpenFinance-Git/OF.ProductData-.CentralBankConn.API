@@ -131,14 +131,10 @@ public class ProductDataController : ControllerBase
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(coreBankProductRequest.accountId))
-            {
-                _Logger.Warn("balanceId is null or empty. Cannot generate ExternalRefNbr.");
-                return;
-            }
+       
 
             coreBankProductRequest.ExternalRefNbr = await _repository
-                .GetNextSequenceNoAsync("BALENQ", coreBankProductRequest.accountId, _Logger.Log);
+                .GetNextSequenceNoAsync("PRODUCTENQ", coreBankProductRequest!.ExternalRefNbr, _Logger.Log);
 
         }
         catch (Exception ex)
