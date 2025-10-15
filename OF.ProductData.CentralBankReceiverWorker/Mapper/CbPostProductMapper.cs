@@ -1,4 +1,5 @@
-﻿using OF.ProductData.Model.CentralBank.Products;
+﻿using Newtonsoft.Json;
+using OF.ProductData.Model.CentralBank.Products;
 using OF.ProductData.Model.EFModel.Products;
 
 namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
@@ -6,9 +7,9 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
     public static class CbPostProductMapper
     {
 
-        public static List<ProductResponse> MapCbPostProductResponsetToEF(CbProductResponseWrapper requestDto)
+        public static List<EFProductResponse> MapCbPostProductResponsetToEF(CbProductResponseWrapper requestDto)
         {
-            var productList = new List<ProductResponse>();
+            var productList = new List<EFProductResponse>();
 
             if (requestDto?.centralBankProductResponse?.Data == null)
                 return productList;
@@ -19,7 +20,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
 
                 foreach (var prod in lfiData.Products)
                 {
-                    var productData = new ProductResponse
+                    var productData = new EFProductResponse
                     {
                         LFIId = lfiData.LFIId,
                         LFIBrandId = lfiData.LFIBrandId,
@@ -48,10 +49,16 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
                         ApplicationDescription = prod.Links?.ApplicationDescription,
 
                         // Eligibility
+                        ChannelsType = prod.Channels?.FirstOrDefault()?.Type,
+                        ChannelsDescription = prod.Channels?.FirstOrDefault()?.Description,
                         ResidenceStatusType = prod.Eligibility?.ResidenceStatus?.FirstOrDefault()?.Type,
                         ResidenceStatusDescription = prod.Eligibility?.ResidenceStatus?.FirstOrDefault()?.Description,
                         EmploymentStatusType = prod.Eligibility?.EmploymentStatus?.FirstOrDefault()?.Type,
                         EmploymentStatusDescription = prod.Eligibility?.EmploymentStatus?.FirstOrDefault()?.Description,
+                        CustomerTypeType = prod.Eligibility?.CustomerType?.FirstOrDefault()?.Type,
+                        CustomerTypeDescription = prod.Eligibility?.CustomerType?.FirstOrDefault()?.Description,
+                        AccountOwnershipType = prod.Eligibility?.AccountOwnership?.FirstOrDefault()?.Type,
+                        AccountOwnershipDescription = prod.Eligibility?.AccountOwnership?.FirstOrDefault()?.Description,
                         AgeEligibilityType = prod.Eligibility?.Age?.FirstOrDefault()?.Type,
                         AgeEligibilityValue = prod.Eligibility?.Age?.FirstOrDefault()?.Value ?? 0,
                         AgeEligibilityDescription = prod.Eligibility?.Age?.FirstOrDefault()?.Description,
@@ -68,6 +75,10 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
                         FinanceProfitRate = MapFinanceProfitRate(prod.Product?.FinanceProfitRate)
                     };
 
+                    productData.CreatedBy = "System";
+                    productData.Status = "PROCESSED";
+                    productData.CreatedOn = DateTime.UtcNow;
+                    productData.ResponsePayload = JsonConvert.SerializeObject(productData);
                     productList.Add(productData);
                 }
             }
@@ -137,7 +148,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
                 Description = src.Description,
                 MinimumBalance=Convert.ToDecimal(src.MinimumBalance!.AmountValue),
                 Currency=src.MinimumBalance.Currency,
-                AnnualReturn=Convert.ToDecimal(src.AnnualReturn),                
+                AnnualReturn=Convert.ToDecimal(src.AnnualReturn),
                 DocumentationType = src.Documentation?.FirstOrDefault()?.Type,
                 DocumentationDescription = src.Documentation?.FirstOrDefault()?.Description,
 
@@ -244,7 +255,8 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
             ProfitRateTo = src?.Rate.ProfitRate?.To,
             AnnualPercentageRateFrom = src.AnnualPercentageRateRange.From,
             AnnualPercentageRateTo   = src.AnnualPercentageRateRange.To,
-
+            FixedRatePeriod=src?.FixedRatePeriod,
+            DebtBurdenRatio=src?.DebtBurdenRatio,
             AdditionalInfoType = src.AdditionalInformation?.FirstOrDefault()?.Type,
             AdditionalInfoDescription = src.AdditionalInformation?.FirstOrDefault()?.Description,
             DocumentationType = src.Documentation?.FirstOrDefault()?.Type,
@@ -252,7 +264,14 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
             FeaturesType = src.Features?.FirstOrDefault()?.Type,
             FeaturesDescription = src.Features?.FirstOrDefault()?.Description,
             FeesType = src.Fees?.FirstOrDefault()?.Type,
+            FeesPeriod = src.Fees?.FirstOrDefault()?.Period,
+            FeesDescription = src.Fees?.FirstOrDefault()?.Description,
+            FeesUnit= src.Fees?.FirstOrDefault()?.Unit,
             FeesName = src.Fees?.FirstOrDefault()?.Name,
+            FeesCurrency = src.Fees?.FirstOrDefault()?.Amount.Currency,
+            FeesPercentage = Convert.ToDecimal(src.Fees?.FirstOrDefault()?.Percentage),
+            FeesUnitValue =Convert.ToDecimal(src.Fees?.FirstOrDefault()?.UnitValue),
+            FeesMaximumUnitValue = Convert.ToDecimal(src.Fees?.FirstOrDefault()?.MaximumUnitValue),
             FeesAmount = src.Fees?.FirstOrDefault()?.Amount != null ? decimal.Parse(src.Fees.First().Amount.AmountValue) : (decimal?)null,
             LimitsDescription=src.Limits.FirstOrDefault().Description,
             LimitsType=src.Limits.FirstOrDefault().Type,
@@ -264,7 +283,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
                 BenefitsValue = firstBenefit != null ? (decimal)firstBenefit.Value : (decimal?)null
                 }
 
-        
+
     };
         }
 
@@ -281,7 +300,9 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
             CalculationMethod = src.CalculationMethod,
             Structure=src.Structure,
             MinimumLoanAmount = src.MinimumLoanAmount != null ? decimal.Parse(src.MinimumLoanAmount.AmountValue) : (decimal?)null,
+            MinimumLoanCurrency=src.MinimumLoanAmount.Currency,
             MaximumLoanAmount = src.MaximumLoanAmount != null ? decimal.Parse(src.MaximumLoanAmount.AmountValue) : (decimal?)null,
+            MaximumLoanCurrency=src.MaximumLoanAmount.Currency,
             MaxTenure = src.Tenure.MaximumLoanTenure,
             MinTenure = src.Tenure.MaximumLoanTenure,
 
@@ -292,16 +313,22 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
             IndicativeAPRTo = src?.Rate.IndicativeRate?.To,
             ProfitRateFrom = src?.Rate.ProfitRate?.From,
             ProfitRateTo = src?.Rate.ProfitRate?.To,
-            //APRFrom =src.Rate.ap?.From,
-            //APRTo = aprRange?.To,
-            AdditionalInfoType = src.AdditionalInformation?.FirstOrDefault()?.Type,
-            AdditionalInfoDescription = src.AdditionalInformation?.FirstOrDefault()?.Description,
+            IndicativeRateFrom = src?.Rate.IndicativeRate?.From,
+            IndicativeRateTo = src?.Rate.IndicativeRate?.To,
+        
             DocumentationType = src.Documentation?.FirstOrDefault()?.Type,
             DocumentationDescription = src.Documentation?.FirstOrDefault()?.Description,
             FeaturesType = src.Features?.FirstOrDefault()?.Type,
             FeaturesDescription = src.Features?.FirstOrDefault()?.Description,
             FeesType = src.Fees?.FirstOrDefault()?.Type,
+            FeesPeriod = src.Fees?.FirstOrDefault()?.Period,
+            FeesDescription = src.Fees?.FirstOrDefault()?.Description,
+            FeesUnit= src.Fees?.FirstOrDefault()?.Unit,
             FeesName = src.Fees?.FirstOrDefault()?.Name,
+            FeesCurrency = src.Fees?.FirstOrDefault()?.Amount.Currency,
+            FeesPercentage = Convert.ToDecimal(src.Fees?.FirstOrDefault()?.Percentage),
+            FeesUnitValue =Convert.ToDecimal(src.Fees?.FirstOrDefault()?.UnitValue),
+            FeesMaximumUnitValue = Convert.ToDecimal(src.Fees?.FirstOrDefault()?.MaximumUnitValue),
             FeesAmount = src.Fees?.FirstOrDefault()?.Amount != null ? decimal.Parse(src.Fees.First().Amount.AmountValue) : (decimal?)null,
             LimitsDescription=src.Limits.FirstOrDefault().Description,
             LimitsType=src.Limits.FirstOrDefault().Type,
@@ -371,9 +398,11 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
                 TiersMinimumTierValue = tier?.MinimumTierValue?.AmountValue != null
                     ? decimal.Parse(tier.MinimumTierValue.AmountValue)
                     : (decimal?)null,
+                TiersMinimumTierCurrency = tier?.MinimumTierValue.Currency,
                 TiersMaximumTierValue = tier?.MaximumTierValue?.AmountValue != null
                     ? decimal.Parse(tier.MaximumTierValue.AmountValue)
                     : (decimal?)null,
+                TiersMaximumTierCurrency = tier?.MaximumTierValue.Currency,
                 TiersMinimumTierRate = tier?.MinimumTierRate,
                 TiersMaximumTierRate = tier?.MaximumTierRate,
                 TiersCondition = tier?.Condition,

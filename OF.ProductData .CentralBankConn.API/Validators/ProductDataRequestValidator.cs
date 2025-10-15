@@ -5,7 +5,7 @@ using OF.ProductData.Model.Common;
 namespace OF.ProductData.CentralBankConn.API.Validators;
 
 
-public class ProductDataRequestValidator : AbstractValidator<CbProductRequest>
+public class ProductDataRequestValidator : AbstractValidator<CbProductDataRequest>
 {
     private readonly IMasterRepository _masterRepository;
     private readonly Logger _logger;
@@ -15,15 +15,77 @@ public class ProductDataRequestValidator : AbstractValidator<CbProductRequest>
         _masterRepository = masterRepository;
         _logger = logger;
 
-        //Authorization
-        RuleFor(model => model.Authorization)
+        RuleFor(model => model.O3ProviderId)
+             .Cascade(CascadeMode.Stop)
+             .NotNull().WithMessage("o3-provider-id cannot be blank")
+             .NotEmpty().WithMessage("o3-provider-id cannot be blank")
+             .MaximumLength(100).WithMessage("o3-provider-id length should be maximum 100 characters.")
+             .Matches("^[a-zA-Z0-9_-]*$").WithMessage("o3-provider-id must not contain special characters.")
+             .MustAsync(ValidateDuplicateTransactionIdAsync)
+             .WithMessage("Duplicate Transaction ID found.");
+
+        //o3-aspsp-id
+        RuleFor(model => model.O3AspspId)
             .Cascade(CascadeMode.Stop)
-            .NotNull().WithMessage("Authorization cannot be blank")
-            .NotEmpty().WithMessage("Authorization cannot be blank")
-            .MaximumLength(100).WithMessage("Authorization length should be maximum 100 characters.")
-            .Matches("^[a-zA-Z0-9_-]*$").WithMessage("Authorization must not contain special characters.")
-            .MustAsync(ValidateDuplicateTransactionIdAsync);
-         
+            .NotNull().WithMessage("o3-aspsp-id cannot be blank")
+            .NotEmpty().WithMessage("o3-aspsp-id cannot be blank")
+            .MaximumLength(100).WithMessage("o3-aspsp-id length should be maximum 100 characters.")
+            .Matches("^[a-zA-Z0-9_-]*$").WithMessage("o3-aspsp-id must not contain special characters.");
+
+        //o3-caller-org-id
+        RuleFor(model => model.O3CallerOrgId)
+            .Cascade(CascadeMode.Stop)
+            .NotNull().WithMessage("o3-caller-org-id cannot be blank")
+            .NotEmpty().WithMessage("o3-caller-org-id cannot be blank")
+            .MaximumLength(100).WithMessage("o3-caller-org-id length should be maximum 100 characters.")
+            .Matches("^[a-zA-Z0-9_-]*$").WithMessage("o3-caller-org-id must not contain special characters.");
+
+        //o3-caller-client-id
+        RuleFor(model => model.O3CallerClientId)
+            .Cascade(CascadeMode.Stop)
+            .NotNull().WithMessage("o3-caller-client-id cannot be blank")
+            .NotEmpty().WithMessage("o3-caller-client-id cannot be blank")
+            .MaximumLength(100).WithMessage("o3-caller-client-id length should be maximum 100 characters.")
+            .Matches("^[a-zA-Z0-9_-]*$").WithMessage("o3-caller-client-id must not contain special characters.");
+
+        //o3-caller-software-statement-id
+        RuleFor(model => model.O3CallerSoftwareStatementId)
+            .Cascade(CascadeMode.Stop)
+            .NotNull().WithMessage("o3-caller-software-statement-id cannot be blank")
+            .NotEmpty().WithMessage("o3-caller-software-statement-id cannot be blank")
+            .MaximumLength(100).WithMessage("o3-caller-software-statement-id length should be maximum 100 characters.")
+            .Matches("^[a-zA-Z0-9_-]*$").WithMessage("o3-caller-software-statement-id must not contain special characters.");
+
+        //o3-api-uri
+        RuleFor(model => model.O3ApiUri)
+            .Cascade(CascadeMode.Stop)
+            .NotNull().WithMessage("o3-api-uri cannot be blank")
+            .NotEmpty().WithMessage("o3-api-uri cannot be blank")
+            .MaximumLength(100).WithMessage("o3-api-uri length should be maximum 100 characters.")
+            .Matches("^[a-zA-Z0-9_-]*$").WithMessage("o3-api-uri must not contain special characters.");
+
+        //o3-api-operation
+        RuleFor(model => model.O3ApiOperation)
+            .Cascade(CascadeMode.Stop)
+            .NotNull().WithMessage("o3-api-operation cannot be blank")
+            .NotEmpty().WithMessage("o3-api-operation cannot be blank")
+            .MaximumLength(100).WithMessage("o3-api-operation length should be maximum 100 characters.")
+            .Matches("^[a-zA-Z0-9_-]*$").WithMessage("o3-api-operation must not contain special characters.");
+        //o3-caller-interaction-id
+        RuleFor(model => model.O3CallerInteractionId)
+            .Cascade(CascadeMode.Stop)
+            .NotNull().WithMessage("o3-caller-interaction-id cannot be blank")
+            .NotEmpty().WithMessage("o3-caller-interaction-id cannot be blank")
+            .MaximumLength(100).WithMessage("o3-caller-interaction-id length should be maximum 100 characters.")
+            .Matches("^[a-zA-Z0-9_-]*$").WithMessage("o3-caller-interaction-id must not contain special characters.");
+
+        //o3-ozone-interaction-id
+        RuleFor(model => model.O3OzoneInteractionId)
+            .Cascade(CascadeMode.Stop)
+            .NotNull().WithMessage("o3-ozone-interaction-id cannot be blank")
+            .NotEmpty().WithMessage("o3-ozone-interaction-id cannot be blank")
+            .MaximumLength(100).WithMessage("o3-ozone-interaction-id length should be maximum 100 characters.")
+            .Matches("^[a-zA-Z0-9_-]*$").WithMessage("o3-ozone-interaction-id must not contain special characters.");
 
         //CustomerIpAddress
         RuleFor(model => model.CustomerIpAddress)
@@ -78,7 +140,7 @@ public class ProductDataRequestValidator : AbstractValidator<CbProductRequest>
 
     }
 
-    private async Task<bool> ValidateDuplicateTransactionIdAsync(CbProductRequest model, string o3ProviderId, CancellationToken cancellationToken)
+    private async Task<bool> ValidateDuplicateTransactionIdAsync(CbProductDataRequest model, string o3ProviderId, CancellationToken cancellationToken)
     {
         try
         {

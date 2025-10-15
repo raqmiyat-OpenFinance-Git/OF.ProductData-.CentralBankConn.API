@@ -37,9 +37,8 @@ public class CentralBankProductDataResponseConsumer : IConsumer<CbProductRespons
                 return;
             }
             _logger.Info($"Received CentralBankProductDataResponseConsumer - CorrelationId: {context?.Message?.CorrelationId}");
-            await Task.Delay(5000);
+       
             await UpdateProduct(context?.Message!);
-            await UpdatePostProductRequestStatusAsync(context?.Message!, _logger.Log);
         }
         catch (Exception ex)
         {
@@ -54,44 +53,20 @@ public class CentralBankProductDataResponseConsumer : IConsumer<CbProductRespons
         {
             ArgumentNullException.ThrowIfNull(centralBankProductResponseWrapper);
             var response = centralBankProductResponseWrapper.centralBankProductResponse;
-            CbProductResponse balanceresponse = new();
-            CbProductResponse productModel = new();
+            CbProductDataResponse productModel = new();
             var paymentResponse = CbPostProductMapper.MapCbPostProductResponsetToEF(centralBankProductResponseWrapper);
             long paymentRequestId = await _productService.GetPostProductIdAsync(centralBankProductResponseWrapper.CorrelationId, _logger.Log);
-            await _productService.AddProductResponseAsync(paymentRequestId,centralBankProductResponseWrapper.CorrelationId, paymentResponse, _logger.Log);
             await Task.Delay(5000);
+            await _productService.AddProductResponseAsync(paymentRequestId,centralBankProductResponseWrapper.CorrelationId, paymentResponse, _logger.Log);
+            await _productService.UpdateProductRequestStatusAsync(paymentRequestId, centralBankProductResponseWrapper.CorrelationId, _logger.Log);
+           
         }
         catch (Exception ex)
         {
             _logger.Error(ex, $"Error occurred in UpdateProduct(). Request ID: {centralBankProductResponseWrapper?.CorrelationId}");
         }
     }
-    public async Task<bool> UpdatePostProductRequestStatusAsync(CbProductResponseWrapper centralBankProductResponseWrapper, Logger logger)
-    {
-        try
-        {
-            var parameters = new DynamicParameters();
-            parameters.Add("@Id", centralBankProductResponseWrapper.CorrelationId, DbType.Guid);
-            parameters.Add("@Status", "PROCESSED", DbType.String);
-
-            logger.Info($"Calling UpdatePostProductRequestStatusAsync with Correlation: Id={centralBankProductResponseWrapper.CorrelationId}, Status={"PROCESSED"}");
-
-            await _dbConnection.ExecuteAsync(
-                "OF_UpdateLfiBalanceRequests",
-                parameters,
-                commandType: CommandType.StoredProcedure,
-                commandTimeout: 1200,
-                transaction: null);
-
-            logger.Info($"Payment request updated successfully with . : CorrelationId Id={centralBankProductResponseWrapper.CorrelationId}, Status={"PROCESSED"}");
-            return true;
-        }
-        catch (Exception ex)
-        {
-            logger.Error(ex, $"Error updating payment request  CorrelationId Id={centralBankProductResponseWrapper.CorrelationId}, Status={"PROCESSED"}");
-            throw;
-        }
-    }
+   
 
    
 

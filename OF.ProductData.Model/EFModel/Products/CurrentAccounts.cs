@@ -13,14 +13,14 @@
 
         public bool IsOverdraftAvailable { get; set; }
 
-      
+
         public string? DocumentationType { get; set; }
         public string? DocumentationDescription { get; set; }
-        
+
         public string? FeaturesType { get; set; }
         public string? FeaturesDescription { get; set; }
 
-       
+
         public string? FeesType { get; set; }
         public string? FeesPeriod { get; set; }
         public string? FeesName { get; set; }
@@ -32,18 +32,18 @@
         public decimal? FeesUnitValue { get; set; }
         public decimal? FeesMaximumUnitValue { get; set; }
 
-       
+
         public string? LimitsType { get; set; }
         public string? LimitsDescription { get; set; }
         public decimal? LimitsValue { get; set; }
 
-        
+
         public string? BenefitsType { get; set; }
         public string? BenefitsName { get; set; }
         public string? BenefitsDescription { get; set; }
         public decimal? BenefitsValue { get; set; }
         // Navigation property
-        public virtual ProductResponse? Product { get; set; }
+        public virtual EFProductResponse? Product { get; set; }
     }
 
 }

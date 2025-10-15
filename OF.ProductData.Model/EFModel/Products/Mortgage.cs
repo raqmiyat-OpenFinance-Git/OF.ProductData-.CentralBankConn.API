@@ -6,17 +6,19 @@
 
         [Key]
         public Guid Id { get; set; }
-       [ForeignKey(nameof(Product))]
+        [ForeignKey(nameof(Product))]
         public long RequestId { get; set; }
         public string? Type { get; set; }
         public string? Description { get; set; }
-       
+
         public decimal? MinimumLoanAmount { get; set; }
+        public string? MinimumLoanCurrency { get; set; }
         public decimal? MaximumLoanAmount { get; set; }
+        public string? MaximumLoanCurrency { get; set; }
         public decimal? MinTenure { get; set; }
-        public decimal? MaxTenure { get; set; }      
-        public string? CalculationMethod { get; set; }     
-        public string? Structure { get; set; }     
+        public decimal? MaxTenure { get; set; }
+        public string? CalculationMethod { get; set; }
+        public string? Structure { get; set; }
         public string? RateType { get; set; }
         public string? RateDescription { get; set; }
         public string? ReviewFrequency { get; set; }
@@ -52,11 +54,10 @@
         public string? BenefitsName { get; set; }
         public string? BenefitsDescription { get; set; }
         public decimal? BenefitsValue { get; set; }
-        public string? AdditionalInfoType { get; set; }
-        public string? AdditionalInfoDescription { get; set; }
+ 
 
         // Navigation
-        public virtual ProductResponse? Product { get; set; }
+        public virtual EFProductResponse? Product { get; set; }
     }
 
 }

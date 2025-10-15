@@ -122,142 +122,13 @@ public class ProductDataService : IProductDataService
         return apiResult!;
     }
 
-    //public CbProductResponse GetCentralBankProductByIdResponse(CbsProductResponse cbProductResponse, Logger logger)
-    //{
-    //    var random = new Random();
-
-    //    try
-    //    {
-    //        var response = new CbProductResponse
-    //        {
-    //            Data = new List<LFIData>
-    //        {
-    //            new LFIData
-    //            {
-    //                LFIId = Guid.NewGuid().ToString(),
-    //                LFIBrandId = "Brand_" + random.Next(1000, 9999),
-    //                Products = new List<ProductWrapper>
-    //                {
-    //                    new ProductWrapper
-    //                    {
-    //                        ProductId = "Prod_" + random.Next(10000, 99999),
-    //                        ProductName = "Savings Account",
-    //                        ProductCategory = "SavingsAccount",
-    //                        Description = "Dummy savings account product",
-    //                        EffectiveFromDateTime = DateTime.UtcNow.AddYears(-1),
-    //                        EffectiveToDateTime = DateTime.UtcNow.AddYears(1),
-    //                        LastUpdatedDateTime = DateTime.UtcNow,
-    //                        IsShariaCompliant = false,
-    //                        ShariaInformation = "Not Applicable",
-    //                        IsSalaryTransferRequired = false,
-    //                        Links = new Links
-    //                        {
-    //                            ApplicationUri = "http://example.com/apply",
-    //                            ApplicationPhoneNumber = "+971500000000",
-    //                            ApplicationEmail = "support@example.com",
-    //                            ApplicationDescription = "Application info",
-    //                            KfsUri = "http://example.com/kfs",
-    //                            OverviewUri = "http://example.com/overview",
-    //                            TermsUri = "http://example.com/terms",
-    //                            FeesAndPricingUri = "http://example.com/fees",
-    //                            ScheduleOfChargesUri = "http://example.com/schedule",
-    //                            EligibilityUri = "http://example.com/eligibility",
-    //                            CardImageUri = "http://example.com/card.png"
-    //                        },
-    //                        Eligibility = new EligibilityData
-    //                        {
-    //                            ResidenceStatus = new List<TypeDescription>
-    //                            {
-    //                                new TypeDescription { Type = "UaeResident", Description = "A person who is a resident of the UAE." }
-    //                            },
-    //                            EmploymentStatus = new List<TypeDescription>
-    //                            {
-    //                                new TypeDescription { Type = "Salaried", Description = "Salaried employee" }
-    //                            },
-    //                            CustomerType = new List<TypeDescription>
-    //                            {
-    //                                new TypeDescription { Type = "Retail", Description = "Retail customer" }
-    //                            },
-    //                            AccountOwnership = new List<TypeDescription>
-    //                            {
-    //                                new TypeDescription { Type = "Individual", Description = "Individual ownership" }
-    //                            },
-    //                            Age = new List<AgeEligibility>
-    //                            {
-    //                                new AgeEligibility { Type = "MinimumAge", Description = "Minimum 18 years", Value = 18 }
-    //                            },
-    //                            AdditionalEligibility = new List<TypeDescription>
-    //                            {
-    //                                new TypeDescription { Type = "Student", Description = "Student eligibility" }
-    //                            }
-    //                        },
-    //                        Channels = new List<Channel>
-    //                        {
-    //                            new Channel { Type = "Phone", Description = "Apply via phone" }
-    //                        },
-    //                        Product = new ProductDetails
-    //                        {
-    //                            SavingsAccount = new SavingsAccountData
-    //                            {
-    //                                Type = "Savings",
-    //                                Description = "Dummy savings account",
-    //                                MinimumBalance = new Amount { AmountValue = "1000", Currency = "AED" },
-    //                                AnnualReturn = 1.5,
-    //                                Documentation = new List<Document>
-    //                                {
-    //                                    new Document { Type = "ApplicationForm", Description = "Fill application form" }
-    //                                },
-    //                                Features = new List<Feature>
-    //                                {
-    //                                    new Feature { Type = "IslamicBanking", Description = "Sharia compliant feature" }
-    //                                },
-    //                                Fees = new List<Fee>
-    //                                {
-    //                                    new Fee
-    //                                    {
-    //                                        Type = "MonthlyFees",
-    //                                        Period = "Monthly",
-    //                                        Name = "Account Maintenance",
-    //                                        Description = "Monthly account maintenance fee",
-    //                                        Unit = "Amount",
-    //                                        Amount = new Amount { AmountValue = "10", Currency = "AED" },
-    //                                        Percentage = 0,
-    //                                        UnitValue = 10,
-    //                                        MaximumUnitValue = 10
-    //                                    }
-    //                                },
-    //                                Limits = new List<Limit>
-    //                                {
-    //                                    new Limit { Type = "MinimumOpeningBalance", Description = "Minimum opening balance", Value = 1000 }
-    //                                },
-    //                                Benefits = new List<Benefit>
-    //                                {
-    //                                    new Benefit { Type = "Cashback", Name = "Monthly Cashback", Description = "Cashback benefit", Value = 50 }
-    //                                }
-    //                            }
-    //                        }
-    //                    }
-    //                }
-    //            }
-    //        }
-    //        };
-
-    //        return response;
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        logger.Error(ex, "Error occurred in GetCentralBankProductByIdResponse()");
-    //        throw;
-    //    }
-    //}
-
-    public CbProductResponse GetCentralBankProductByIdResponse(CbsProductResponse cbProductResponse, Logger logger)
+    public CbProductDataResponse GetCentralBankProductByIdResponse(CbsProductResponse cbProductResponse, Logger logger)
     {
         var random = new Random();
 
         try
         {
-            var response = new CbProductResponse
+            var response = new CbProductDataResponse
             {
                 Data = new List<LFIData>
             {
@@ -412,7 +283,7 @@ public class ProductDataService : IProductDataService
                                             Unit = "Balance",
                                             MinimumTierValue = new Amount
                                             {
-                                                AmountValue = "1000",  // regex: ^\d{1,13}$|^\d{1,13}\.\d{1,5}$
+                                                AmountValue = "1000",
                                                 Currency = "AED"
                                             },
                                             MaximumTierValue = new Amount
@@ -442,11 +313,6 @@ public class ProductDataService : IProductDataService
             throw;
         }
     }
-
-
-
-
-
     private StringContent GetStringContent(string jsonContent, string correlationId)
     {
         try
@@ -458,7 +324,5 @@ public class ProductDataService : IProductDataService
             throw new InvalidOperationException("Error during encryption/decryption", ex);
         }
     }
-
-
    
 }

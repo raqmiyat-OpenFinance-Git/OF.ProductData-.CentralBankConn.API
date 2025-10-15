@@ -24,11 +24,11 @@
         public string? AnnualReturnName { get; set; }
         public string? AnnualReturnDescription { get; set; }
 
-  
+
         public string? AdditionalInfoType { get; set; }
         public string? AdditionalInfoDescription { get; set; }
 
 
-        public virtual ProductResponse? Product { get; set; }
+        public virtual EFProductResponse? Product { get; set; }
     }
 }

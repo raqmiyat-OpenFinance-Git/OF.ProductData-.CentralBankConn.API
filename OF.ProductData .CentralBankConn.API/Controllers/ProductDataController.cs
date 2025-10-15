@@ -5,6 +5,7 @@ using OF.ProductData.Common.NLog;
 using OF.ProductData.Model.CentralBank.Products;
 using OF.ProductData.Model.Common;
 using OF.ProductData.Model.CoreBank.Products;
+using System.Net;
 using ErrorResponse = OF.ProductData.Model.Common.ErrorResponse;
 
 namespace OF.ProductData.CentralBankConn.API.Controllers;
@@ -15,8 +16,8 @@ public class ProductDataController : ControllerBase
     private readonly ProductLogger _logger;
     private readonly SendPointInitialize _sendPointInitialize;
     private readonly IOptions<CoreBankApis> _coreBankApis;
-    private readonly IValidator<CbProductRequest> _validator;
-    public ProductDataController(IProductDataService service, ProductLogger logger, SendPointInitialize sendPointInitialize, IOptions<CoreBankApis> coreBankApis, IValidator<CbProductRequest> validator)
+    private readonly IValidator<CbProductDataRequest> _validator;
+    public ProductDataController(IProductDataService service, ProductLogger logger, SendPointInitialize sendPointInitialize, IOptions<CoreBankApis> coreBankApis, IValidator<CbProductDataRequest> validator)
     {
         _service = service;
         _logger = logger;
@@ -27,34 +28,52 @@ public class ProductDataController : ControllerBase
 
     [HttpGet]
     [Route("/products")]
-    [ProducesResponseType(typeof(CbProductResponse), 200)]
+    [ProducesResponseType(typeof(CbProductDataResponse), 200)]
     [ProducesResponseType(typeof(ErrorResponse), 400)]
     [ProducesResponseType(typeof(ErrorResponse), 404)]
     [ProducesResponseType(typeof(ErrorResponse), 500)]
     public async Task<IActionResult> RetrieveProduct(
 
-      [FromHeader(Name = "authorization")] string? authorization,
-     [Required][FromHeader(Name = "x-fapi-customer-ip-address")] string customerIpAddress,
+    // ==== Required Headers ====
+    [Required][FromHeader(Name = "o3-provider-id")] string o3ProviderId,
+    [Required][FromHeader(Name = "o3-caller-org-id")] string o3CallerOrgId,
+    [Required][FromHeader(Name = "o3-caller-client-id")] string o3CallerClientId,
+    [Required][FromHeader(Name = "o3-caller-software-statement-id")] string o3CallerSoftwareStatementId,
+    [Required][FromHeader(Name = "o3-api-uri")] string o3ApiUri,
+    [Required][FromHeader(Name = "o3-api-operation")] string o3ApiOperation,
+    [FromHeader(Name = "o3-caller-interaction-id")] string? o3CallerInteractionId,
+    [Required][FromHeader(Name = "o3-ozone-interaction-id")] string o3OzoneInteractionId,
+    [Required][FromHeader(Name = "x-fapi-customer-ip-address")] string xFapiCustomerIpAddress,
 
-    [Required][FromQuery(Name = "ProductCategory")] string? productCategory = null, // enum //SavingsAccount | CurrentAccount | CreditCard | Loan | Mortgage.
-    [Required][FromQuery(Name = "IsShariaCompliant")] bool? isShariaCompliant = null,
-    [Required][FromQuery(Name = "LastUpdatedDateTime")] DateTime? lastUpdatedDateTime = null,
-    [Required][FromQuery(Name = "PageNumber")] int pageNumber = 1,
-    [Required][FromQuery(Name = "PageSize")] int pageSize = 100,
-    [Required][FromQuery(Name = "SortOrder")] string sortOrder = "asc",
-    [Required][FromQuery(Name = "SortField")] string sortField = "LastUpdatedDateTime")
+    // ==== Query Parameters ====
+    [Required][FromQuery(Name = "ProductCategory")] string productCategory, // Enum: SavingsAccount | CurrentAccount | CreditCard | Loan | Mortgage
+    [FromQuery(Name = "IsShariaCompliant")] bool? isShariaCompliant = null,
+    [FromQuery(Name = "LastUpdatedDateTime")] DateTime? lastUpdatedDateTime = null,
+    [FromQuery(Name = "SortOrder")] string sortOrder = "asc", // Enum: asc | desc
+    [FromQuery(Name = "SortField")] string sortField = "LastUpdatedDateTime", // Enum: LastUpdatedDateTime | ProductId
+    [FromQuery(Name = "page")] int page = 1,
+    [FromQuery(Name = "page-size")] int pageSize = 100)
     {
         var stopwatch = Stopwatch.StartNew();
-        authorization = authorization?.Trim();
-        customerIpAddress = customerIpAddress.Trim();
-        productCategory = productCategory?.Trim()!;
+        o3ProviderId = o3ProviderId.Trim();
+        o3CallerOrgId = o3CallerOrgId.Trim();
+        o3CallerClientId = o3CallerClientId.Trim();
+        o3CallerSoftwareStatementId = o3CallerSoftwareStatementId.Trim();
+        o3ApiUri = o3ApiUri.Trim();
+        o3ApiOperation = o3ApiOperation.Trim();
+        o3CallerInteractionId = o3CallerInteractionId?.Trim();
+        o3OzoneInteractionId = o3OzoneInteractionId.Trim();
+        xFapiCustomerIpAddress = xFapiCustomerIpAddress.Trim();
+        productCategory = productCategory.Trim();
+        sortOrder = sortOrder.Trim().ToLowerInvariant();
+        sortField = sortField.Trim();
         isShariaCompliant = isShariaCompliant;
-        lastUpdatedDateTime = lastUpdatedDateTime;
-        pageNumber = pageNumber;
+        lastUpdatedDateTime=lastUpdatedDateTime;
         pageSize = pageSize;
-        sortOrder = sortOrder;
-        sortField = sortField;
-     
+        page = page;
+
+
+
 
         string? correlationId = string.Empty;
         string requestJson = string.Empty;
@@ -74,7 +93,7 @@ public class ProductDataController : ControllerBase
             _logger.Info("RetrieveProduct invoked.");
 
             _logger.Info("------------------------------------------------------------------------");
-          
+
 
             endPointUrl = UrlHelper.CombineUrl(_coreBankApis.Value.BaseUrl!, _coreBankApis.Value.ProductServiceUrl!.GetProductUrl!);
             correlationId = HttpContext.Items["X-Correlation-ID"]?.ToString();
@@ -83,12 +102,28 @@ public class ProductDataController : ControllerBase
                 _logger.Info($"Invalid CorrelationId: {correlationId}");
                 return BadRequest(new ErrorResponse { errorCode = "400", errorMessage = $"Invalid CorrelationId: {correlationId}" });
             }
-   
 
-            CbProductRequest centralRequest = MapHeadersToCentralRequest(
-            authorization, customerIpAddress, productCategory, isShariaCompliant,
-            lastUpdatedDateTime, pageNumber, pageSize,
-            sortOrder, sortField,  guid);
+
+            CbProductDataRequest centralRequest = MapHeadersToCentralRequest(
+     xFapiCustomerIpAddress,
+     productCategory,
+     isShariaCompliant,
+     lastUpdatedDateTime,
+     page,
+     pageSize,
+     sortOrder,
+     sortField,
+     guid,
+     // Pass all O3 headers if MapHeadersToCentralRequest accepts them
+     o3ProviderId,
+     o3CallerOrgId,
+     o3CallerClientId,
+     o3CallerSoftwareStatementId,
+     o3ApiUri,
+     o3ApiOperation,
+     o3CallerInteractionId,
+     o3OzoneInteractionId
+ );
 
             requestJson = JsonConvert.SerializeObject(centralRequest, Formatting.Indented);
 
@@ -97,7 +132,7 @@ public class ProductDataController : ControllerBase
             await _sendPointInitialize.GetProductDataRequest!.Send(centralRequest);
 
             _logger.Info($"Request send:\n{requestJson}");
-         
+
             CbsProductRequest coreRequest = new()
             {
                 //Authorization = authorization?.Trim(),
@@ -109,7 +144,8 @@ public class ProductDataController : ControllerBase
                 //PageSize = pageSize,
                 //SortOrder = sortOrder,
                 //SortField = sortField,
-                CorrelationId = guid,
+                CorrelationId = guid
+                
             };
 
             // call internal API
@@ -122,10 +158,10 @@ public class ProductDataController : ControllerBase
 
             if (apiResult == null)
             {
-                return NotFound(new ErrorResponse { errorCode = "404", errorMessage = "Customer data not found." });
+                return NotFound(new ErrorResponse { errorCode = "404", errorMessage = "Product data not found." });
             }
             CbProductResponseWrapper centralBankProductResponseWrapper = new();
-            CbProductResponse cbResponse;
+            CbProductDataResponse cbResponse;
             centralBankProductResponseWrapper.CorrelationId = guid;
             if (apiResult.Success)
             {
@@ -157,7 +193,7 @@ public class ProductDataController : ControllerBase
             }
             else
             {
-                centralBankProductResponseWrapper.centralBankProductResponse = new CbProductResponse();
+                centralBankProductResponseWrapper.centralBankProductResponse = new CbProductDataResponse();
                 await _sendPointInitialize.GetProductDataResponse!.Send(centralBankProductResponseWrapper);
 
                 var log = AuditLogFactory.CreateAuditLog(
@@ -204,7 +240,7 @@ public class ProductDataController : ControllerBase
     }
 
 
-    private Task<JObject> GetResponseObject(CbProductResponse centralBankProductResponse)
+    private Task<JObject> GetResponseObject(CbProductDataResponse centralBankProductResponse)
     {
         try
         {
@@ -219,15 +255,16 @@ public class ProductDataController : ControllerBase
         catch (Exception ex)
         {
             _logger.Error(ex, "Error occurred in GetResponseObject()");
-            return Task.FromResult(new JObject()); 
+            return Task.FromResult(new JObject());
         }
     }
-    private CbProductRequest MapHeadersToCentralRequest(string authorization,string customerIpAddress,string? productCategory,bool? isShariaCompliant,DateTime? lastUpdatedDateTime,int pageNumber,int pageSize,string sortOrder,string sortField,Guid correlationId)
+    private CbProductDataRequest MapHeadersToCentralRequest(string customerIpAddress,string? productCategory,bool? isShariaCompliant, DateTime? lastUpdatedDateTime,int pageNumber, int pageSize,string sortOrder,string sortField,Guid correlationId,
+     string o3ProviderId, string o3CallerOrgId, string o3CallerClientId,string o3CallerSoftwareStatementId,string o3ApiUri, string o3ApiOperation,string? o3CallerInteractionId, string o3OzoneInteractionId
+  )
     {
-        return new CbProductRequest
+        return new CbProductDataRequest
         {
-        
-            Authorization = authorization,
+         
             CustomerIpAddress = customerIpAddress,
             ProductCategory = productCategory,
             IsShariaCompliant = isShariaCompliant,
@@ -236,14 +273,18 @@ public class ProductDataController : ControllerBase
             PageSize = pageSize,
             SortOrder = sortOrder,
             SortField = sortField,
-            CorrelationId = correlationId
+            CorrelationId = correlationId,
+
+            // O3 headers
+            O3ProviderId = o3ProviderId.Trim(),
+            O3CallerOrgId = o3CallerOrgId.Trim(),
+            O3CallerClientId = o3CallerClientId.Trim(),
+            O3CallerSoftwareStatementId = o3CallerSoftwareStatementId.Trim(),
+            O3ApiUri = o3ApiUri.Trim(),
+            O3ApiOperation = o3ApiOperation.Trim(),
+            O3CallerInteractionId = o3CallerInteractionId?.Trim(),
+            O3OzoneInteractionId = o3OzoneInteractionId.Trim()
         };
     }
-
-
-
-
-
-
 
 }

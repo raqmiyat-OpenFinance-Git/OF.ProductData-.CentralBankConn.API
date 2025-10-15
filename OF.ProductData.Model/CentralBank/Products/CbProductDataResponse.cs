@@ -1,5 +1,5 @@
 ﻿namespace OF.ProductData.Model.CentralBank.Products;
-public class CbProductResponse
+public class CbProductDataResponse
 {
     public List<LFIData>? Data { get; set; }
 }

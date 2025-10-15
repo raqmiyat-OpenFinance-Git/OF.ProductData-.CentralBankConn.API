@@ -2,6 +2,7 @@
 using OF.ProductData.CentralBankReceiverWorker.IServices;
 using OF.ProductData.Model.EFModel.Products;
 using System.Data.Common;
+using System.Diagnostics;
 
 namespace OF.ProductData.CentralBankReceiverWorker.Services;
 
@@ -15,7 +16,7 @@ public class ProductDataService : IProductDataService
         _context = context;
         _dbConnection = dbConnection;
     }
-    public async Task AddProductAsync(ProductRequest productRequest, Logger logger)
+    public async Task AddProductAsync(EFProductRequest productRequest, Logger logger)
     {
         try
         {
@@ -36,7 +37,7 @@ public class ProductDataService : IProductDataService
     }
 
 
-    public async Task AddProductResponseAsync(long id,Guid CorrelationId, List<ProductResponse> ProductResponse, Logger logger)
+    public async Task AddProductResponseAsync(long id,Guid CorrelationId, List<EFProductResponse> ProductResponse, Logger logger)
     {
         try
         {
@@ -86,4 +87,32 @@ public class ProductDataService : IProductDataService
 
         return result;
     }
+
+    public async Task<bool> UpdateProductRequestStatusAsync(long id,Guid correlationId, Logger logger)
+    {
+        try
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@Id", id, DbType.Int64);
+            parameters.Add("@Status", "PROCESSED", DbType.String);
+
+            logger.Info($"Calling OF_UpdateProductRequests with Transaction: Id={id}, Status={"PROCESSED"}");
+
+            await _dbConnection.ExecuteAsync(
+                "OF_UpdateProductRequests",
+                parameters,
+                commandType: CommandType.StoredProcedure,
+                commandTimeout: 1200,
+                transaction: null);
+
+            logger.Info($"Payment request updated successfully with Transaction. CorrelationId: {correlationId}, Id={id}, Status={"PROCESSED"}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.Error(ex, $"Error updating payment request. CorrelationId: {correlationId}, Id={id}, Status={"PROCESSED"}");
+            throw;
+        }
+    }
+
 }

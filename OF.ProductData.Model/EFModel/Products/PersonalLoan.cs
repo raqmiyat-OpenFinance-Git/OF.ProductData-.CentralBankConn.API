@@ -16,16 +16,15 @@
         public string? MaximumLoanCurrency { get; set; }
         public decimal? MinTenure { get; set; }
         public decimal? MaxTenure { get; set; }
-        public string? CalculationMethod { get; set; }  
+        public string? CalculationMethod { get; set; }
         public string? RateType { get; set; }
-        public string? RateDescription { get; set; }        
+        public string? RateDescription { get; set; }
         public string? ReviewFrequency { get; set; }
         public decimal? IndicativeRateFrom { get; set; }
         public decimal? IndicativeRateTo { get; set; }
         public decimal? ProfitRateFrom { get; set; }
         public decimal? ProfitRateTo { get; set; }
-        public decimal? APRFrom { get; set; }
-        public decimal? APRTo { get; set; }
+
         public decimal AnnualPercentageRateFrom { get; set; }
         public decimal AnnualPercentageRateTo { get; set; }
         public string? FixedRatePeriod { get; set; }
@@ -51,9 +50,9 @@
         public string? BenefitsName { get; set; }
         public string? BenefitsDescription { get; set; }
         public decimal? BenefitsValue { get; set; }
-    
+
         public string? AdditionalInfoType { get; set; }
         public string? AdditionalInfoDescription { get; set; }
-        public virtual ProductResponse? Product { get; set; }
+        public virtual EFProductResponse? Product { get; set; }
     }
 }

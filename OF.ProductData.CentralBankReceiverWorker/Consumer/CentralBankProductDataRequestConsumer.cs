@@ -7,7 +7,7 @@ using OF.ProductData.Model.EFModel.Products;
 namespace OF.ProductData.CentralBankReceiverWorker.Consumer;
 
 [ExcludeFromConfigureEndpoints]
-public class CentralBankProductDataRequestConsumer : IConsumer<CbProductRequest>
+public class CentralBankProductDataRequestConsumer : IConsumer<CbProductDataRequest>
 {
     private readonly ProductLogger _logger;
     private readonly IDbConnection _dbConnection;
@@ -23,7 +23,7 @@ public class CentralBankProductDataRequestConsumer : IConsumer<CbProductRequest>
         _Service = Service;
     }
 
-    public async Task Consume(ConsumeContext<CbProductRequest> context)
+    public async Task Consume(ConsumeContext<CbProductDataRequest> context)
     {
         try
         {
@@ -42,24 +42,31 @@ public class CentralBankProductDataRequestConsumer : IConsumer<CbProductRequest>
             throw;
         }
     }
-    public async Task CreateProduct(CbProductRequest request)
+    public async Task CreateProduct(CbProductDataRequest request)
     {
         try
         {
 
-            var productRequest = new ProductRequest
+            var productRequest = new EFProductRequest
             {
                 CorrelationId = request.CorrelationId,
-                Authorization = request.Authorization,
                 CustomerIpAddress = request.CustomerIpAddress ?? string.Empty,
                 PageSize = request.PageSize,
                 PageNumber = request.PageNumber,
+                O3ProviderId = request.O3ProviderId ?? string.Empty,
+                O3AspspId = request.O3AspspId ?? string.Empty,
+                O3CallerOrgId = request.O3CallerOrgId ?? string.Empty,
+                O3CallerClientId = request.O3CallerClientId ?? string.Empty,
+                O3CallerSoftwareStatementId = request.O3CallerSoftwareStatementId ?? string.Empty,
+                O3ApiUri = request.O3ApiUri ?? string.Empty,
+                O3ApiOperation = request.O3ApiOperation ?? string.Empty,
+                O3CallerInteractionId = request.O3CallerInteractionId ?? string.Empty,
+                O3OzoneInteractionId = request.O3OzoneInteractionId ?? string.Empty,
                 ProductCategory = request.ProductCategory ?? string.Empty,
                 IsShariaCompliant = request.IsShariaCompliant,
                 LastUpdatedDateTime = Convert.ToString(request.LastUpdatedDateTime),
                 SortOrder = request.SortOrder ?? string.Empty,
                 SortField = request.SortField ?? string.Empty,
-
                 CreatedBy = "System",
                 CreatedOn = DateTime.UtcNow,
                 Status = "PENDING",

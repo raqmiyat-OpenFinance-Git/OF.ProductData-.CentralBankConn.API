@@ -7,5 +7,5 @@ namespace OF.ProductData.CentralBankConn.API.IServices;
 public interface IProductDataService
 {
     Task<ApiResult<CbsProductResponse>> GetProductFromCoreBankAsync(CbsProductRequest cbProductRequest);
-    CbProductResponse GetCentralBankProductByIdResponse(CbsProductResponse cbProductResponse, Logger logger);
+    CbProductDataResponse GetCentralBankProductByIdResponse(CbsProductResponse cbProductResponse, Logger logger);
 }
