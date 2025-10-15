@@ -1,8 +1,6 @@
 ﻿using Dapper;
 using OF.ProductData.CentralBankReceiverWorker.IServices;
 using OF.ProductData.Model.EFModel.Products;
-using System.Data.Common;
-using System.Diagnostics;
 
 namespace OF.ProductData.CentralBankReceiverWorker.Services;
 
