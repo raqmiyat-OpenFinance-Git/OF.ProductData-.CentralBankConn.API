@@ -255,14 +255,10 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
             FeesType = src.Fees?.FirstOrDefault()?.Type,
             FeesName = src.Fees?.FirstOrDefault()?.Name,
             FeesAmount = src.Fees?.FirstOrDefault()?.Amount != null ? decimal.Parse(src.Fees.First().Amount.AmountValue) : (decimal?)null,
-            //Limits = src.Limits?.Take(1).Select(l => new Limit
-            //{
-            //    Type = l.Type,
-            //    Description = l.Description,
-            //    Value = (decimal)l.Value,
-            //    Percentage = (decimal?)l.Percentage
-            //}).ToList(),
-              
+           LimitsDescription=src.Limits.FirstOrDefault().Description,
+            LimitsType=src.Limits.FirstOrDefault().Type,
+               LimitsValue = src.Limits?.FirstOrDefault() != null ? (decimal?)src.Limits.FirstOrDefault().Value : null,
+
                 BenefitsName = firstBenefit?.Name,
                 BenefitsType = firstBenefit?.Type,
                 BenefitsDescription = firstBenefit?.Description,
@@ -289,12 +285,12 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
             MaximumLoanAmount = src.MaximumLoanAmount != null ? decimal.Parse(src.MaximumLoanAmount.AmountValue) : (decimal?)null,
             MaxTenure = src.Tenure.MaximumLoanTenure,
             MinTenure = src.Tenure.MaximumLoanTenure,
-           
+
             RateType = src?.Type,
             RateDescription = src?.Description,
             ReviewFrequency = src?.Rate.ReviewFrequency,
-            IndicativeRateFrom = src?.Rate.IndicativeRate?.From,
-            IndicativeRateTo = src?.Rate.IndicativeRate?.To,
+            IndicativeAPRFrom = src?.Rate.IndicativeRate?.From,
+            IndicativeAPRTo = src?.Rate.IndicativeRate?.To,
             ProfitRateFrom = src?.Rate.ProfitRate?.From,
             ProfitRateTo = src?.Rate.ProfitRate?.To,
             //APRFrom =src.Rate.ap?.From,
@@ -308,21 +304,16 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
             FeesType = src.Fees?.FirstOrDefault()?.Type,
             FeesName = src.Fees?.FirstOrDefault()?.Name,
             FeesAmount = src.Fees?.FirstOrDefault()?.Amount != null ? decimal.Parse(src.Fees.First().Amount.AmountValue) : (decimal?)null,
-            //Limits = src.Limits?.Take(1).Select(l => new Limit
-            //{
-            //    Type = l.Type,
-            //    Description = l.Description,
-            //    Value = (decimal)l.Value,
-            //    Percentage = (decimal?)l.Percentage
-            //}).ToList(),
-              
-                BenefitsName = firstBenefit?.Name,
-                BenefitsType = firstBenefit?.Type,
-                BenefitsDescription = firstBenefit?.Description,
-                BenefitsValue = firstBenefit != null ? (decimal)firstBenefit.Value : (decimal?)null
+            LimitsDescription=src.Limits.FirstOrDefault().Description,
+            LimitsType=src.Limits.FirstOrDefault().Type,
+            LimitsValue = src.Limits?.FirstOrDefault() != null ? (decimal?)src.Limits.FirstOrDefault().Value : null,
+            BenefitsName = firstBenefit?.Name,
+            BenefitsType = firstBenefit?.Type,
+            BenefitsDescription = firstBenefit?.Description,
+            BenefitsValue = firstBenefit != null ? (decimal)firstBenefit.Value : (decimal?)null
         }
 
-        
+
     };
         }
 
