@@ -120,7 +120,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
                 BenefitsType = src.Benefits?.FirstOrDefault()?.Type,
                 BenefitsName = src.Benefits?.FirstOrDefault()?.Name,
                 BenefitsDescription = src.Benefits?.FirstOrDefault()?.Description,
-                BenefitsValue = src.Benefits?.FirstOrDefault() != null ? (decimal?)src.Benefits.FirstOrDefault().Value : null
+                BenefitsValue = src.Benefits?.FirstOrDefault() != null ? (decimal?)src.Benefits.FirstOrDefault()!.Value : null
      }
     };
         }
@@ -133,11 +133,11 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
             return new List<SavingsAccount>
     {
        new SavingsAccount{
-            Type = src.Type,
-            Description = src.Description,
-          
-          
-               // Documentation
+                Type = src.Type,
+                Description = src.Description,
+                MinimumBalance=Convert.ToDecimal(src.MinimumBalance!.AmountValue),
+                Currency=src.MinimumBalance.Currency,
+                AnnualReturn=Convert.ToDecimal(src.AnnualReturn),                
                 DocumentationType = src.Documentation?.FirstOrDefault()?.Type,
                 DocumentationDescription = src.Documentation?.FirstOrDefault()?.Description,
 
@@ -152,8 +152,8 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
                 FeesDescription = src.Fees?.FirstOrDefault()?.Description,
                 FeesUnit = src.Fees?.FirstOrDefault()?.Unit,
                 FeesAmount = src.Fees?.FirstOrDefault()?.Amount?.AmountValue != null
-    ? Convert.ToDecimal(src.Fees.FirstOrDefault().Amount.AmountValue)
-    : (decimal?)null,
+                ? Convert.ToDecimal(src.Fees.FirstOrDefault().Amount.AmountValue)
+                : (decimal?)null,
                 FeesCurrency = src.Fees?.FirstOrDefault()?.Amount?.Currency,
 
                 FeesPercentage = (decimal?)fee?.Percentage,
@@ -223,13 +223,15 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
             var firstBenefit = src.Benefits?.FirstOrDefault();
             return new List<PersonalLoan>
     {
-                new PersonalLoan{
+          new PersonalLoan{
 
 
             Type = src.Type,
             Description = src.Description,
             MinimumLoanAmount = src.MinimumLoanAmount != null ? decimal.Parse(src.MinimumLoanAmount.AmountValue) : (decimal?)null,
+            MinimumLoanCurrency=src.MinimumLoanAmount.Currency,
             MaximumLoanAmount = src.MaximumLoanAmount != null ? decimal.Parse(src.MaximumLoanAmount.AmountValue) : (decimal?)null,
+            MaximumLoanCurrency=src.MaximumLoanAmount.Currency,
             MaxTenure = src.Tenure.MaximumLoanTenure,
             MinTenure = src.Tenure.MaximumLoanTenure,
             CalculationMethod = src.CalculationMethod,

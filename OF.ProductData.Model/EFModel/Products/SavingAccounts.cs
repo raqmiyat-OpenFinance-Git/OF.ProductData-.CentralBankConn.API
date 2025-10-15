@@ -11,7 +11,9 @@
         public string? Description { get; set; }
 
         public decimal? MinimumBalance { get; set; }
+        public string? Currency { get; set; }
 
+        public decimal? AnnualReturn { get; set; }
         public string? DocumentationType { get; set; }
         public string? DocumentationDescription { get; set; }
       

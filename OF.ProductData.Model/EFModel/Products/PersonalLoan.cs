@@ -10,8 +10,10 @@
         public long RequestId { get; set; }
         public string? Type { get; set; }
         public string? Description { get; set; }
-        public decimal? MinimumLoanAmount { get; set; }       
-        public decimal? MaximumLoanAmount { get; set; }     
+        public decimal? MinimumLoanAmount { get; set; }
+        public string? MinimumLoanCurrency { get; set; }
+        public decimal? MaximumLoanAmount { get; set; }
+        public string? MaximumLoanCurrency { get; set; }
         public decimal? MinTenure { get; set; }
         public decimal? MaxTenure { get; set; }
         public string? CalculationMethod { get; set; }  

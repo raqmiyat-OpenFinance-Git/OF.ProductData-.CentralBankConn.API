@@ -402,7 +402,29 @@ public class ProductDataService : IProductDataService
                                     CalculationMethod = "FlatRate",
                                     Rate = 1.0m,
                                     Frequency = "Monthly",
-                                    Tiers = new List<Tier> { new Tier { Type = "Tier1", Unit = "AED", MinimumTierValue = new Amount { AmountValue = "1000", Currency = "AED" }, MaximumTierValue = new Amount { AmountValue = "5000", Currency = "AED" }, MinimumTierRate = 0.5m, MaximumTierRate = 1.0m, Condition = "Basic Condition" } },
+                                    Tiers = new List<Tier>
+                                    {
+                                        new Tier
+                                        {
+                                            Type = "Tier1",
+                                            Description = "Tier for balances between 1,000 and 5,000 AED",
+                                            Name = "Standard Tier",
+                                            Unit = "Balance",
+                                            MinimumTierValue = new Amount
+                                            {
+                                                AmountValue = "1000",  // regex: ^\d{1,13}$|^\d{1,13}\.\d{1,5}$
+                                                Currency = "AED"
+                                            },
+                                            MaximumTierValue = new Amount
+                                            {
+                                                AmountValue = "5000",
+                                                Currency = "AED"
+                                            },
+                                            MinimumTierRate = 0.5m,
+                                            MaximumTierRate = 1.0m,
+                                            Condition = "Applicable for standard savings accounts with minimum balance of 1,000 AED"
+                                        }
+                                    },
                                     AdditionalInformation = new List<AdditionalInformation> { new AdditionalInformation { Type = "Info", Description = "Additional info" } }
                                 }
                             }

@@ -219,31 +219,16 @@ public class ProductDataController : ControllerBase
         catch (Exception ex)
         {
             _logger.Error(ex, "Error occurred in GetResponseObject()");
-            return Task.FromResult(new JObject()); // Return empty JObject on error
+            return Task.FromResult(new JObject()); 
         }
     }
-    private CbProductRequest MapHeadersToCentralRequest(
-      string authorization,
-      string customerIpAddress,
-      string? productCategory,
-      bool? isShariaCompliant,
-      DateTime? lastUpdatedDateTime,
-      int pageNumber,
-      int pageSize,
-      string sortOrder,
-      string sortField,
-   
-      Guid correlationId
-    
-  )
+    private CbProductRequest MapHeadersToCentralRequest(string authorization,string customerIpAddress,string? productCategory,bool? isShariaCompliant,DateTime? lastUpdatedDateTime,int pageNumber,int pageSize,string sortOrder,string sortField,Guid correlationId)
     {
         return new CbProductRequest
         {
-            // Headers
+        
             Authorization = authorization,
             CustomerIpAddress = customerIpAddress,
-
-            // Query parameters
             ProductCategory = productCategory,
             IsShariaCompliant = isShariaCompliant,
             LastUpdatedDateTime = lastUpdatedDateTime,
