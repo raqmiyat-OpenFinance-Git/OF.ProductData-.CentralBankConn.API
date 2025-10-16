@@ -1,6 +1,6 @@
 ﻿namespace OF.ProductData.Model.EFModel.Products
 {
-    [Table("CurrentAccount")]
+    [Table("Lfi_CurrentAccount")]
     public class CurrentAccounts
     {
         [Key]

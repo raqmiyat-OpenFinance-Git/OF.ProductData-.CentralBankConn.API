@@ -1,6 +1,6 @@
 ﻿namespace OF.ProductData.Model.EFModel.Products
 {
-    [Table("ProfitSharingRate")]
+    [Table("Lfi_ProfitSharingRate")]
     public class ProfitSharingRate
     {
 

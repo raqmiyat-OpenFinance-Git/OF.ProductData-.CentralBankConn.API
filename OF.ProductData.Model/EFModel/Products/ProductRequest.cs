@@ -1,6 +1,6 @@
 ﻿namespace OF.ProductData.Model.EFModel.Products;
 
-[Table("ProductDataRequest")]
+[Table("Lfi_ProductDataRequest")]
 public class EFProductRequest
 {
     [Key]

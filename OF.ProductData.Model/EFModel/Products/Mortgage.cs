@@ -1,6 +1,6 @@
 ﻿namespace OF.ProductData.Model.EFModel.Products
 {
-    [Table("Mortgage")]
+    [Table("Lfi_Mortgage")]
     public class Mortgage
     {
 

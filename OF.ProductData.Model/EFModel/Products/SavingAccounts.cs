@@ -1,6 +1,6 @@
 ﻿namespace OF.ProductData.Model.EFModel.Products
 {
-    [Table("SavingsAccount")]
+    [Table("Lfi_SavingsAccount")]
     public class SavingsAccount
     {
         [Key]

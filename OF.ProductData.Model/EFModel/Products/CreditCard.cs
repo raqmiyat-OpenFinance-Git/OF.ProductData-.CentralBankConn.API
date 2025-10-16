@@ -1,6 +1,6 @@
 ﻿namespace OF.ProductData.Model.EFModel.Products
 {
-    [Table("CreditCard")]
+    [Table("Lfi_CreditCard")]
     public class CreditCard
     {
         public Guid Id { get; set; }

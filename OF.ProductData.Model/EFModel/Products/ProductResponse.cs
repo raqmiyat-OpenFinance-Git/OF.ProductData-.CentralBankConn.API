@@ -1,6 +1,6 @@
 ﻿namespace OF.ProductData.Model.EFModel.Products
 {
-    [Table("ProductDataResponse")]
+    [Table("Lfi_ProductDataResponse")]
 
     public class EFProductResponse
     {

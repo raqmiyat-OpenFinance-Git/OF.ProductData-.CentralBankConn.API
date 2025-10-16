@@ -9,7 +9,9 @@ public class EntityDbContext : DbContext
 
     public DbSet<EFProductResponse>? ProductResponse { get; set; }
 
-
+    public DbSet<EFCreateLeadRequest>? createLeadRequest { get; set; }
+    public DbSet<EFCreateLeadResponse>? createLeadResponse { get; set; }
+    public DbSet<EFCreateLeadHeaderRequest>? createLeadHeaderRequest { get; set; }
     public class ProductDbContext : DbContext
     {
         public ProductDbContext(DbContextOptions<ProductDbContext> options)
