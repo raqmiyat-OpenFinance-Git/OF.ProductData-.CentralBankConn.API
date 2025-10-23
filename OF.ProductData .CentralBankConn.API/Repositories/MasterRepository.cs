@@ -1,5 +1,4 @@
-﻿using OF.ProductData.CentralBankConn.API.Repositories;
-using OF.ProductData.Model.Common;
+﻿using OF.ProductData.Model.Common;
 using OF.ProductData.Model.EFModel;
 using ErrorResponse = OF.ProductData.Model.Common.ErrorResponse;
 

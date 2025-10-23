@@ -4,8 +4,9 @@
     public class SavingsAccount
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
-        [ForeignKey(nameof(Product))]
+        [ForeignKey(nameof(ProductRequest))]
         public long RequestId { get; set; }
         public string? Type { get; set; }
         public string? Description { get; set; }
@@ -42,9 +43,7 @@
         public string? BenefitsName { get; set; }
         public string? BenefitsDescription { get; set; }
         public decimal? BenefitsValue { get; set; }
-
-        public virtual EFProductResponse? Product { get; set; }
-
+        public virtual EFProductRequest? ProductRequest { get; set; }  // navigation
 
     }
 

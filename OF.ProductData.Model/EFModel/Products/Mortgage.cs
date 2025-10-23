@@ -5,8 +5,9 @@
     {
 
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
-        [ForeignKey(nameof(Product))]
+        [ForeignKey(nameof(ProductRequest))]
         public long RequestId { get; set; }
         public string? Type { get; set; }
         public string? Description { get; set; }
@@ -32,7 +33,6 @@
         public decimal AnnualPercentageRateFrom { get; set; }
         public decimal AnnualPercentageRateTo { get; set; }
         public string? FixedRatePeriod { get; set; }
-        public string? DebtBurdenRatio { get; set; }
         public string? DocumentationType { get; set; }
         public string? DocumentationDescription { get; set; }
         public string? FeaturesType { get; set; }
@@ -54,10 +54,8 @@
         public string? BenefitsName { get; set; }
         public string? BenefitsDescription { get; set; }
         public decimal? BenefitsValue { get; set; }
- 
+        public virtual EFProductRequest? ProductRequest { get; set; }  // navigation
 
-        // Navigation
-        public virtual EFProductResponse? Product { get; set; }
     }
 
 }

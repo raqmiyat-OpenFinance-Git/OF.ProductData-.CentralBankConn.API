@@ -9,7 +9,7 @@ public class ProductDataService : IProductDataService
 
     private readonly EntityDbContext _context;
     private readonly IDbConnection _dbConnection;
-    public ProductDataService(EntityDbContext context,IDbConnection dbConnection)
+    public ProductDataService(EntityDbContext context, IDbConnection dbConnection)
     {
         _context = context;
         _dbConnection = dbConnection;
@@ -25,7 +25,7 @@ public class ProductDataService : IProductDataService
         catch (DbUpdateException dbEx)
         {
             logger.Error(dbEx, "Database update error occurred while saving AddProductAsync.");
-            throw; 
+            throw;
         }
         catch (Exception ex)
         {
@@ -35,19 +35,148 @@ public class ProductDataService : IProductDataService
     }
 
 
-    public async Task AddProductResponseAsync(long id,Guid CorrelationId, List<EFProductResponse> ProductResponse, Logger logger)
+    public async Task AddProductResponseAsync(long id, Guid CorrelationId, List<EFProductResponse> ProductResponse, Logger logger)
     {
         try
         {
-            ProductResponse.FirstOrDefault()!.RequestId = id;
-            await _context.ProductResponse!.AddRangeAsync(ProductResponse);
+           
+
+            var ProductCategory = _context.ProductRequest!.Where(r => r.RequestId == id).Select(s => s.ProductCategory).FirstOrDefault();
+
+            var response = ProductResponse.FirstOrDefault();
+            if (response == null) return;
+
+            // Add parent only; EF tracks children
+            _context.ProductResponse!.Add(response);
             await _context.SaveChangesAsync();
-           logger.Info($"AddProductResponseAsync is done. ProductId: {ProductResponse.FirstOrDefault()!.ProductId}");
+
+            if (ProductCategory?.Trim().Equals("CurrentAccount", StringComparison.OrdinalIgnoreCase) ?? false)
+            {
+                var currentAccount = response.CurrentAccount!.FirstOrDefault();
+                if (currentAccount == null) return;
+
+                _context.CurrentAccounts.Add(currentAccount);
+                await _context.SaveChangesAsync();
+            }
+            else if(ProductCategory?.Trim().Equals("SavingsAccount", StringComparison.OrdinalIgnoreCase) ?? false)
+            {
+                var SavingsAccount = response.SavingsAccount!.FirstOrDefault();
+                if (SavingsAccount == null) return;
+
+                _context.SavingsAccounts.Add(SavingsAccount);
+                await _context.SaveChangesAsync();
+
+            }
+            else if(ProductCategory?.Trim().Equals("CreditCard", StringComparison.OrdinalIgnoreCase) ?? false)
+            {
+                var CreditCard = response.CreditCard!.FirstOrDefault();
+                if (CreditCard == null) return;
+
+                _context.CreditCards.Add(CreditCard);
+                await _context.SaveChangesAsync();
+
+            }
+            else if (ProductCategory?.Trim().Equals("Loan", StringComparison.OrdinalIgnoreCase) ?? false)
+            {
+                var PersonalLoan = response.PersonalLoan!.FirstOrDefault();
+                if (PersonalLoan == null) return;
+
+                _context.PersonalLoans.Add(PersonalLoan);
+                await _context.SaveChangesAsync();
+
+            }   
+
+            else if (ProductCategory?.Trim().Equals("Mortgage", StringComparison.OrdinalIgnoreCase) ?? false)
+            {
+                var Mortgage = response.Mortgage!.FirstOrDefault();
+                if (Mortgage == null) return;
+
+                _context.Mortgages.Add(Mortgage);
+                await _context.SaveChangesAsync();
+
+            }
+
+
+            else if (ProductCategory?.Trim().Equals("ProfitSharingRate", StringComparison.OrdinalIgnoreCase) ?? false)
+            {
+                var ProfitSharingRate = response.ProfitSharingRate!.FirstOrDefault();
+                if (ProfitSharingRate == null) return;
+
+
+                _context.ProfitSharingRate.Add(ProfitSharingRate);
+                await _context.SaveChangesAsync();
+
+            }
+
+            else if (ProductCategory?.Trim().Equals("FinanceProfitRate", StringComparison.OrdinalIgnoreCase) ?? false)
+            {
+                var FinanceProfitRate = response.FinanceProfitRate!.FirstOrDefault();
+                if (FinanceProfitRate == null) return;
+
+                _context.FinanceProfitRate.Add(FinanceProfitRate);
+                await _context.SaveChangesAsync();
+
+            }
+            else
+            {
+                var currentAccount = response.CurrentAccount!.FirstOrDefault();
+                if (currentAccount == null) return;
+
+                _context.CurrentAccounts.Add(currentAccount);
+                await _context.SaveChangesAsync();
+
+
+
+                var SavingsAccount = response.SavingsAccount!.FirstOrDefault();
+                if (SavingsAccount == null) return;
+
+                _context.SavingsAccounts.Add(SavingsAccount);
+                await _context.SaveChangesAsync();
+
+
+                var CreditCard = response.CreditCard!.FirstOrDefault();
+                if (CreditCard == null) return;
+
+                _context.CreditCards.Add(CreditCard);
+                await _context.SaveChangesAsync();
+
+
+                var PersonalLoan = response.PersonalLoan!.FirstOrDefault();
+                if (PersonalLoan == null) return;
+
+                _context.PersonalLoans.Add(PersonalLoan);
+                await _context.SaveChangesAsync();
+
+
+                var Mortgage = response.Mortgage!.FirstOrDefault();
+                if (Mortgage == null) return;
+
+                _context.Mortgages.Add(Mortgage);
+                await _context.SaveChangesAsync();
+
+
+                var ProfitSharingRate = response.ProfitSharingRate!.FirstOrDefault();
+                if (ProfitSharingRate == null) return;
+
+
+                _context.ProfitSharingRate.Add(ProfitSharingRate);
+                await _context.SaveChangesAsync();
+
+
+                var FinanceProfitRate = response.FinanceProfitRate!.FirstOrDefault();
+                if (FinanceProfitRate == null) return;
+
+                _context.FinanceProfitRate.Add(FinanceProfitRate);
+                await _context.SaveChangesAsync();
+
+            }
+
+            logger.Info($"AddProductResponseAsync is done. ProductId: {ProductResponse.FirstOrDefault()!.ProductId}");
         }
         catch (DbUpdateException dbEx)
         {
             logger.Error(dbEx, "Database update error occurred while saving AddProductResponseAsync.");
-            throw; // Rethrow or return a special value depending on your error handling strategy
+            throw; 
         }
         catch (Exception ex)
         {
@@ -86,7 +215,7 @@ public class ProductDataService : IProductDataService
         return result;
     }
 
-    public async Task<bool> UpdateProductRequestStatusAsync(long id,Guid correlationId, Logger logger)
+    public async Task<bool> UpdateProductRequestStatusAsync(long id, Guid correlationId, Logger logger)
     {
         try
         {

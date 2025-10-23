@@ -7,7 +7,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
     public static class CbPostProductMapper
     {
 
-        public static List<EFProductResponse> MapCbPostProductResponsetToEF(CbProductResponseWrapper requestDto)
+        public static List<EFProductResponse> MapCbPostProductResponsetToEF(CbProductResponseWrapper requestDto, long paymentRequestId)
         {
             var productList = new List<EFProductResponse>();
 
@@ -66,19 +66,20 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
                         AdditionalEligibilityDescription = prod.Eligibility?.AdditionalEligibility?.FirstOrDefault()?.Description,
 
                         // Nested product types
-                        CurrentAccount = MapCurrentAccount(prod.Product?.CurrentAccount),
-                        SavingsAccount = MapSavingsAccount(prod.Product?.SavingsAccount),
-                        CreditCard = MapCreditCard(prod.Product?.CreditCard),
-                        PersonalLoan = MapPersonalLoan(prod.Product?.PersonalLoan),
-                        Mortgage = MapMortgage(prod.Product?.Mortgage),
-                        ProfitSharingRate = MapProfitSharingRate(prod.Product?.ProfitSharingRate),
-                        FinanceProfitRate = MapFinanceProfitRate(prod.Product?.FinanceProfitRate)
+                        CurrentAccount = MapCurrentAccount(prod.Product?.CurrentAccount, paymentRequestId),
+                        SavingsAccount = MapSavingsAccount(prod.Product?.SavingsAccount, paymentRequestId),
+                        CreditCard = MapCreditCard(prod.Product?.CreditCard, paymentRequestId),
+                        PersonalLoan = MapPersonalLoan(prod.Product?.PersonalLoan, paymentRequestId),
+                        Mortgage = MapMortgage(prod.Product?.Mortgage, paymentRequestId),
+                        ProfitSharingRate = MapProfitSharingRate(prod.Product?.ProfitSharingRate, paymentRequestId),
+                        FinanceProfitRate = MapFinanceProfitRate(prod.Product?.FinanceProfitRate, paymentRequestId)
                     };
 
                     productData.CreatedBy = "System";
                     productData.Status = "PROCESSED";
                     productData.CreatedOn = DateTime.UtcNow;
                     productData.ResponsePayload = JsonConvert.SerializeObject(requestDto.centralBankProductResponse.Data);
+                    productData.RequestId = paymentRequestId;
                     productList.Add(productData);
                 }
             }
@@ -88,7 +89,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
 
         // -------------------- Helper mapping methods --------------------
 
-        private static ICollection<CurrentAccounts> MapCurrentAccount(CurrentAccountData src)
+        public static ICollection<CurrentAccounts> MapCurrentAccount(CurrentAccountData src, long paymentRequestId)
         {
             if (src == null) return null;
             var fee = src.Fees?.FirstOrDefault();
@@ -96,6 +97,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
     {
      new CurrentAccounts
         {
+         RequestId = paymentRequestId,
             Type = src.Type,
             Description = src.Description,
              IsOverdraftAvailable = src.IsOverdraftAvailable,
@@ -137,13 +139,14 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
         }
 
 
-        private static ICollection<SavingsAccount> MapSavingsAccount(SavingsAccountData src)
+        public static ICollection<SavingsAccount> MapSavingsAccount(SavingsAccountData src, long paymentRequestId)
         {
             if (src == null) return null;
             var fee = src.Fees?.FirstOrDefault();
             return new List<SavingsAccount>
     {
        new SavingsAccount{
+           RequestId = paymentRequestId,
                 Type = src.Type,
                 Description = src.Description,
                 MinimumBalance=Convert.ToDecimal(src.MinimumBalance!.AmountValue),
@@ -187,7 +190,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
         }
 
 
-        private static ICollection<CreditCard> MapCreditCard(CreditCardData src)
+        public static ICollection<CreditCard> MapCreditCard(CreditCardData src, long paymentRequestId)
         {
             if (src == null) return null;
 
@@ -196,6 +199,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
             return new List<CreditCard>
             {
                 new CreditCard{
+                    RequestId = paymentRequestId,
                 Type = src.Type,
                 Description = src.Description,
                 Rate = src.Rate,
@@ -224,11 +228,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
             };
         }
 
-
-
-
-
-        private static ICollection<PersonalLoan> MapPersonalLoan(PersonalLoanData src)
+        public static ICollection<PersonalLoan> MapPersonalLoan(PersonalLoanData src, long paymentRequestId)
         {
             if (src == null) return null;
             var firstBenefit = src.Benefits?.FirstOrDefault();
@@ -236,7 +236,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
     {
           new PersonalLoan{
 
-
+              RequestId = paymentRequestId,
             Type = src.Type,
             Description = src.Description,
             MinimumLoanAmount = src.MinimumLoanAmount != null ? decimal.Parse(src.MinimumLoanAmount.AmountValue) : (decimal?)null,
@@ -288,13 +288,14 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
         }
 
 
-        private static ICollection<Mortgage> MapMortgage(MortgageData src)
+        public static ICollection<Mortgage> MapMortgage(MortgageData src, long paymentRequestId)
         {
             if (src == null) return null;
             var firstBenefit = src.Benefits?.FirstOrDefault();
             return new List<Mortgage>
     {
         new Mortgage{
+            RequestId = paymentRequestId,
             Type = src.Type,
             Description = src.Description,
             CalculationMethod = src.CalculationMethod,
@@ -309,13 +310,13 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
             RateType = src?.Type,
             RateDescription = src?.Description,
             ReviewFrequency = src?.Rate.ReviewFrequency,
-            IndicativeAPRFrom = src?.Rate.IndicativeRate?.From,
-            IndicativeAPRTo = src?.Rate.IndicativeRate?.To,
+            IndicativeAPRFrom = src?.IndicativeAPR?.From,
+            IndicativeAPRTo = src?.IndicativeAPR?.To,
             ProfitRateFrom = src?.Rate.ProfitRate?.From,
             ProfitRateTo = src?.Rate.ProfitRate?.To,
             IndicativeRateFrom = src?.Rate.IndicativeRate?.From,
             IndicativeRateTo = src?.Rate.IndicativeRate?.To,
-        
+            FixedRatePeriod=src?.FixedRatePeriod,
             DocumentationType = src.Documentation?.FirstOrDefault()?.Type,
             DocumentationDescription = src.Documentation?.FirstOrDefault()?.Description,
             FeaturesType = src.Features?.FirstOrDefault()?.Type,
@@ -343,13 +344,14 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
     };
         }
 
-        private static ICollection<ProfitSharingRate> MapProfitSharingRate(ProfitSharingRateData src)
+        public static ICollection<ProfitSharingRate> MapProfitSharingRate(ProfitSharingRateData src, long paymentRequestId)
         {
             if (src == null) return null;
 
             return new List<ProfitSharingRate>
     {
        new ProfitSharingRate{
+           RequestId = paymentRequestId,
             Name = src.Name,
             Description = src.Description,
             MinimumDepositAmount = src.MinimumDepositAmount?.AmountValue != null
@@ -375,7 +377,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
         }
 
 
-        private static ICollection<FinanceProfitRate> MapFinanceProfitRate(FinanceProfitRateData src)
+        public static ICollection<FinanceProfitRate> MapFinanceProfitRate(FinanceProfitRateData src, long paymentRequestId)
         {
             if (src == null) return null;
 
@@ -384,6 +386,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
 
             var entity = new FinanceProfitRate
             {
+                RequestId = paymentRequestId,
                 Name = src.Name,
                 Description = src.Description,
                 CalculationMethod = src.CalculationMethod,

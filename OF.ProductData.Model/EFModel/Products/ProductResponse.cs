@@ -7,7 +7,7 @@
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
-        [ForeignKey("ProductRequest")]
+        [ForeignKey(nameof(ProductRequest))]
         public long RequestId { get; set; }
         public string? LFIId { get; set; }
         public string? LFIBrandId { get; set; }
@@ -56,14 +56,28 @@
         public DateTime? ModifiedOn { get; set; }
         public string? ResponsePayload { get; set; }
 
+        // Child collections for in-memory navigation (NotMapped to prevent EF from creating FK)
+        [NotMapped]
         public virtual ICollection<CurrentAccounts>? CurrentAccount { get; set; }
+
+        [NotMapped]
         public virtual ICollection<SavingsAccount>? SavingsAccount { get; set; }
+
+        [NotMapped]
         public virtual ICollection<CreditCard>? CreditCard { get; set; }
+
+        [NotMapped]
         public virtual ICollection<PersonalLoan>? PersonalLoan { get; set; }
+
+        [NotMapped]
         public virtual ICollection<Mortgage>? Mortgage { get; set; }
+
+        [NotMapped]
         public virtual ICollection<ProfitSharingRate>? ProfitSharingRate { get; set; }
+
+        [NotMapped]
         public virtual ICollection<FinanceProfitRate>? FinanceProfitRate { get; set; }
 
-        public EFProductRequest? ProductRequest { get; set; }
+        public virtual EFProductRequest? ProductRequest { get; set; }  // navigation
     }
 }

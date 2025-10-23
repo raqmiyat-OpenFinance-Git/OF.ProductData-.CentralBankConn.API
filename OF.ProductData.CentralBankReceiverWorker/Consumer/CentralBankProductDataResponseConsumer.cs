@@ -1,9 +1,7 @@
-﻿using Dapper;
-using OF.ProductData.CentralBankReceiverWorker.IServices;
+﻿using OF.ProductData.CentralBankReceiverWorker.IServices;
 using OF.ProductData.Common.NLog;
 using OF.ProductData.Model.CentralBank.Products;
 using OF.ProductData.Model.Common;
-using OF.ProductData.Model.EFModel.Products;
 using OF.ServiceInitiation.CentralBankReceiverWorker.Mappers;
 
 namespace OF.ProductData.CentralBankReceiverWorker.Consumer;
@@ -37,7 +35,7 @@ public class CentralBankProductDataResponseConsumer : IConsumer<CbProductRespons
                 return;
             }
             _logger.Info($"Received CentralBankProductDataResponseConsumer - CorrelationId: {context?.Message?.CorrelationId}");
-       
+
             await UpdateProduct(context?.Message!);
         }
         catch (Exception ex)
@@ -54,23 +52,18 @@ public class CentralBankProductDataResponseConsumer : IConsumer<CbProductRespons
             ArgumentNullException.ThrowIfNull(centralBankProductResponseWrapper);
             var response = centralBankProductResponseWrapper.centralBankProductResponse;
             CbProductDataResponse productModel = new();
-            var paymentResponse = CbPostProductMapper.MapCbPostProductResponsetToEF(centralBankProductResponseWrapper);
             long paymentRequestId = await _productService.GetPostProductIdAsync(centralBankProductResponseWrapper.CorrelationId, _logger.Log);
+            var paymentResponse = CbPostProductMapper.MapCbPostProductResponsetToEF(centralBankProductResponseWrapper, paymentRequestId);
             await Task.Delay(5000);
-            await _productService.AddProductResponseAsync(paymentRequestId,centralBankProductResponseWrapper.CorrelationId, paymentResponse, _logger.Log);
+            await _productService.AddProductResponseAsync(paymentRequestId, centralBankProductResponseWrapper.CorrelationId, paymentResponse, _logger.Log);
             await _productService.UpdateProductRequestStatusAsync(paymentRequestId, centralBankProductResponseWrapper.CorrelationId, _logger.Log);
-           
+
         }
         catch (Exception ex)
         {
             _logger.Error(ex, $"Error occurred in UpdateProduct(). Request ID: {centralBankProductResponseWrapper?.CorrelationId}");
         }
     }
-   
-
-   
-
-
 }
 
 

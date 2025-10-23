@@ -52,8 +52,8 @@ public class CentralBankCreateLeadResponseConsumer : IConsumer<CbProductResponse
             ArgumentNullException.ThrowIfNull(centralBankProductResponseWrapper);
             var response = centralBankProductResponseWrapper.centralBankProductResponse;
             CbProductDataResponse productModel = new();
-            var paymentResponse = CbPostProductMapper.MapCbPostProductResponsetToEF(centralBankProductResponseWrapper);
             long paymentRequestId = await _productService.GetPostProductIdAsync(centralBankProductResponseWrapper.CorrelationId, _logger.Log);
+            var paymentResponse = CbPostProductMapper.MapCbPostProductResponsetToEF(centralBankProductResponseWrapper, paymentRequestId);
             await Task.Delay(5000);
             await _productService.AddProductResponseAsync(paymentRequestId,centralBankProductResponseWrapper.CorrelationId, paymentResponse, _logger.Log);
             await _productService.UpdateProductRequestStatusAsync(paymentRequestId, centralBankProductResponseWrapper.CorrelationId, _logger.Log);

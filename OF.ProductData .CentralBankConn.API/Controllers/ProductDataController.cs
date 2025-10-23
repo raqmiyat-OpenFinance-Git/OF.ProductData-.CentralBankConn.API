@@ -5,7 +5,6 @@ using OF.ProductData.Common.NLog;
 using OF.ProductData.Model.CentralBank.Products;
 using OF.ProductData.Model.Common;
 using OF.ProductData.Model.CoreBank.Products;
-using System.Net;
 using ErrorResponse = OF.ProductData.Model.Common.ErrorResponse;
 
 namespace OF.ProductData.CentralBankConn.API.Controllers;
@@ -104,26 +103,8 @@ public class ProductDataController : ControllerBase
             }
 
 
-            CbProductDataRequest centralRequest = MapHeadersToCentralRequest(
-     xFapiCustomerIpAddress,
-     productCategory,
-     isShariaCompliant,
-     lastUpdatedDateTime,
-     page,
-     pageSize,
-     sortOrder,
-     sortField,
-     guid,
-     // Pass all O3 headers if MapHeadersToCentralRequest accepts them
-     o3ProviderId,
-     o3CallerOrgId,
-     o3CallerClientId,
-     o3CallerSoftwareStatementId,
-     o3ApiUri,
-     o3ApiOperation,
-     o3CallerInteractionId,
-     o3OzoneInteractionId
- );
+            CbProductDataRequest centralRequest = MapHeadersToCentralRequest(xFapiCustomerIpAddress,productCategory,isShariaCompliant,lastUpdatedDateTime,page,pageSize,sortOrder,sortField,guid,
+          o3ProviderId,o3CallerOrgId,o3CallerClientId,o3CallerSoftwareStatementId,o3ApiUri,o3ApiOperation,o3CallerInteractionId,o3OzoneInteractionId);
 
             requestJson = JsonConvert.SerializeObject(centralRequest, Formatting.Indented);
 
@@ -135,17 +116,7 @@ public class ProductDataController : ControllerBase
 
             CbsProductRequest coreRequest = new()
             {
-                //Authorization = authorization?.Trim(),
-                //CustomerIpAddress = customerIpAddress.Trim(),
-                //ProductCategory = productCategory?.Trim()!,
-                //IsShariaCompliant = isShariaCompliant,
-                //LastUpdatedDateTime = lastUpdatedDateTime,
-                //PageNumber = pageNumber,
-                //PageSize = pageSize,
-                //SortOrder = sortOrder,
-                //SortField = sortField,
                 CorrelationId = guid
-                
             };
 
             // call internal API

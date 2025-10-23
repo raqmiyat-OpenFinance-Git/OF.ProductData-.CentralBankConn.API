@@ -185,6 +185,7 @@ public class Amount
 {
     [JsonPropertyName("Amount")]
     public string? AmountValue { get; set; }
+    [JsonPropertyName("Currency")]
     public string? Currency { get; set; }
 }
 

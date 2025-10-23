@@ -1,5 +1,4 @@
 ﻿using OF.ProductData.Model.EFModel.Audit;
-using OF.ProductData.Model.EFModel.Products;
 
 namespace OF.ProductData.CoreBankConn.API.EFModel;
 

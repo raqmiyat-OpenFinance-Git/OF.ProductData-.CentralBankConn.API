@@ -1,7 +1,6 @@
 ﻿
 using ConsentModel.Common;
 using OF.ProductData.Model.Common;
-using System.Net.Http;
 using System.Net.Http.Headers;
 
 namespace Raqmiyat.Framework.Custom

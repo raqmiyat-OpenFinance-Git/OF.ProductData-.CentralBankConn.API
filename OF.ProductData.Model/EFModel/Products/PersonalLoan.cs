@@ -5,8 +5,9 @@
     {
 
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
-        [ForeignKey(nameof(Product))]
+        [ForeignKey(nameof(ProductRequest))]
         public long RequestId { get; set; }
         public string? Type { get; set; }
         public string? Description { get; set; }
@@ -53,6 +54,6 @@
 
         public string? AdditionalInfoType { get; set; }
         public string? AdditionalInfoDescription { get; set; }
-        public virtual EFProductResponse? Product { get; set; }
+        public virtual EFProductRequest? ProductRequest { get; set; }  // navigation
     }
 }
