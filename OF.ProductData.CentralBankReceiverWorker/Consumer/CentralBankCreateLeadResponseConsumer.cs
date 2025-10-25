@@ -54,9 +54,9 @@ public class CentralBankCreateLeadResponseConsumer : IConsumer<CbCreateLeadRespo
             var response = centralBankLeadResponseWrapper.centralBankCreateLeadResponse;
             CbsCreateLeadResponse Model = new();
             long RequestId = await _leadService.GetPostCreateLeadIdAsync(centralBankLeadResponseWrapper.CorrelationId, _logger.Log);
-            var paymentResponse = CbPostCreateLeadMapper.MapCbPostCreateLeadResponseToEF(centralBankLeadResponseWrapper, RequestId);
+            var LeadResponse = CbPostCreateLeadMapper.MapCbPostCreateLeadResponseToEF(centralBankLeadResponseWrapper, RequestId);
             await Task.Delay(5000);
-            await _leadService.AddCreateLeadResponseAsync(RequestId, centralBankLeadResponseWrapper.CorrelationId, paymentResponse, _logger.Log);
+            await _leadService.AddCreateLeadResponseAsync(RequestId, centralBankLeadResponseWrapper.CorrelationId, LeadResponse, _logger.Log);
             await _leadService.UpdateCreateLeadRequestStatusAsync(RequestId, centralBankLeadResponseWrapper.CorrelationId, _logger.Log);
            
         }
