@@ -1,5 +1,5 @@
 ﻿using OF.ProductData.CentralBankConn.API.Repositories;
-using OF.ServiceInitiation.Model.CentralBank.Payments.PostHeader;
+using OF.ProductData.Model.CentralBank.CreateLead;
 
 namespace OF.ProductData.CentralBankConn.API.Validators;
 

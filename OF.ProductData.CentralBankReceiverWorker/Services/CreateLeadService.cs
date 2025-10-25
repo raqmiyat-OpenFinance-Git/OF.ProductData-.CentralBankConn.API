@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using OF.ProductData.CentralBankReceiverWorker.IServices;
-using OF.ProductData.Model.EFModel.Products;
+using OF.ProductData.Model.EFModel.CreateLead;
 
 namespace OF.ProductData.CentralBankReceiverWorker.Services;
 

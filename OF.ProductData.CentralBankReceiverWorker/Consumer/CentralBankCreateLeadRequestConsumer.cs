@@ -1,9 +1,7 @@
 ﻿using OF.DataSharing.Model.CentralBank.CoPQuery;
 using OF.ProductData.CentralBankReceiverWorker.IServices;
 using OF.ProductData.Common.NLog;
-using OF.ProductData.Model.CentralBank.Products;
 using OF.ProductData.Model.Common;
-using OF.ProductData.Model.EFModel.Products;
 using OF.ServiceInitiation.CentralBankReceiverWorker.Mappers;
 
 namespace OF.ProductData.CentralBankReceiverWorker.Consumer;

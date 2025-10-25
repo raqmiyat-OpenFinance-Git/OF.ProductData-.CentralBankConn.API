@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using OF.DataSharing.Model.CentralBank.CoPQuery;
 using OF.ProductData.Model.CentralBank.Products;
+using OF.ProductData.Model.EFModel.CreateLead;
 using OF.ProductData.Model.EFModel.Products;
 
 namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers

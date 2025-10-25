@@ -1,4 +1,4 @@
-﻿namespace OF.ServiceInitiation.Model.CentralBank.Payments.PostHeader;
+﻿namespace OF.ProductData.Model.CentralBank.CreateLead;
 
 public class CbPostCreateLeadHeader
 {

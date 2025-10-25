@@ -1,4 +1,4 @@
-﻿namespace OF.ProductData.Model.EFModel.Products;
+﻿namespace OF.ProductData.Model.EFModel.CreateLead;
 
 [Table("Lfi_LeadRequestHeader")]
 public class EFCreateLeadHeaderRequest

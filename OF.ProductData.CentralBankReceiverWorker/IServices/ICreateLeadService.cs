@@ -1,4 +1,4 @@
-﻿using OF.ProductData.Model.EFModel.Products;
+﻿using OF.ProductData.Model.EFModel.CreateLead;
 
 namespace OF.ProductData.CentralBankReceiverWorker.IServices;
 public interface ICreateLeadService
