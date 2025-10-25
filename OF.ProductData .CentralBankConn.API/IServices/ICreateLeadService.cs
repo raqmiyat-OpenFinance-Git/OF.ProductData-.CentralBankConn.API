@@ -6,6 +6,6 @@ namespace OF.ProductData.CentralBankConn.API.IServices;
 
 public interface ICreateLeadService
 {
-    Task<ApiResult<CbsCreateLeadResponse>> GetProductFromCoreBankAsync(CbsCreateLeadRequest cbProductRequest);
-    CbProductDataResponse GetCentralBankProductByIdResponse(CbsCreateLeadResponse cbProductResponse, Logger logger);
+    Task<ApiResult<CbsCreateLeadResponse>> PostCreateLeadFromCoreBankAsync(CbsCreateLeadRequest cbProductRequest);
+    CbPostCreateLeadResponse GetCentralBankCreateLeadResponse(CbsCreateLeadResponse cbProductResponse, Logger logger);
 }

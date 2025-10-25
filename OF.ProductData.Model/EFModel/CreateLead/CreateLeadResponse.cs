@@ -1,6 +1,6 @@
 ﻿namespace OF.ProductData.Model.EFModel.Products
 {
-    [Table("LeadResponse")]
+    [Table("Lfi_LeadResponse")]
     public class EFCreateLeadResponse
     {
    

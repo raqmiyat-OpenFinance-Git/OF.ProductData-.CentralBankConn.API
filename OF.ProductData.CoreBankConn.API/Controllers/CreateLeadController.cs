@@ -56,7 +56,7 @@ public class CreateLeadController : ControllerBase
 
     [HttpPost]
     [Route("CreateLead")]
-    public async Task<IActionResult> GetProductData(CbsCreateLeadRequest coreBankProductRequest)
+    public async Task<IActionResult> CreateLead(CbsCreateLeadRequest coreBankProductRequest)
     {
         var coreBankproductResponse = new ApiResult<CbsCreateLeadResponse>
         {

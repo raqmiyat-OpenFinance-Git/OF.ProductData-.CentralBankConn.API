@@ -38,6 +38,22 @@ public class SendPointInitializerHostedService : IHostedService
 
         _queueLogger.Info("Queue GetProductDataResponse has been created");
 
+
+
+        _sendPoint.PostLeadRequest = await _bus.GetSendEndpoint(
+  new Uri("queue:" + _settings.PostLeadRequest));
+
+        _queueLogger.Info("Queue PostLeadRequest has been created");
+
+
+        _sendPoint.PostLeadResponse = await _bus.GetSendEndpoint(
+        new Uri("queue:" + _settings.PostLeadResponse));
+
+        _queueLogger.Info("Queue PostLeadResponse has been created");
+
+
+
+
         _sendPoint.AuditLog = await _bus.GetSendEndpoint(
             new Uri("queue:" + _settings.AuditLog));
 

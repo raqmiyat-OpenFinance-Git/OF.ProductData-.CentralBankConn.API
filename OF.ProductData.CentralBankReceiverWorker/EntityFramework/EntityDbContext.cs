@@ -73,4 +73,25 @@ public class EntityDbContext : DbContext
         }
     }
 
+    public class LeadDbContext : DbContext
+    {
+        public LeadDbContext(DbContextOptions<LeadDbContext> options)
+            : base(options) { }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+
+            modelBuilder.Entity<EFCreateLeadHeaderRequest>()
+                .HasOne(c => c.CreateLeadRequest)
+                .WithMany()
+                .HasForeignKey(c => c.RequestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+         
+
+        }
+    }
+
 }

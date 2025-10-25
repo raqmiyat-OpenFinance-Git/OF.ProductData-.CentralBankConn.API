@@ -49,9 +49,12 @@ public class CentralBankCreateLeadRequestConsumer : IConsumer<CbPostCreateLeadRe
         try
         {
 
-            var paymentRequest = CbPostCreateLeadMapper.MapCbPostLeadResponsetToEF(request);
-            await _Service.AddCreateLeadAsync(paymentRequest, _logger.Log);
-            Console.WriteLine($"PaymentRequest inserted. Id = {request.CorrelationId}");
+            var (headerEntity, leadEntity) = CbPostCreateLeadMapper.MapCbPostLeadResponseToEF(request);
+            await _Service.AddCreateLeadAsync(leadEntity, _logger.Log);
+            var requestid = leadEntity.RequestId;
+            await _Service.AddCreateLeadHeaderAsync(headerEntity, requestid, _logger.Log);
+
+           _logger.Info($"PaymentRequest inserted. Id = {request.CorrelationId}");
         }
         catch (Exception ex)
         {

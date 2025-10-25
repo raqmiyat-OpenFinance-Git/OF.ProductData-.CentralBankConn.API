@@ -142,8 +142,7 @@ public static class Program
         services.AddTransient<IAuditLogger, AuditLogger>();
    
         services.AddTransient<IProductDataService, ProductDataService>();
-      
-
+        services.AddTransient<ICreateLeadService, CreateLeadService>();
     }
 
     private static void RegisterSingletonServices(IServiceCollection services)
@@ -151,7 +150,7 @@ public static class Program
         //services.AddSingleton<ICoreBankRepository, CoreBankRepository>();
      
         services.AddSingleton<ProductLogger>();
-      
+        services.AddSingleton<CreateLeadLogger>();
         services.AddSingleton<WarmUpLogger>();
         services.AddSingleton<BaseLogger>();
         services.AddSingleton<ApiClientLogger>();
@@ -170,6 +169,8 @@ public static class Program
           
             x.AddConsumer<CentralBankProductDataRequestConsumer>();
             x.AddConsumer<CentralBankProductDataResponseConsumer>();
+            x.AddConsumer<CentralBankCreateLeadRequestConsumer>();
+            x.AddConsumer<CentralBankCreateLeadResponseConsumer>();
             x.AddConsumer<AuditLogConsumer>();
             x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
             {
@@ -193,6 +194,23 @@ public static class Program
                     ep.ConfigureConsumer<CentralBankProductDataResponseConsumer>(provider);
                     _logger.Info("CentralBankProductResponseConsumer-ConfigureConsumer is initialized.");
                 });
+
+
+
+                cfg.ReceiveEndpoint(rabbitMqSettings.PostLeadRequest!, ep =>
+                {
+                    ep.ConfigureConsumer<CentralBankCreateLeadRequestConsumer>(provider);
+                    _logger.Info("CentralBankCreateLeadRequestConsumer-ConfigureConsumer is initialized.");
+                });
+
+
+                cfg.ReceiveEndpoint(rabbitMqSettings.PostLeadResponse!, ep =>
+                {
+                    ep.ConfigureConsumer<CentralBankCreateLeadResponseConsumer>(provider);
+                    _logger.Info("CentralBankCreateLeadResponseConsumer-ConfigureConsumer is initialized.");
+                });
+
+
 
                 cfg.ReceiveEndpoint(rabbitMqSettings.AuditLog!, ep =>
                 {

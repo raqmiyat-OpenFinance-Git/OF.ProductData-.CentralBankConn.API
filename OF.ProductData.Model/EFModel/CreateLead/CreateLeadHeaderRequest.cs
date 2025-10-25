@@ -1,10 +1,10 @@
 ﻿namespace OF.ProductData.Model.EFModel.Products;
 
-[Table("LeadRequestHeaders")]
+[Table("Lfi_LeadRequestHeader")]
 public class EFCreateLeadHeaderRequest
 {
     [Key]
-    public long Id { get; set; }
+    public Guid CorrelationId { get; set; }
     [ForeignKey(nameof(CreateLeadRequest))]
     public long RequestId { get; set; }
     public string? O3ProviderId { get; set; }

@@ -43,5 +43,6 @@
     {
     public string? Type { get; set; }  // e.g. "SavingsAccount", "CurrentAccount", etc.
     }
+
     
 
