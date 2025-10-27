@@ -4,6 +4,7 @@ using OF.ProductData.CentralBankConn.API.Repositories;
 using OF.ProductData.Common.Custom;
 using OF.ProductData.Common.Helpers;
 using OF.ProductData.Common.NLog;
+using OF.ProductData.Model.CentralBank.CreateLead;
 using OF.ProductData.Model.CentralBank.Products;
 using OF.ProductData.Model.Common;
 using OF.ProductData.Model.CoreBank;
@@ -21,7 +22,7 @@ public class CreateLeadService : ICreateLeadService
     private readonly IOptions<ApiHeaderParams> _apiHeaderParams;
     private readonly Custom _Custom;
     private readonly ProductLogger _logger;
-    public CreateLeadService(HttpClient httpClient, IOptions<CoreBankApis> coreBankApis, IMasterRepository masterRepository,IOptions<ApiHeaderParams> apiHeaderParams, Custom custom, ProductLogger logger)
+    public CreateLeadService(HttpClient httpClient, IOptions<CoreBankApis> coreBankApis, IMasterRepository masterRepository, IOptions<ApiHeaderParams> apiHeaderParams, Custom custom, ProductLogger logger)
     {
         _httpClient = httpClient;
         _coreBankApis = coreBankApis;
@@ -91,7 +92,7 @@ public class CreateLeadService : ICreateLeadService
             if (apiResponse.IsSuccessStatusCode)
             {
                 _logger.Info($"CorrelationId: {cbcreateLeadRequest!.CorrelationId} || API Response: SUCCESS");
-               
+
                 var coreBankCreateLeadResponse = JsonConvert.DeserializeObject<CbsCreateLeadResponse>(apiResponseBody) ?? throw new InvalidOperationException("Deserialized coreBankCreateLeadResponse is null.");
                 apiResult = ApiResultFactory.Success(data: coreBankCreateLeadResponse!, apiResponseBody, "200");
             }
@@ -172,6 +173,59 @@ public class CreateLeadService : ICreateLeadService
         }
     }
 
+    public CbPostCreateLeadResponse GetCreateLeadResponse(CbsCreateLeadResponse cbProductResponse, CbPostCreateLeadRequest leadRequest, Logger logger)
+    {
+        var random = new Random();
+
+        try
+        {
+            var productType = leadRequest.Data.ProductCategories!.Select(c => c.Type).FirstOrDefault();
+            // ✅ Create and return dummy data
+            return new CbPostCreateLeadResponse
+            {
+                data = new LeadResponseData
+                {
+                    LeadId = $"LEAD-{random.Next(100000, 999999)}",
+                    Email = leadRequest.Data.Email,
+                    PhoneNumber = leadRequest.Data.PhoneNumber,
+                    Name = new LeadResponseName
+                    {
+                        GivenName = leadRequest.Data.Name!.GivenName,
+                        LastName = leadRequest.Data.Name.LastName
+                    },
+                    EmiratesId = leadRequest.Data.EmiratesId,
+                    Nationality = "AE",
+                    ResidentialAddress = new LeadResponseResidentialAddress
+                    {
+                        AddressType = "Residential",
+                        AddressLine = new List<string> { "Flat 101", "Sunset Tower" },
+                        BuildingNumber = "B12",
+                        BuildingName = "Sunset Tower",
+                        Floor = "10",
+                        StreetName = "Sheikh Zayed Road",
+                        DistrictName = "Downtown",
+                        PostBox = "12345",
+                        TownName = "Dubai",
+                        CountrySubDivision = "Dubai",
+                        Country = "AE"
+                    },
+                    LeadInformation = "Interested in new " + productType,
+
+                    MarketingOptOut = leadRequest.Data.MarketingOptOut,
+                    ProductCategories = new List<LeadResponseProductCategory>
+                {
+                    new LeadResponseProductCategory { Type = productType },
+                }
+                }
+            };
+        }
+        catch (Exception ex)
+        {
+            logger.Error(ex, "Error occurred in GetCentralBankCreateLeadResponse()");
+            throw;
+        }
+    }
+
     private StringContent GetStringContent(string jsonContent, string correlationId)
     {
         try
@@ -183,5 +237,5 @@ public class CreateLeadService : ICreateLeadService
             throw new InvalidOperationException("Error during encryption/decryption", ex);
         }
     }
-   
+
 }

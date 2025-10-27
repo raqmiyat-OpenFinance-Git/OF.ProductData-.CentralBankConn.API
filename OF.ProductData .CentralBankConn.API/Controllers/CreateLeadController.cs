@@ -135,7 +135,8 @@ public class CreateLeadController : ControllerBase
             centralBankLeadResponseWrapper.CorrelationId = guid;
             if (apiResult.Success)
             {
-                cbResponse = _service.GetCentralBankCreateLeadResponse(apiResult.Data!, _logger.Log);
+                //cbResponse = _service.GetCentralBankCreateLeadResponse(apiResult.Data!, _logger.Log);
+                cbResponse = _service.GetCreateLeadResponse(apiResult.Data!, requestBody, _logger.Log);
                 centralBankLeadResponseWrapper.centralBankCreateLeadResponse = cbResponse;
                 //await Task.Delay(5000);
                 await _sendPointInitialize.PostLeadResponse!.Send(centralBankLeadResponseWrapper);
