@@ -8,4 +8,5 @@ public interface IProductDataService
 {
     Task<ApiResult<CbsProductResponse>> GetProductFromCoreBankAsync(CbsProductRequest cbProductRequest);
     CbProductDataResponse GetCentralBankProductByIdResponse(CbsProductResponse cbProductResponse, Logger logger);
+    CbProductDataResponse ResponseProductDetails(CbsProductResponse cbProductResponse, string productCategory, Logger logger);
 }

@@ -83,7 +83,10 @@ public class ProductDetails
     public FinanceProfitRateData? FinanceProfitRate { get; set; }
 }
 
-public class CurrentAccountData : AccountBase { }
+public class CurrentAccountData : AccountBase {
+    public Amount? MinimumBalance { get; set; }
+    public double AnnualReturn { get; set; }
+}
 public class SavingsAccountData : AccountBase
 {
     public Amount? MinimumBalance { get; set; }
