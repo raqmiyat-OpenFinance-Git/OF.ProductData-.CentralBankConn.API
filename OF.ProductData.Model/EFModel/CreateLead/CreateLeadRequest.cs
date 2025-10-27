@@ -1,12 +1,14 @@
-﻿namespace OF.ProductData.Model.EFModel.Products;
+﻿
 
-[Table("LeadRequest")]
+namespace OF.ProductData.Model.EFModel.CreateLead;
+
+[Table("Lfi_LeadRequest")]
 public class EFCreateLeadRequest
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long RequestId { get; set; }
-    public Guid CorrelationId { get; set; } = Guid.NewGuid();
+    public Guid CorrelationId { get; set; }
     public string? Email { get; set; }
     public string? PhoneNumber { get; set; }
     public string? GivenName { get; set; }

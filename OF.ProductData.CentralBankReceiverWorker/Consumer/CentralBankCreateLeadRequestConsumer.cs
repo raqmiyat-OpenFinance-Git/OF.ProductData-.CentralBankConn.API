@@ -1,9 +1,7 @@
 ﻿using OF.DataSharing.Model.CentralBank.CoPQuery;
 using OF.ProductData.CentralBankReceiverWorker.IServices;
 using OF.ProductData.Common.NLog;
-using OF.ProductData.Model.CentralBank.Products;
 using OF.ProductData.Model.Common;
-using OF.ProductData.Model.EFModel.Products;
 using OF.ServiceInitiation.CentralBankReceiverWorker.Mappers;
 
 namespace OF.ProductData.CentralBankReceiverWorker.Consumer;
@@ -49,9 +47,12 @@ public class CentralBankCreateLeadRequestConsumer : IConsumer<CbPostCreateLeadRe
         try
         {
 
-            var paymentRequest = CbPostCreateLeadMapper.MapCbPostLeadResponsetToEF(request);
-            await _Service.AddCreateLeadAsync(paymentRequest, _logger.Log);
-            Console.WriteLine($"PaymentRequest inserted. Id = {request.CorrelationId}");
+            var (headerEntity, leadEntity) = CbPostCreateLeadMapper.MapCbPostLeadResponseToEF(request);
+            await _Service.AddCreateLeadAsync(leadEntity, _logger.Log);
+            var requestid = leadEntity.RequestId;
+            await _Service.AddCreateLeadHeaderAsync(headerEntity, requestid, _logger.Log);
+
+           _logger.Info($"PaymentRequest inserted. Id = {request.CorrelationId}");
         }
         catch (Exception ex)
         {

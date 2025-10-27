@@ -1,4 +1,4 @@
-﻿namespace OF.ProductData.Model.CentralBank.Products;
+﻿namespace OF.ProductData.Model.CentralBank.CreateLead;
 
 
     public class CbPostCreateLeadRequest
@@ -43,5 +43,6 @@
     {
     public string? Type { get; set; }  // e.g. "SavingsAccount", "CurrentAccount", etc.
     }
+
     
 

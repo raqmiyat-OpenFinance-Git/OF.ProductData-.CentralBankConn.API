@@ -1,7 +1,7 @@
 ﻿namespace OF.ProductData.Model.CentralBank.Products;
 public class CbPostCreateLeadResponse
 {
-    public LeadResponseData Data { get; set; } = new LeadResponseData();
+    public LeadResponseData data { get; set; } = new LeadResponseData();
 }
 
 public class LeadResponseData

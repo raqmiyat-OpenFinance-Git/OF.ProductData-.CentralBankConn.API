@@ -7,7 +7,6 @@ using OF.ProductData.Common.Helpers;
 using OF.ProductData.CoreBankConn.API.EFModel;
 using OF.ProductData.CoreBankConn.API.IServices;
 using OF.ProductData.CoreBankConn.API.Repositories;
-using OF.ProductData.Model.CentralBank.Products;
 using OF.ProductData.Model.Common;
 using OF.ProductData.Model.CoreBank;
 using OF.ProductData.Model.CoreBank.Products;
@@ -68,7 +67,7 @@ public class CreateLeadService : ICreateLeadService
                 if (response == null)
                 {
 
-                    logger.Error($"CorrelationId: {request.CorrelationId} || Failed to deserialize balance response.");
+                    logger.Error($"CorrelationId: {request.CorrelationId} || Failed to deserialize Lead response.");
                     postStatus = PostStatus.ERROR;
                     enquiry = CreateCoreBankEnquiry(request.CorrelationId, request.ExternalRefNbr!, Utils.GetStatus(postStatus), "500", "Failed to process response.", messageSentAt, messageReceivedAt, requestPayload, responsePayload, logger);
                 }

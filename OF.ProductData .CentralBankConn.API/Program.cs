@@ -42,6 +42,7 @@ public static class Program
         RegisterTransientServices(builder.Services);
         RegisterSingletonServices(builder.Services);
         RegisterProductEnquiryHttpClient(builder.Services);
+        RegisterCreateLeadEnquiryHttpClient(builder.Services);
       
         // RegisterConfirmationPayeeEnquiryHttpClient(builder.Services);
         RegisterCustomHttpClient(builder.Services);
@@ -79,6 +80,9 @@ public static class Program
         });
         builder.Services.AddFluentValidationAutoValidation()
                 .AddValidatorsFromAssemblyContaining<ProductDataRequestValidator>();
+
+        builder.Services.AddFluentValidationAutoValidation()
+              .AddValidatorsFromAssemblyContaining<CreateLeadRequestValidator>();
 
         builder.Services.AddSwaggerGen(c =>
 
@@ -194,6 +198,46 @@ public static class Program
         });
     }
 
+
+    private static void RegisterCreateLeadEnquiryHttpClient(IServiceCollection services)
+    {
+        services.AddHttpClient<ICreateLeadService, CreateLeadService>((provider, client) =>
+        {
+            var handlerSettings = provider.GetRequiredService<IOptions<SocketsHttpHandlerSettings>>().Value;
+            var coreBankApis = provider.GetRequiredService<IOptions<CoreBankApis>>().Value;
+
+            if (string.IsNullOrWhiteSpace(coreBankApis.BaseUrl))
+                throw new InvalidOperationException("CoreBankApis.BaseUrl must be configured.");
+
+            client.DefaultRequestHeaders.Connection.Add("keep-alive");
+            client.DefaultRequestHeaders.ConnectionClose = false;
+            client.BaseAddress = new Uri(coreBankApis.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(handlerSettings.ClientTimeoutInSeconds);
+        })
+        .SetHandlerLifetime(TimeSpan.FromHours(2))
+        .ConfigurePrimaryHttpMessageHandler(provider =>
+        {
+            var settings = provider.GetRequiredService<IOptions<SocketsHttpHandlerSettings>>().Value;
+
+            return new SocketsHttpHandler
+            {
+                PooledConnectionLifetime = TimeSpan.FromHours(settings.PooledConnectionLifetimeInHours),
+                PooledConnectionIdleTimeout = TimeSpan.FromMinutes(settings.PooledConnectionIdleTimeoutInMinutes),
+                ConnectTimeout = TimeSpan.FromSeconds(settings.ClientTimeoutInSeconds),
+                KeepAlivePingDelay = TimeSpan.FromMinutes(settings.KeepAlivePingDelayInMinutes),
+                KeepAlivePingTimeout = TimeSpan.FromSeconds(settings.KeepAlivePingTimeoutInSeconds),
+                UseCookies = settings.UseCookies,
+                SslOptions = new SslClientAuthenticationOptions
+                {
+                    EnabledSslProtocols = SslClient.ParseSslProtocols(settings.EnabledSslProtocols ?? "Tls12"),
+                    CertificateRevocationCheckMode = SslClient.ParseRevocationMode(settings.CertificateRevocationCheckMode ?? "NoCheck"),
+                    RemoteCertificateValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
+                        sslPolicyErrors == SslPolicyErrors.None || settings.RemoteCertificateValidationCallback
+                }
+            };
+        });
+    }
+
     private static void RegisterCustomHttpClient(IServiceCollection services)
     {
         services.AddHttpClient<Custom>((provider, client) =>
@@ -257,6 +301,7 @@ public static class Program
         services.AddTransient<IMasterRepository, MasterRepository>();
         
         services.AddTransient<IProductDataService, ProductDataService>();
+        services.AddTransient<ICreateLeadService, CreateLeadService>();
   
         services.AddTransient<Logger>(sp =>
         {
@@ -273,6 +318,7 @@ public static class Program
         services.AddSingleton<BaseLogger>();
         services.AddSingleton<ApiClientLogger>();
         services.AddSingleton<ProductLogger>();
+        services.AddSingleton<CreateLeadLogger>();
         services.AddSingleton<SendPointInitialize>();
 
         services.AddHostedService<SendPointInitializerHostedService>();

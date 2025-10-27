@@ -3,10 +3,10 @@ using OF.ProductData.CentralBankConn.API.IServices;
 using OF.ProductData.CentralBankConn.API.Models;
 using OF.ProductData.Common.Helpers;
 using OF.ProductData.Common.NLog;
+using OF.ProductData.Model.CentralBank.CreateLead;
 using OF.ProductData.Model.CentralBank.Products;
 using OF.ProductData.Model.Common;
 using OF.ProductData.Model.CoreBank.Products;
-using OF.ServiceInitiation.Model.CentralBank.Payments.PostHeader;
 using ErrorResponse = OF.ProductData.Model.Common.ErrorResponse;
 
 namespace OF.ProductData.CentralBankConn.API.Controllers;
@@ -17,8 +17,8 @@ public class CreateLeadController : ControllerBase
     private readonly CreateLeadLogger _logger;
     private readonly SendPointInitialize _sendPointInitialize;
     private readonly IOptions<CoreBankApis> _coreBankApis;
-    private readonly IValidator<CbPostCreateLeadRequest> _validator;
-    public CreateLeadController(ICreateLeadService service, CreateLeadLogger logger, SendPointInitialize sendPointInitialize, IOptions<CoreBankApis> coreBankApis, IValidator<CbPostCreateLeadRequest> validator)
+    private readonly IValidator<CbPostCreateLeadHeader> _validator;
+    public CreateLeadController(ICreateLeadService service, CreateLeadLogger logger, SendPointInitialize sendPointInitialize, IOptions<CoreBankApis> coreBankApis, IValidator<CbPostCreateLeadHeader> validator)
     {
         _service = service;
         _logger = logger;
@@ -28,6 +28,7 @@ public class CreateLeadController : ControllerBase
     }
 
     [HttpPost]
+    [Route("/leads")]
     [ProducesResponseType(typeof(CbPostCreateLeadResponse), 200)]
     [ProducesResponseType(typeof(ErrorResponse), 400)]
     [ProducesResponseType(typeof(ErrorResponse), 500)]
@@ -83,7 +84,7 @@ public class CreateLeadController : ControllerBase
             _logger.Info("------------------------------------------------------------------------");
 
 
-            endPointUrl = UrlHelper.CombineUrl(_coreBankApis.Value.BaseUrl!, _coreBankApis.Value.ProductServiceUrl!.GetProductUrl!);
+            endPointUrl = UrlHelper.CombineUrl(_coreBankApis.Value.BaseUrl!, _coreBankApis.Value.LeadServiceUrl!.GetLeadUrl!);
             correlationId = HttpContext.Items["X-Correlation-ID"]?.ToString();
             if (!Guid.TryParse(correlationId, out guid))
             {
@@ -108,7 +109,7 @@ public class CreateLeadController : ControllerBase
 
             _logger.Info($"Request received:\n{requestJson}");
 
-            await _sendPointInitialize.GetProductDataRequest!.Send(cbRequestDto);
+            await _sendPointInitialize.PostLeadRequest!.Send(cbRequestDto);
 
             _logger.Info($"Request send:\n{requestJson}");
 
@@ -120,7 +121,7 @@ public class CreateLeadController : ControllerBase
             // call internal API
 
             _logger.Info($"CoreBank Request Received: {JsonConvert.SerializeObject(coreRequest)}");
-            var apiResult = await _service.GetProductFromCoreBankAsync(coreRequest);
+            var apiResult = await _service.PostCreateLeadFromCoreBankAsync(coreRequest);
 
             _logger.Info($"CoreBank Request send: {JsonConvert.SerializeObject(coreRequest)}");
 
@@ -129,15 +130,15 @@ public class CreateLeadController : ControllerBase
             {
                 return NotFound(new ErrorResponse { errorCode = "404", errorMessage = "Product data not found." });
             }
-            CbProductResponseWrapper centralBankProductResponseWrapper = new();
-            CbProductDataResponse cbResponse;
-            centralBankProductResponseWrapper.CorrelationId = guid;
+            CbCreateLeadResponseWrapper centralBankLeadResponseWrapper = new();
+            CbPostCreateLeadResponse cbResponse;
+            centralBankLeadResponseWrapper.CorrelationId = guid;
             if (apiResult.Success)
             {
-                cbResponse = _service.GetCentralBankProductByIdResponse(apiResult.Data!, _logger.Log);
-                centralBankProductResponseWrapper.centralBankProductResponse = cbResponse;
+                cbResponse = _service.GetCentralBankCreateLeadResponse(apiResult.Data!, _logger.Log);
+                centralBankLeadResponseWrapper.centralBankCreateLeadResponse = cbResponse;
                 //await Task.Delay(5000);
-                await _sendPointInitialize.GetProductDataResponse!.Send(centralBankProductResponseWrapper);
+                await _sendPointInitialize.PostLeadResponse!.Send(centralBankLeadResponseWrapper);
 
                 var response = await GetResponseObject(cbResponse);
 
@@ -162,8 +163,8 @@ public class CreateLeadController : ControllerBase
             }
             else
             {
-                centralBankProductResponseWrapper.centralBankProductResponse = new CbProductDataResponse();
-                await _sendPointInitialize.GetProductDataResponse!.Send(centralBankProductResponseWrapper);
+                centralBankLeadResponseWrapper.centralBankCreateLeadResponse = new CbPostCreateLeadResponse();
+                await _sendPointInitialize.GetProductDataResponse!.Send(centralBankLeadResponseWrapper);
 
                 var log = AuditLogFactory.CreateAuditLog(
                    correlationId: guid,
@@ -209,7 +210,7 @@ public class CreateLeadController : ControllerBase
     }
 
 
-    private Task<JObject> GetResponseObject(CbProductDataResponse centralBankProductResponse)
+    private Task<JObject> GetResponseObject(CbPostCreateLeadResponse centralBankProductResponse)
     {
         try
         {

@@ -1,4 +1,5 @@
-﻿using OF.ProductData.Model.EFModel.Products;
+﻿using OF.ProductData.Model.EFModel.CreateLead;
+using OF.ProductData.Model.EFModel.Products;
 
 namespace OF.ProductData.CoreBankConn.API.EFModel;
 
@@ -69,6 +70,27 @@ public class EntityDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(c => c.RequestId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+        }
+    }
+
+    public class LeadDbContext : DbContext
+    {
+        public LeadDbContext(DbContextOptions<LeadDbContext> options)
+            : base(options) { }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+
+            modelBuilder.Entity<EFCreateLeadHeaderRequest>()
+                .HasOne(c => c.CreateLeadRequest)
+                .WithMany()
+                .HasForeignKey(c => c.RequestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+         
 
         }
     }

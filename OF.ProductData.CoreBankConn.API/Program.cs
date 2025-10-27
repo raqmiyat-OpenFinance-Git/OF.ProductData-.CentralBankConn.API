@@ -204,6 +204,7 @@ public static class Program
     {
        
         services.AddTransient<IProductDataService, ProductDataService>();
+        services.AddTransient<ICreateLeadService, CreateLeadService>();
         services.AddTransient<ICoreBankRepository, CoreBankRepository>();
        
     }

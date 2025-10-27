@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using OF.ProductData.CentralBankReceiverWorker.IServices;
-using OF.ProductData.Model.EFModel.Products;
+using OF.ProductData.Model.EFModel.CreateLead;
 
 namespace OF.ProductData.CentralBankReceiverWorker.Services;
 
@@ -20,38 +20,59 @@ public class CreateLeadService : ICreateLeadService
         {
             _context.createLeadRequest!.Add(LeadRequest);
             await _context.SaveChangesAsync();
-            logger.Info($"AddProductAsync is done. RequestId: {LeadRequest.RequestId}");
+            logger.Info($"AddCreateLeadAsync is done. RequestId: {LeadRequest.RequestId}");
         }
         catch (DbUpdateException dbEx)
         {
-            logger.Error(dbEx, "Database update error occurred while saving AddProductAsync.");
+            logger.Error(dbEx, "Database update error occurred while saving AddCreateLeadAsync.");
             throw; 
         }
         catch (Exception ex)
         {
-            logger.Error(ex, $"RequestId: {LeadRequest.RequestId} || An error occurred while saving AddProductAsync.");
+            logger.Error(ex, $"RequestId: {LeadRequest.RequestId} || An error occurred while saving AddCreateLeadAsync.");
+            throw;
+        }
+    }
+
+    public async Task AddCreateLeadHeaderAsync(EFCreateLeadHeaderRequest LeadHeader, long requestid, Logger logger)
+    {
+        try
+        {
+            LeadHeader.RequestId = requestid;
+            _context.createLeadHeaderRequest!.Add(LeadHeader);
+            await _context.SaveChangesAsync();
+            logger.Info($"AddCreateLeadHeaderAsync is done. RequestId: {LeadHeader.RequestId}");
+        }
+        catch (DbUpdateException dbEx)
+        {
+            logger.Error(dbEx, "Database update error occurred while saving AddCreateLeadHeaderAsync.");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.Error(ex, $"RequestId: {LeadHeader.RequestId} || An error occurred while saving AddCreateLeadHeaderAsync.");
             throw;
         }
     }
 
 
-    public async Task AddCreateLeadResponseAsync(long id,Guid CorrelationId, List<EFCreateLeadResponse> ProductResponse, Logger logger)
+    public async Task AddCreateLeadResponseAsync(long id,Guid CorrelationId, EFCreateLeadResponse LeadResponse, Logger logger)
     {
         try
         {
-            ProductResponse.FirstOrDefault()!.Id = id;
-            await _context.createLeadResponse!.AddRangeAsync(ProductResponse);
+            LeadResponse.RequestId = id;
+            await _context.createLeadResponse!.AddRangeAsync(LeadResponse);
             await _context.SaveChangesAsync();
-           logger.Info($"AddProductResponseAsync is done. ProductId: {ProductResponse.FirstOrDefault()!.Id}");
+           logger.Info($"AddCreateLeadResponseAsync is done. RequestId: {LeadResponse.RequestId}");
         }
         catch (DbUpdateException dbEx)
         {
-            logger.Error(dbEx, "Database update error occurred while saving AddProductResponseAsync.");
+            logger.Error(dbEx, "Database update error occurred while saving AddCreateLeadResponseAsync.");
             throw; // Rethrow or return a special value depending on your error handling strategy
         }
         catch (Exception ex)
         {
-            logger.Error(ex, $"RequestId: {ProductResponse.FirstOrDefault()!.Id} || An error occurred while saving AddProductResponseAsync.");
+            logger.Error(ex, $"RequestId: {LeadResponse!.RequestId} || An error occurred while saving AddCreateLeadResponseAsync.");
             throw;
         }
     }
@@ -66,7 +87,7 @@ public class CreateLeadService : ICreateLeadService
             parameters.Add("correlationId", correlationId, DbType.Guid);
 
             var dbResult = await _dbConnection.ExecuteScalarAsync<long?>(
-                "OF_GetProductDataRequestId",
+                "OF_GetCreateLeadRequestId",
                 parameters,
                 commandTimeout: 1200,
                 commandType: CommandType.StoredProcedure,
@@ -94,10 +115,10 @@ public class CreateLeadService : ICreateLeadService
             parameters.Add("@Id", id, DbType.Int64);
             parameters.Add("@Status", "PROCESSED", DbType.String);
 
-            logger.Info($"Calling OF_UpdateProductRequests with Transaction: Id={id}, Status={"PROCESSED"}");
+            logger.Info($"Calling OF_UpdateCreateLeadRequests with Transaction: Id={id}, Status={"PROCESSED"}");
 
             await _dbConnection.ExecuteAsync(
-                "OF_UpdateProductRequests",
+                "OF_UpdateCreateLeadRequests",
                 parameters,
                 commandType: CommandType.StoredProcedure,
                 commandTimeout: 1200,
