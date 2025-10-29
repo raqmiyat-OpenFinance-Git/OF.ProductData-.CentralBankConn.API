@@ -15,8 +15,8 @@
         public string? MinimumLoanCurrency { get; set; }
         public decimal? MaximumLoanAmount { get; set; }
         public string? MaximumLoanCurrency { get; set; }
-        public decimal? MinTenure { get; set; }
-        public decimal? MaxTenure { get; set; }
+        public string? MinTenure { get; set; }
+        public string? MaxTenure { get; set; }
         public string? CalculationMethod { get; set; }
         public string? RateType { get; set; }
         public string? RateDescription { get; set; }

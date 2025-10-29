@@ -32,7 +32,6 @@ public class ProductDataService : IProductDataService
         _logger = logger;
     }
 
-
     public async Task<ApiResult<CbsProductResponse>> GetProductFromCoreBankAsync(CbsProductRequest cbProductRequest)
     {
         ApiResult<CbsProductResponse>? apiResult = null;
@@ -314,288 +313,602 @@ public class ProductDataService : IProductDataService
             throw;
         }
     }
+    //public CbProductDataResponse ResponseProductDetails(CbsProductResponse cbProductResponse, string productCategory, Logger logger)
+    //{
+    //    var random = new Random();
+    //    var response = new CbProductDataResponse();
+    //    try
+    //    {
+
+    //        var lfiDataList = new List<LFIData>();
+    //        // Dummy product data
+    //        LFIData lFIData = new LFIData();
+
+    //        lFIData.LFIId = Guid.NewGuid().ToString();
+    //        lFIData.LFIBrandId = Guid.NewGuid().ToString();
+    //        lFIData.Products = new List<ProductWrapper>();
+
+    //        logger.Info($"Product Category: {productCategory}");
+
+    //        if (productCategory!.ToUpper() == "SAVINGSACCOUNT")
+    //        {
+    //            var products = new ProductWrapper
+    //            {
+    //                ProductId = "SAV001",
+    //                ProductName = "Premium Savings Account",
+    //                ProductCategory = "SavingsAccount",
+    //                Description = "A high-yield savings account with flexible access to funds.",
+    //                EffectiveFromDateTime = new DateTime(2024, 1, 1),
+    //                EffectiveToDateTime = new DateTime(2026, 12, 31),
+    //                LastUpdatedDateTime = DateTime.UtcNow,
+    //                IsShariaCompliant = false,
+    //                ShariaInformation = "Conventional account, not Sharia-compliant.",
+    //                IsSalaryTransferRequired = false,
+    //                Links = new Links
+    //                {
+    //                    ApplicationUri = "https://example.com/apply/savings",
+    //                    ApplicationPhoneNumber = "+971600543210",
+    //                    ApplicationEmail = "savings@example.com",
+    //                    OverviewUri = "https://example.com/savings/overview",
+    //                    FeesAndPricingUri = "https://example.com/savings/fees",
+    //                    TermsUri = "https://example.com/savings/terms"
+    //                },
+    //                Eligibility = new EligibilityData
+    //                {
+    //                    ResidenceStatus = new List<TypeDescription>
+    //                    {
+    //                            new TypeDescription { Type = "UaeResident", Description = "Available for UAE residents" }
+    //                    },
+    //                    EmploymentStatus = new List<TypeDescription>
+    //                    {
+    //                            new TypeDescription { Type = "Salaried", Description = "For salaried employees" }
+    //                    },
+    //                    Age = new List<AgeEligibility>
+    //                    {
+    //                            new AgeEligibility { Type = "MinimumAge", Value = 21, Description = "Minimum age is 21 years" }
+    //                    }
+    //                },
+    //                Product = new ProductDetails
+    //                {
+    //                    SavingsAccount = new SavingsAccountData
+    //                    {
+    //                        Type = "Savings",
+    //                        Description = "Earn interest on your balance with flexible withdrawal options.",
+    //                        MinimumBalance = new OF.ProductData.Model.CentralBank.Products.Amount
+    //                        {
+    //                            AmountValue = "3000.00",
+    //                            Currency = "AED"
+    //                        },
+    //                        AnnualReturn = 2.5,
+    //                        Features = new List<Feature> { new Feature { Type = "IslamicBanking", Description = "Sharia compliant feature" } },
+    //                        Fees = new List<Fee> { new Fee { Type = "MonthlyFees", Period = "Daily", Name = "Account Maintenance", Description = "Monthly account maintenance fee", Unit = "Amount", Amount = new Amount { AmountValue = "10", Currency = "AED" }, Percentage = 0.5, UnitValue = 0.5, MaximumUnitValue = 0.5 } },
+    //                        Limits = new List<Limit> { new Limit { Type = "MinimumDeposit", Description = "Minimum deposit", Value = 0.5 } },
+    //                        Benefits = new List<Benefit> { new Benefit { Type = "Cashback", Name = "Monthly Cashback", Description = "Cashback benefit", Value = 0.5 } }
+
+    //                    }
+    //                },
+    //            };
+    //            lFIData.Products!.Add(products);
+    //        }
+    //        else if (productCategory!.ToUpper() == "CURRENTACCOUNT")
+    //        {
+    //            var products = new ProductWrapper
+    //            {
+    //                ProductId = "CUR001",
+    //                ProductName = "Business Current Account",
+    //                ProductCategory = "CurrentAccount",
+    //                Description = "Ideal for small and medium enterprises for day-to-day transactions.",
+    //                EffectiveFromDateTime = new DateTime(2024, 5, 1),
+    //                EffectiveToDateTime = new DateTime(2026, 12, 31),
+    //                LastUpdatedDateTime = DateTime.UtcNow,
+    //                IsShariaCompliant = true,
+    //                ShariaInformation = "Compliant with Islamic Banking principles.",
+    //                Product = new ProductDetails
+    //                {
+    //                    CurrentAccount = new CurrentAccountData
+    //                    {
+    //                        Type = "Business",
+    //                        Description = "No-interest current account for daily business use.",
+    //                        MinimumBalance = new OF.ProductData.Model.CentralBank.Products.Amount
+    //                        {
+    //                            AmountValue = "10000.00",
+    //                            Currency = "AED"
+    //                        },
+    //                        Fees = new List<Fee> { new Fee { Type = "MonthlyFees", Period = "Daily", Name = "Account Maintenance", Description = "Monthly account maintenance fee", Unit = "Amount", Amount = new Amount { AmountValue = "10", Currency = "AED" }, Percentage = 0.5, UnitValue = 0.5, MaximumUnitValue = 0.5 } },
+    //                        Limits = new List<Limit> { new Limit { Type = "MinimumDeposit", Description = "Minimum deposit", Value = 0.5 } },
+    //                        Benefits = new List<Benefit> { new Benefit { Type = "Cashback", Name = "Monthly Cashback", Description = "Cashback benefit", Value = 0.5 } }
+
+    //                    }
+    //                }
+    //            };
+    //            lFIData.Products!.Add(products);
+    //        }
+    //        else if (productCategory!.ToUpper() == "CREDITCARD")
+    //        {
+    //            var products = new ProductWrapper
+    //            {
+    //                ProductId = "CC001",
+    //                ProductName = "Platinum Rewards Credit Card",
+    //                ProductCategory = "CreditCard",
+    //                Description = "Premium card offering travel benefits and cashbacks.",
+    //                EffectiveFromDateTime = new DateTime(2024, 3, 1),
+    //                EffectiveToDateTime = new DateTime(2026, 12, 31),
+    //                LastUpdatedDateTime = DateTime.UtcNow,
+    //                IsShariaCompliant = false,
+    //                IsSalaryTransferRequired = true,
+    //                Product = new ProductDetails
+    //                {
+    //                    CreditCard = new CreditCardData
+    //                    {
+    //                        Type = "Visa",
+    //                        Description = "Visa Platinum with 1% cashback and free lounge access.",
+    //                        Rate = 15.99m,
+    //                        Documentation = new List<Document>
+    //                                            {
+    //                                                    new Document { Type = "IDCard", Description = "Valid Emirates ID" },
+    //                                                    new Document { Type = "BankStatement", Description = "3 months bank statements" }
+    //                                            },
+    //                        Features = new List<Feature>
+    //                                            {
+    //                                                    new Feature { Type = "Rewards", Description = "Earn 1 point per AED 1 spent" },
+    //                                                    new Feature { Type = "TravelInsurance", Description = "Free travel insurance" }
+    //                                            },
+    //                        Fees = new List<Fee>
+    //                                            {
+    //                                                    new Fee
+    //                                                    {
+    //                                                        Type = "AnnualFee",
+    //                                                        Period = "Yearly",
+    //                                                        Name = "Annual Membership Fee",
+    //                                                        Description = "Charged annually",
+    //                                                        Amount = new OF.ProductData.Model.CentralBank.Products.Amount
+    //                                                        {
+    //                                                            AmountValue = "500.00", Currency = "AED"
+    //                                                        },
+    //                                                        UnitValue = 500.00
+    //                                                    }
+    //                                            },
+    //                        Limits = new List<Limit> { new Limit { Type = "MinimumDeposit", Description = "Minimum deposit", Value = 0.5 } },
+    //                        Benefits = new List<Benefit> { new Benefit { Type = "Cashback", Name = "Monthly Cashback", Description = "Cashback benefit", Value = 0.5 } }
+
+    //                    }
+    //                }
+    //            };
+
+    //            lFIData.Products!.Add(products);
+    //        }
+    //        else if (productCategory!.ToUpper() == "LOAN")
+    //        {
+    //            var products = new ProductWrapper
+    //            {
+    //                ProductId = "LN001",
+    //                ProductName = "Personal Finance Loan",
+    //                ProductCategory = "Loan",
+    //                Description = "Flexible loan with low interest rates.",
+    //                EffectiveFromDateTime = new DateTime(2024, 2, 1),
+    //                EffectiveToDateTime = new DateTime(2026, 12, 31),
+    //                LastUpdatedDateTime = DateTime.UtcNow,
+    //                IsShariaCompliant = false,
+    //                Product = new ProductDetails
+    //                {
+    //                    PersonalLoan = new PersonalLoanData
+    //                    {
+    //                        Type = "PersonalFinance",
+    //                        Description = "Borrow up to AED 500,000 with flexible tenure.",
+    //                        MinimumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
+    //                        {
+    //                            AmountValue = "10000.00",
+    //                            Currency = "AED"
+    //                        },
+    //                        MaximumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
+    //                        {
+    //                            AmountValue = "500000.00",
+    //                            Currency = "AED"
+    //                        },
+    //                        Tenure = new LoanTenure { MinimumLoanTenure = 12, MaximumLoanTenure = 60 },
+    //                        Rate = new RateDetails
+    //                        {
+    //                            Type = "Fixed",
+    //                            Description = "Fixed annual rate",
+    //                            IndicativeRate = new APR { From = 5.99m, To = 11.99m }
+    //                        },
+    //                        Fees = new List<Fee>
+    //                                            {
+    //                                                    new Fee
+    //                                                    {
+    //                                                        Type = "ProcessingFee",
+    //                                                        Period = "OneOff",
+    //                                                        Name = "Processing Fee",
+    //                                                        Unit = "Percentage",
+    //                                                        Percentage = 1.0,
+    //                                                        UnitValue = 1.0
+    //                                                    }
+    //                                            },
+    //                        Limits = new List<Limit> { new Limit { Type = "MinimumDeposit", Description = "Minimum deposit", Value = 0.5 } },
+    //                        Benefits = new List<Benefit> { new Benefit { Type = "Cashback", Name = "Monthly Cashback", Description = "Cashback benefit", Value = 0.5 } }
+
+    //                    }
+    //                }
+    //            };
+    //            lFIData.Products!.Add(products);
+    //        }
+    //        else if (productCategory!.ToUpper() == "MORTGAGE")
+    //        {
+    //            var products = new ProductWrapper
+    //            {
+    //                ProductId = "MTG001",
+    //                ProductName = "Home Mortgage Loan",
+    //                ProductCategory = "Mortgage",
+    //                Description = "Competitive home loan for first-time buyers and investors.",
+    //                EffectiveFromDateTime = new DateTime(2024, 4, 1),
+    //                EffectiveToDateTime = new DateTime(2026, 12, 31),
+    //                LastUpdatedDateTime = DateTime.UtcNow,
+    //                IsShariaCompliant = false,
+    //                Product = new ProductDetails
+    //                {
+    //                    Mortgage = new MortgageData
+    //                    {
+    //                        Type = "HomeFinance",
+    //                        Description = "Home loan with fixed or variable rate options.",
+    //                        MinimumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
+    //                        {
+    //                            AmountValue = "250000.00",
+    //                            Currency = "AED"
+    //                        },
+    //                        MaximumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
+    //                        {
+    //                            AmountValue = "5000000.00",
+    //                            Currency = "AED"
+    //                        },
+    //                        Tenure = new LoanTenure { MinimumLoanTenure = 60, MaximumLoanTenure = 300 },
+    //                        Rate = new RateDetails
+    //                        {
+    //                            Type = "Variable",
+    //                            Description = "Variable rate linked to EIBOR",
+    //                            IndicativeRate = new APR { From = 3.5m, To = 6.5m }
+    //                        }
+    //                    }
+    //                }
+    //            };
+    //            lFIData.Products!.Add(products);
+    //        }
+
+    //        lfiDataList.Add(lFIData);
+    //        response.Data = lfiDataList;
+
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        logger.Error($"Error in ProductDetails(): {ex.Message}");
+    //    }
+    //    return response;
+    //}
     public CbProductDataResponse ResponseProductDetails(CbsProductResponse cbProductResponse, string productCategory, Logger logger)
     {
         var random = new Random();
         var response = new CbProductDataResponse();
+
         try
         {
-
             var lfiDataList = new List<LFIData>();
-            // Dummy product data
-            LFIData lFIData = new LFIData();
-
-            lFIData.LFIId = Guid.NewGuid().ToString();
-            lFIData.LFIBrandId = Guid.NewGuid().ToString();
-            lFIData.Products = new List<ProductWrapper>();
+            var lFIData = new LFIData
+            {
+                LFIId = Guid.NewGuid().ToString(),
+                LFIBrandId = Guid.NewGuid().ToString(),
+                Products = new List<ProductWrapper>()
+            };
 
             logger.Info($"Product Category: {productCategory}");
 
-            if (productCategory!.ToUpper() == "SAVINGSACCOUNT")
+            // Helper functions
+            string RandomAmount(int min, int max) => random.Next(min, max).ToString("N2");
+            decimal RandomRate(decimal min, decimal max) => Math.Round((decimal)(random.NextDouble() * ((double)max - (double)min) + (double)min), 2);
+
+            // Random unique suffix for product names and IDs
+            string suffix = random.Next(100, 999).ToString();
+
+            // Random effective period
+            var effectiveFrom = DateTime.UtcNow.AddDays(-random.Next(10, 300));
+            var effectiveTo = effectiveFrom.AddMonths(random.Next(12, 36));
+
+            ProductWrapper? product = null;
+
+            switch (productCategory?.ToUpper())
             {
-                var products = new ProductWrapper
-                {
-                    ProductId = "SAV001",
-                    ProductName = "Premium Savings Account",
-                    ProductCategory = "SavingsAccount",
-                    Description = "A high-yield savings account with flexible access to funds.",
-                    EffectiveFromDateTime = new DateTime(2024, 1, 1),
-                    EffectiveToDateTime = new DateTime(2026, 12, 31),
-                    LastUpdatedDateTime = DateTime.UtcNow,
-                    IsShariaCompliant = false,
-                    ShariaInformation = "Conventional account, not Sharia-compliant.",
-                    IsSalaryTransferRequired = false,
-                    Links = new Links
+                case "SAVINGSACCOUNT":
+                    product = new ProductWrapper
                     {
-                        ApplicationUri = "https://example.com/apply/savings",
-                        ApplicationPhoneNumber = "+971600543210",
-                        ApplicationEmail = "savings@example.com",
-                        OverviewUri = "https://example.com/savings/overview",
-                        FeesAndPricingUri = "https://example.com/savings/fees",
-                        TermsUri = "https://example.com/savings/terms"
-                    },
-                    Eligibility = new EligibilityData
-                    {
-                        ResidenceStatus = new List<TypeDescription>
+                        ProductId = $"SAV{suffix}",
+                        ProductName = $"Premium Savings Account {suffix}",
+                        ProductCategory = "SavingsAccount",
+                        Description = "A high-return savings account with easy fund access.",
+                        EffectiveFromDateTime = effectiveFrom,
+                        EffectiveToDateTime = effectiveTo,
+                        LastUpdatedDateTime = DateTime.UtcNow,
+                        IsShariaCompliant = random.Next(0, 2) == 1,
+                        ShariaInformation = "Complies with applicable banking principles.",
+                        IsSalaryTransferRequired = false,
+                        Links = new Links
                         {
-                                new TypeDescription { Type = "UaeResident", Description = "Available for UAE residents" }
+                            ApplicationUri = $"https://bank.example.com/apply/savings/{suffix}",
+                            ApplicationPhoneNumber = $"+9716005{random.Next(10000, 99999)}",
+                            ApplicationEmail = $"savings{suffix}@bank.example.com",
+                            OverviewUri = $"https://bank.example.com/savings/{suffix}/overview",
+                            FeesAndPricingUri = $"https://bank.example.com/savings/{suffix}/fees",
+                            TermsUri = $"https://bank.example.com/savings/{suffix}/terms"
                         },
-                        EmploymentStatus = new List<TypeDescription>
+                        Product = new ProductDetails
                         {
-                                new TypeDescription { Type = "Salaried", Description = "For salaried employees" }
-                        },
-                        Age = new List<AgeEligibility>
-                        {
-                                new AgeEligibility { Type = "MinimumAge", Value = 21, Description = "Minimum age is 21 years" }
-                        }
-                    },
-                    Product = new ProductDetails
-                    {
-                        SavingsAccount = new SavingsAccountData
-                        {
-                            Type = "Savings",
-                            Description = "Earn interest on your balance with flexible withdrawal options.",
-                            MinimumBalance = new OF.ProductData.Model.CentralBank.Products.Amount
+                            SavingsAccount = new SavingsAccountData
                             {
-                                AmountValue = "3000.00",
-                                Currency = "AED"
-                            },
-                            AnnualReturn = 2.5,
-                            Features = new List<Feature>
-                            {
-                                    new Feature { Type = "DebitCard", Description = "Free Visa debit card" },
-                                    new Feature { Type = "MobileBanking", Description = "24/7 mobile banking access" }
-                            },
-                            Fees = new List<Fee>
-                            {
+                                Type = "Savings",
+                                Description = "Earn competitive returns with flexible withdrawals.",
+                                MinimumBalance = new OF.ProductData.Model.CentralBank.Products.Amount
+                                {
+                                    AmountValue = "1000",
+                                    Currency = "AED"
+                                },
+                                AnnualReturn = (double)RandomRate(1.5m, 3.5m),
+                                Documentation = new List<Document> { new Document { Type = "ApplicationForm", Description = "Fill application form" } },
+                                Features = new List<Feature> { new Feature { Type = "Interest", Description = "Attractive interest rate" } },
+                                Fees = new List<Fee>
+                                {
                                     new Fee
                                     {
                                         Type = "Maintenance",
                                         Period = "Monthly",
-                                        Name = "Account Maintenance",
-                                        Description = "Charged monthly for account upkeep",
+                                        Name = "Account Maintenance Fee",
+                                        Description = "Charged monthly",
+                                        Unit = "Amount",
+                                        Amount = new Amount { AmountValue = RandomAmount(10, 25), Currency = "AED" }
+                                    }
+                                },
+                                Limits = new List<Limit> { new Limit { Type = "MinimumDeposit", Description = "Minimum deposit required", Value = 1000 } },
+                                Benefits = new List<Benefit> { new Benefit { Type = "Cashback", Name = "Loyalty Reward", Description = "Earn loyalty points", Value = 1.0 } }
+                            }
+
+                        }
+                    };
+                    break;
+
+                case "CURRENTACCOUNT":
+                    product = new ProductWrapper
+                    {
+                        ProductId = $"CUR{suffix}",
+                        ProductName = $"Business Current Account {suffix}",
+                        ProductCategory = "CurrentAccount",
+                        Description = "Ideal for daily business banking needs.",
+                        EffectiveFromDateTime = effectiveFrom,
+                        EffectiveToDateTime = effectiveTo,
+                        LastUpdatedDateTime = DateTime.UtcNow,
+                        IsShariaCompliant = random.Next(0, 2) == 1,
+                        Product = new ProductDetails
+                        {
+                            CurrentAccount = new CurrentAccountData
+                            {
+                                Type = "Business",
+                                Description = "Convenient account for regular transactions.",
+                                MinimumBalance = new OF.ProductData.Model.CentralBank.Products.Amount
+                                {
+                                    AmountValue = "1000",
+                                    Currency = "AED"
+                                },
+                                Documentation = new List<Document> { new Document { Type = "ApplicationForm", Description = "Fill application form" } },
+                                Fees = new List<Fee>
+                                {
+                                    new Fee
+                                    {
+                                        Type = "Maintenance",
+                                        Period = "Monthly",
+                                        Name = "Account Fee",
+                                        Description = "Standard account fee",
+                                        Unit = "Amount",
+                                        Amount = new Amount { AmountValue = RandomAmount(10, 50), Currency = "AED" }
+                                    }
+                                },
+                                IsOverdraftAvailable = false,
+                                Features = new List<Feature> { new Feature { Type = "IslamicBanking", Description = "Sharia compliant feature" } },
+                                Limits = new List<Limit> { new Limit { Type = "MinimumDeposit", Description = "Minimum deposit", Value = 0.5 } },
+                                Benefits = new List<Benefit> { new Benefit { Type = "Cashback", Name = "Monthly Cashback", Description = "Cashback benefit", Value = 0.5 } }
+                            }
+                        }
+                    };
+                    break;
+
+                case "CREDITCARD":
+                    product = new ProductWrapper
+                    {
+                        ProductId = $"CC{suffix}",
+                        ProductName = $"Platinum Rewards Card {suffix}",
+                        ProductCategory = "CreditCard",
+                        Description = "Premium credit card with travel and cashback rewards.",
+                        EffectiveFromDateTime = effectiveFrom,
+                        EffectiveToDateTime = effectiveTo,
+                        LastUpdatedDateTime = DateTime.UtcNow,
+                        IsSalaryTransferRequired = random.Next(0, 2) == 1,
+                        Product = new ProductDetails
+                        {
+                            CreditCard = new CreditCardData
+                            {
+                                Type = "Visa",
+                                Description = "Platinum Visa card with exclusive privileges.",
+                                Rate = RandomRate(10.0m, 19.5m),
+                                Documentation = new List<Document> { new Document { Type = "ApplicationForm", Description = "Fill application form" } },
+                                Fees = new List<Fee>
+                                {
+                                    new Fee
+                                    {
+                                        Type = "AnnualFee",
+                                        Period = "Yearly",
+                                        Name = "Annual Membership Fee",
+                                        Description = "Charged once per year",
+                                        Unit = "Amount",
                                         Amount = new OF.ProductData.Model.CentralBank.Products.Amount
                                         {
-                                            AmountValue = "25.00", Currency = "AED"
-                                        },
-                                        UnitValue = 25.00
+                                            AmountValue = RandomAmount(300, 800),
+                                            Currency = "AED"
+                                        }
                                     }
-                            },
-                            Limits = new List<Limit>
-                            {
-                                    new Limit { Type = "MinimumBalance", Value = 1000, Description = "Maintain minimum AED 1,000" }
+                                },
+                                Features = new List<Feature>
+                                {
+                                    new Feature { Type = "Rewards", Description = "Earn 1 point per AED 1 spent" },
+                                    new Feature { Type = "TravelInsurance", Description = "Free travel insurance coverage" }
+                                },
+                                Limits = new List<Limit> { new Limit { Type = "MinimumCreditLimit", Description = "Minimum credit limit", Value = 5000 } },
+                                Benefits = new List<Benefit> { new Benefit { Type = "Cashback", Name = "Cashback", Description = "Cashback benefit", Value = 50 } }
+
                             }
                         }
-                    },
-                };
-                lFIData.Products!.Add(products);
-            }
-            else if (productCategory!.ToUpper() == "CURRENTACCOUNT")
-            {
-                var products = new ProductWrapper
-                {
-                    ProductId = "CUR001",
-                    ProductName = "Business Current Account",
-                    ProductCategory = "CurrentAccount",
-                    Description = "Ideal for small and medium enterprises for day-to-day transactions.",
-                    EffectiveFromDateTime = new DateTime(2024, 5, 1),
-                    EffectiveToDateTime = new DateTime(2026, 12, 31),
-                    LastUpdatedDateTime = DateTime.UtcNow,
-                    IsShariaCompliant = true,
-                    ShariaInformation = "Compliant with Islamic Banking principles.",
-                    Product = new ProductDetails
-                    {
-                        CurrentAccount = new CurrentAccountData
-                        {
-                            Type = "Business",
-                            Description = "No-interest current account for daily business use.",
-                            MinimumBalance = new OF.ProductData.Model.CentralBank.Products.Amount
-                            {
-                                AmountValue = "10000.00",
-                                Currency = "AED"
-                            },
-                            Features = new List<Feature>
-                                                {
-                                                        new Feature { Type = "ChequeBook", Description = "Free cheque book" },
-                                                        new Feature { Type = "OnlineBanking", Description = "Secure online transactions" }
-                                                }
-                        }
-                    }
-                };
-                lFIData.Products!.Add(products);
-            }
-            else if (productCategory!.ToUpper() == "CREDITCARD")
-            {
-                var products = new ProductWrapper
-                {
-                    ProductId = "CC001",
-                    ProductName = "Platinum Rewards Credit Card",
-                    ProductCategory = "CreditCard",
-                    Description = "Premium card offering travel benefits and cashbacks.",
-                    EffectiveFromDateTime = new DateTime(2024, 3, 1),
-                    EffectiveToDateTime = new DateTime(2026, 12, 31),
-                    LastUpdatedDateTime = DateTime.UtcNow,
-                    IsShariaCompliant = false,
-                    IsSalaryTransferRequired = true,
-                    Product = new ProductDetails
-                    {
-                        CreditCard = new CreditCardData
-                        {
-                            Type = "Visa",
-                            Description = "Visa Platinum with 1% cashback and free lounge access.",
-                            Rate = 15.99m,
-                            Documentation = new List<Document>
-                                                {
-                                                        new Document { Type = "IDCard", Description = "Valid Emirates ID" },
-                                                        new Document { Type = "BankStatement", Description = "3 months bank statements" }
-                                                },
-                            Features = new List<Feature>
-                                                {
-                                                        new Feature { Type = "Rewards", Description = "Earn 1 point per AED 1 spent" },
-                                                        new Feature { Type = "TravelInsurance", Description = "Free travel insurance" }
-                                                },
-                            Fees = new List<Fee>
-                                                {
-                                                        new Fee
-                                                        {
-                                                            Type = "AnnualFee",
-                                                            Period = "Yearly",
-                                                            Name = "Annual Membership Fee",
-                                                            Description = "Charged annually",
-                                                            Amount = new OF.ProductData.Model.CentralBank.Products.Amount
-                                                            {
-                                                                AmountValue = "500.00", Currency = "AED"
-                                                            },
-                                                            UnitValue = 500.00
-                                                        }
-                                                }
-                        }
-                    }
-                };
+                    };
+                    break;
 
-                lFIData.Products!.Add(products);
-            }
-            else if (productCategory!.ToUpper() == "LOAN")
-            {
-                var products = new ProductWrapper
-                {
-                    ProductId = "LN001",
-                    ProductName = "Personal Finance Loan",
-                    ProductCategory = "Loan",
-                    Description = "Flexible loan with low interest rates.",
-                    EffectiveFromDateTime = new DateTime(2024, 2, 1),
-                    EffectiveToDateTime = new DateTime(2026, 12, 31),
-                    LastUpdatedDateTime = DateTime.UtcNow,
-                    IsShariaCompliant = false,
-                    Product = new ProductDetails
+                case "LOAN":
+                    product = new ProductWrapper
                     {
-                        PersonalLoan = new PersonalLoanData
+                        ProductId = $"LN{suffix}",
+                        ProductName = $"Personal Loan {suffix}",
+                        ProductCategory = "Loan",
+                        Description = "Flexible personal loan with attractive interest rates.",
+                        EffectiveFromDateTime = effectiveFrom,
+                        EffectiveToDateTime = effectiveTo,
+                        LastUpdatedDateTime = DateTime.UtcNow,
+                        Product = new ProductDetails
                         {
-                            Type = "PersonalFinance",
-                            Description = "Borrow up to AED 500,000 with flexible tenure.",
-                            MinimumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
+                            PersonalLoan = new PersonalLoanData
                             {
-                                AmountValue = "10000.00",
-                                Currency = "AED"
-                            },
-                            MaximumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
-                            {
-                                AmountValue = "500000.00",
-                                Currency = "AED"
-                            },
-                            Tenure = new LoanTenure { MinimumLoanTenure = 12, MaximumLoanTenure = 60 },
-                            Rate = new RateDetails
-                            {
-                                Type = "Fixed",
-                                Description = "Fixed annual rate",
-                                IndicativeRate = new APR { From = 5.99m, To = 11.99m }
-                            },
-                            Fees = new List<Fee>
-                                                {
-                                                        new Fee
-                                                        {
-                                                            Type = "ProcessingFee",
-                                                            Period = "OneOff",
-                                                            Name = "Processing Fee",
-                                                            Unit = "Percentage",
-                                                            Percentage = 1.0,
-                                                            UnitValue = 1.0
-                                                        }
-                                                }
-                        }
-                    }
-                };
-                lFIData.Products!.Add(products);
-            }
-            else if (productCategory!.ToUpper() == "MORTGAGE")
-            {
-                var products = new ProductWrapper
-                {
-                    ProductId = "MTG001",
-                    ProductName = "Home Mortgage Loan",
-                    ProductCategory = "Mortgage",
-                    Description = "Competitive home loan for first-time buyers and investors.",
-                    EffectiveFromDateTime = new DateTime(2024, 4, 1),
-                    EffectiveToDateTime = new DateTime(2026, 12, 31),
-                    LastUpdatedDateTime = DateTime.UtcNow,
-                    IsShariaCompliant = false,
-                    Product = new ProductDetails
-                    {
-                        Mortgage = new MortgageData
-                        {
-                            Type = "HomeFinance",
-                            Description = "Home loan with fixed or variable rate options.",
-                            MinimumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
-                            {
-                                AmountValue = "250000.00",
-                                Currency = "AED"
-                            },
-                            MaximumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
-                            {
-                                AmountValue = "5000000.00",
-                                Currency = "AED"
-                            },
-                            Tenure = new LoanTenure { MinimumLoanTenure = 60, MaximumLoanTenure = 300 },
-                            Rate = new RateDetails
-                            {
-                                Type = "Variable",
-                                Description = "Variable rate linked to EIBOR",
-                                IndicativeRate = new APR { From = 3.5m, To = 6.5m }
+                                Type = "PersonalFinance",
+                                Description = "Borrow funds for personal needs with easy repayment options.",
+                                MinimumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
+                                {
+                                    AmountValue = "100000",
+                                    Currency = "AED"
+                                },
+                                MaximumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
+                                {
+                                    AmountValue = "5000000",
+                                    Currency = "AED"
+                                },
+                                Tenure = new LoanTenure
+                                {
+                                    MinimumLoanTenure = 3,
+                                    MaximumLoanTenure = 36
+                                },
+                                Rate = new RateDetails
+                                {
+                                    Type = "Fixed",
+                                    Description = "Fixed annual interest rate",
+                                    IndicativeRate = new APR
+                                    {
+                                        From = RandomRate(3.5m, 6.5m),
+                                        To = RandomRate(7.0m, 10.0m)
+                                    }
+                                },
+                                Documentation = new List<Document> { new Document { Type = "ApplicationForm", Description = "Fill application form" } },
+                                Fees = new List<Fee>
+                                {
+                                    new Fee
+                                    {
+                                        Type = "ProcessingFee",
+                                        Period = "OneOff",
+                                        Name = "Processing Fee",
+                                        Unit = "Percentage",
+                                        Percentage = 1.0,
+                                        UnitValue = 1.0,
+                                        Amount = new OF.ProductData.Model.CentralBank.Products.Amount
+                                        {
+                                            AmountValue = RandomAmount(300, 800),
+                                            Currency = "AED"
+                                        }
+                                    }
+                                },
+                                CalculationMethod = "FlatRate",
+                                AnnualPercentageRateRange = new APR { From = 0.5m, To = 1.5m },
+                                FixedRatePeriod = "1 year",
+                                DebtBurdenRatio = "40%",
+                                Features = new List<Feature> { new Feature { Type = "IslamicBanking", Description = "Sharia compliant feature" } },
+                                Limits = new List<Limit> { new Limit { Type = "MinimumRequiredCreditScore", Description = "Minimum credit score", Value = 600 } },
+                                Benefits = new List<Benefit> { new Benefit { Type = "Other", Name = "Other Benefit", Description = "Other benefit", Value = 0.5 } },
+                                AdditionalInformation = new List<AdditionalInformation> { new AdditionalInformation { Type = "Other", Description = "Additional info" } }
                             }
                         }
-                    }
-                };
-                lFIData.Products!.Add(products);
+                    };
+                    break;
+
+                case "MORTGAGE":
+                    product = new ProductWrapper
+                    {
+                        ProductId = $"MTG{suffix}",
+                        ProductName = $"Home Mortgage {suffix}",
+                        ProductCategory = "Mortgage",
+                        Description = "Competitive mortgage for home buyers and investors.",
+                        EffectiveFromDateTime = effectiveFrom,
+                        EffectiveToDateTime = effectiveTo,
+                        LastUpdatedDateTime = DateTime.UtcNow,
+                        Product = new ProductDetails
+                        {
+                            Mortgage = new MortgageData
+                            {
+                                Type = "HomeFinance",
+                                Description = "Flexible home financing solution.",
+                                MinimumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
+                                {
+                                    AmountValue = "10000",
+                                    Currency = "AED"
+                                },
+                                MaximumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
+                                {
+                                    AmountValue = "500000",
+                                    Currency = "AED"
+                                },
+                                Tenure = new LoanTenure
+                                {
+                                    MinimumLoanTenure = 3,
+                                    MaximumLoanTenure = 36
+                                },
+                                Rate = new RateDetails
+                                {
+                                    Type = "Variable",
+                                    Description = "Rate linked to EIBOR",
+                                    IndicativeRate = new APR
+                                    {
+                                        From = RandomRate(3.0m, 5.0m),
+                                        To = RandomRate(5.5m, 7.5m)
+                                    }
+                                },
+                                Documentation = new List<Document> { new Document { Type = "ApplicationForm", Description = "Fill application form" } },
+                                Features = new List<Feature> { new Feature { Type = "IslamicBanking", Description = "Sharia compliant feature" } },
+                                Fees = new List<Fee> { new Fee { Type = "Processing", Period = "Daily", Name = "Processing Fee", Description = "Processing fee", Unit = "Amount", Amount = new Amount { AmountValue = "100", Currency = "AED" }, Percentage = 0.5, UnitValue = 0.5, MaximumUnitValue = 0.5 } },
+                                Limits = new List<Limit> { new Limit { Type = "MinimumRequiredCreditScore", Description = "Minimum credit score", Value = 600, Percentage = 0.5 } },
+                                Benefits = new List<Benefit> { new Benefit { Type = "Other", Name = "Other Benefit", Description = "Other benefit", Value = 0.5 } },
+                                CalculationMethod = "FlatRate",
+                                Structure = "Standard",
+                                IndicativeAPR = new APR { From = 0.5m, To = 1.0m },
+                                FixedRatePeriod = "1 year",
+                                MaximumLTV = 0.8,
+                                DownPayment = new Amount { AmountValue = "20000", Currency = "AED" },
+                            }
+                        }
+                    };
+                    break;
+
+                default:
+                    logger.Warn($"Unknown product category: {productCategory}");
+                    break;
             }
 
-            lfiDataList.Add(lFIData);
-            response.Data = lfiDataList;
-
+            if (product != null)
+            {
+                lFIData.Products!.Add(product);
+                lfiDataList.Add(lFIData);
+                response.Data = lfiDataList;
+            }
         }
         catch (Exception ex)
         {
-            logger.Error($"Error in ProductDetails(): {ex.Message}");
+            logger.Error($"Error in ProductDetails(): {ex}");
         }
+
         return response;
     }
 
