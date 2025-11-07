@@ -1,5 +1,6 @@
 ﻿using ConsentModel.Common;
 using FluentValidation.AspNetCore;
+using Microsoft.OpenApi.Models;
 using OF.ProductData.CentralBankConn.API.IServices;
 using OF.ProductData.CentralBankConn.API.Middleware;
 using OF.ProductData.CentralBankConn.API.Models;
@@ -51,10 +52,10 @@ public static class Program
         builder.Services.AddMemoryCache();
         builder.Services.AddTransient<Custom>();
         builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
-    });
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+        });
 
         var redisSettings = builder.Configuration
            .GetSection("RedisCacheSettings")
@@ -70,42 +71,37 @@ public static class Program
             });
         }
         builder.Services.AddHttpContextAccessor();
-        builder.Services.AddControllers();
         builder.Services.AddHealthChecks();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
         {
-            c.CustomSchemaIds(type => type.FullName); // helps with duplicate names
+            c.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "CentralBank Product API",
+                Version = "v1",
+                Description = "API for Central Bank product data communication."
+            });
+            c.CustomSchemaIds(type => type.FullName);
             c.DescribeAllParametersInCamelCase();
         });
+
         builder.Services.AddFluentValidationAutoValidation()
                 .AddValidatorsFromAssemblyContaining<ProductDataRequestValidator>();
 
         builder.Services.AddFluentValidationAutoValidation()
               .AddValidatorsFromAssemblyContaining<CreateLeadRequestValidator>();
 
-        builder.Services.AddSwaggerGen(c =>
-
-        {
-
-            c.CustomSchemaIds(type => type.FullName);
-
-        });
-
         var app = builder.Build();
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
-
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "CentalBankPRoductAPI V1.0");
-
+            c.SwaggerEndpoint("v1/swagger.json", "CentralBankProductAPI V1.0");
         });
+
         // Register custom middleware here (preferably early in the pipeline)
         app.UseMiddleware<CorrelationIdMiddleware>();
         app.UseMiddleware<ExceptionMiddleware>();
         app.UseCors(AllowSpecificOrigins);
-        app.UseSwagger();
-        app.UseSwaggerUI();
         app.UseHttpsRedirection();
         app.UseAuthorization();
         app.MapControllers();

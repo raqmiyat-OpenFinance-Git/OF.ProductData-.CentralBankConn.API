@@ -2,8 +2,10 @@ using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using NLog;
 using OF.ProductData.Common.AES;
 using OF.ProductData.Common.Custom;
@@ -17,7 +19,6 @@ using System.Data;
 using System.Net;
 using System.Net.Security;
 using System.Text;
-using Microsoft.EntityFrameworkCore;
 
 namespace OF.ProductData.CoreBankConn.API;
 
@@ -50,26 +51,26 @@ public static class Program
         builder.Services.AddControllers();
         builder.Services.AddHealthChecks();
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
         builder.Services.AddSwaggerGen(c =>
-
         {
-
+            c.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "CoreBank Product API",
+                Version = "v1",
+                Description = "API for Core Bank product data communication."
+            });
             c.CustomSchemaIds(type => type.FullName);
-
+            c.DescribeAllParametersInCamelCase();
         });
         var app = builder.Build();
        
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
-
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "CoreBankBankPRoductAPI V1.0");
-
+            c.SwaggerEndpoint("v1/swagger.json", "CoreBankProductDataAPI V1.0");
         });
+
         app.UseCors(AllowSpecificOrigins);
-        app.UseSwagger();
-        app.UseSwaggerUI();
         app.UseHttpsRedirection();
         app.UseAuthorization();
         app.MapControllers();
