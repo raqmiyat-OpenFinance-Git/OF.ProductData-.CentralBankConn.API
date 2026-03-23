@@ -645,7 +645,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
         //}
 
 
-        public static ICollection<OF.ProductData.Model.EFModel.Products.Tenor> MapTenor(ProductData.Model.CentralBank.Products.Tenor src,long paymentRequestId)
+        public static ICollection<OF.ProductData.Model.EFModel.Products.Tenor> MapTenor(ProductData.Model.CentralBank.Products.Tenor src, long paymentRequestId)
         {
             if (src == null)
                 return null;
@@ -661,7 +661,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
             };
         }
 
-        public static ICollection<OF.ProductData.Model.EFModel.Products.AssetBacked> MapAssetBacked(OF.ProductData.Model.CentralBank.Products.AssetBacked src,long paymentRequestId)
+        public static ICollection<OF.ProductData.Model.EFModel.Products.AssetBacked> MapAssetBacked(OF.ProductData.Model.CentralBank.Products.AssetBacked src, long paymentRequestId)
         {
             if (src == null)
                 return null;
@@ -752,13 +752,13 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
             Name = src.Name,
             Description = src.Description,
             Type = src.Type.ToString(),
-            
+
             BalanceAmount = src.Balance?.Amount != null
                 ? Convert.ToDecimal(src.Balance.Amount)
                 : (decimal?)null,
 
             BalanceCurrency = src.Balance?.Currency,
-            
+
             RewardBasis = src.RewardBasis != null && src.RewardBasis.Any()
                 ? string.Join(",", src.RewardBasis)
                 : null,
