@@ -16,6 +16,11 @@ public class EntityDbContext : DbContext
     public DbSet<Mortgage> Mortgages { get; set; }
     public DbSet<ProfitSharingRate> ProfitSharingRate { get; set; }
     public DbSet<FinanceProfitRate> FinanceProfitRate { get; set; }
+    public DbSet<DepositRatesModel> DepositRatesModel { get; set; }
+    public DbSet<FinanceRates> FixedRateMapped { get; set; }
+    public DbSet<Tenor> TenorMapped { get; set; }
+    public DbSet<AssetBacked> AssetBackedMapped { get; set; }
+    public DbSet<RewardsBenefits> RewardsMapped { get; set; }
     public DbSet<EFCreateLeadRequest>? createLeadRequest { get; set; }
     public DbSet<EFCreateLeadResponse>? createLeadResponse { get; set; }
     public DbSet<EFCreateLeadHeaderRequest>? createLeadHeaderRequest { get; set; }

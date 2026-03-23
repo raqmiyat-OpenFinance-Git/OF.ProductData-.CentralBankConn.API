@@ -31,7 +31,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
                 EmiratesId = request?.EmiratesId,
                 Nationality = request?.Nationality,
 
-                LeadResidentialAddressType = request?.ResidentialAddress?.AddressType,
+                LeadResidentialAddressType = request?.ResidentialAddress?.AddressType.ToString(),
                 LeadResidentialAddressLine = request?.ResidentialAddress?.AddressLine != null
                     ? string.Join(", ", request.ResidentialAddress.AddressLine)
                     : null,
@@ -42,13 +42,13 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
                 LeadResidentialDistrictName = request?.ResidentialAddress?.DistrictName,
                 LeadResidentialPostBox = request?.ResidentialAddress?.PostBox,
                 LeadResidentialTownName = request?.ResidentialAddress?.TownName,
-                LeadResidentialCountrySubDivision = request?.ResidentialAddress?.CountrySubDivision,
+                LeadResidentialCountrySubDivision = request?.ResidentialAddress?.CountrySubDivision.ToString(),
                 LeadResidentialCountry = request?.ResidentialAddress?.Country,
 
                 LeadInformation = request?.LeadInformation,
                 MarketingOptOut = request?.MarketingOptOut,
                 ProductType = request?.ProductCategories != null
-                    ? string.Join(", ", request.ProductCategories.Select(c => c.Type))
+                    ? string.Join(", ", request.ProductCategories.Select(c => c.ToString()))
                     : null,
                 CorrelationId = requestDto.CorrelationId,
                 CreatedBy = "System",

@@ -4,6 +4,7 @@ using OF.ProductData.CentralBankConn.API.Repositories;
 using OF.ProductData.Common.Custom;
 using OF.ProductData.Common.Helpers;
 using OF.ProductData.Common.NLog;
+using OF.ProductData.Model.CentralBank.CreateLead;
 using OF.ProductData.Model.CentralBank.Products;
 using OF.ProductData.Model.Common;
 using OF.ProductData.Model.CoreBank;
@@ -142,7 +143,7 @@ public class ProductDataService : IProductDataService
                         {
                             ProductId = "Prod_" + random.Next(10000, 99999),
                             ProductName = "Banking Products",
-                            ProductCategory = "MultiProduct",
+                            ProductCategory =ProductCategory.SavingsAccount,
                             Description = "Dummy multi-product response",
                             EffectiveFromDateTime = DateTime.UtcNow.AddYears(-1),
                             EffectiveToDateTime = DateTime.UtcNow.AddYears(1),
@@ -256,48 +257,147 @@ public class ProductDataService : IProductDataService
                                     Limits = new List<Limit> { new Limit { Type = "MinimumRequiredCreditScore", Description = "Minimum credit score", Value = 600, Percentage = 0.5 } },
                                     Benefits = new List<Benefit> { new Benefit { Type = "Other", Name = "Other Benefit", Description = "Other benefit", Value = 0.5 } }
                                 },
-                                ProfitSharingRate = new ProfitSharingRateData
+                                //depositRates = new DepositRates
+                                //{
+                                //        RateType = RateType.FixedInterest,
+                                //        RateDetails = new RateDetailsRate
+                                //        {
+                                //            RateCategory = RateCategory.Standard,
+                                //            AnnualRate = 2.5m,
+                                //            AnnualRateRange = new AnnualRateRange
+                                //            {
+                                //                MinRate = 2.0m,
+                                //                MaxRate = 3.0m
+                                //            },
+                                //            Tier = new Tiers
+                                //            {
+                                //                MinBalance = "1000",
+                                //                MaxBalance = "50000"
+                                //            },
+                                //            Currency = "AED",
+                                //            Term = "P1Y",
+                                //            EffectiveDate = DateTime.UtcNow.AddMonths(-1),
+                                //            ExpiryDate = DateTime.UtcNow.AddYears(1),
+                                //            CalculationMethod = CalculationMethod.AverageMonthlyBalance,
+                                //            CalculationFrequency = Frequency.Monthly,
+                                //            ApplicationFrequency = Frequency.Monthly,
+                                //            Notes = "Dummy deposit rate"
+                                //        }
+                                //},
+                                FinanceInterestRate = new FinanceInterestRate
                                 {
-                                    Name = "Dummy Profit Sharing",
-                                    Description = "Profit sharing account",
-                                    MinimumDepositAmount = new Amount { AmountValue = "1000", Currency = "AED" },
-                                    AnnualReturn = 1.0m,
-                                    AnnualReturnOptions = new List<NameDescription> { new NameDescription { Name = "Option1", Description = "Return Option 1" } },
-                                    InvestmentPeriod = new NameDescription { Name = "1 Year", Description = "Investment period" },
-                                    AdditionalInformation = new List<AdditionalInformation> { new AdditionalInformation { Type = "Info", Description = "Additional info" } }
+                                     
                                 },
-                                FinanceProfitRate = new FinanceProfitRateData
+                                Tenor = new Tenor
                                 {
-                                    Name = "Dummy Finance Profit",
-                                    Description = "Finance profit rate",
-                                    CalculationMethod = "FlatRate",
-                                    Rate = 1.0m,
-                                    Frequency = "Monthly",
-                                    Tiers = new List<Tier>
+                                    MinimumTenor = "P1Y",
+                                    MaximumTenor = "P5Y",
+                                    Condition = "Subject to bank approval"
+                                },
+                                AssetBacked = new AssetBacked
+                                {
+                                    Type = AssetBackedType.OwnershipTransfer,
+                                    AssetType = AssetType.Property,
+                                    Description = "Property pledged as collateral",
+                                    Valuation = new Valuation
                                     {
-                                        new Tier
+                                        Date = DateTime.UtcNow,
+                                        Amount = new MoneyAmount
                                         {
-                                            Type = "Tier1",
-                                            Description = "Tier for balances between 1,000 and 5,000 AED",
-                                            Name = "Standard Tier",
-                                            Unit = "Balance",
-                                            MinimumTierValue = new Amount
-                                            {
-                                                AmountValue = "1000",
-                                                Currency = "AED"
-                                            },
-                                            MaximumTierValue = new Amount
-                                            {
-                                                AmountValue = "5000",
-                                                Currency = "AED"
-                                            },
-                                            MinimumTierRate = 0.5m,
-                                            MaximumTierRate = 1.0m,
-                                            Condition = "Applicable for standard savings accounts with minimum balance of 1,000 AED"
+                                            Amount = "750000",
+                                            Currency = "AED"
                                         }
                                     },
-                                    AdditionalInformation = new List<AdditionalInformation> { new AdditionalInformation { Type = "Info", Description = "Additional info" } }
-                                }
+                                    SupplementaryInformation = new SupplementaryInformation
+                                    {
+                                        AdditionalData = "Valuation done by approved valuer"
+                                    },
+                                    OwnershipTransfer = new OwnershipTransfer
+                                    {
+                                        TransferOfOwnershipDate = DateTime.UtcNow.AddYears(20),
+                                        Type = OwnershipTransferType.Gradual,
+                                        Method = OwnershipTransferMethod.Buyouts,
+                                        BuyoutSchedule = new BuyoutSchedule
+                                        {
+                                            Frequency = PaymentFrequency.Monthly,
+                                            BuyoutAmount = new MoneyAmount
+                                            {
+                                                Amount = "2500",
+                                                Currency = "AED"
+                                            }
+                                        },
+                                        TransferConditions = new List<TransferCondition>
+                                        {
+                                            TransferCondition.AllLeasePaymentsCompleted
+                                        }
+                                    }
+                                },
+                                RewardsBenefits = new RewardsBenefits
+                                {
+                                    Name = "Monthly Cashback Program",
+                                    Description = "Earn cashback on eligible transactions",
+                                    Type = RewardType.Cashback,
+                                    Balance = new CashbackBalance
+                                    {
+                                        Amount = "150",
+                                        Currency = "AED"
+                                    },
+                                    RewardBasis = new List<string>
+                                    {
+                                        "Card spend",
+                                        "Bill payments"
+                                    },
+                                    FrequencyPaid = FrequencyPaid.Monthly
+                                  },
+                                DenominationCurrency="AED"
+
+
+
+
+
+
+                                //ProfitSharingRate = new ProfitSharingRateData
+                                //{
+                                //    Name = "Dummy Profit Sharing",
+                                //    Description = "Profit sharing account",
+                                //    MinimumDepositAmount = new Amount { AmountValue = "1000", Currency = "AED" },
+                                //    AnnualReturn = 1.0m,
+                                //    AnnualReturnOptions = new List<NameDescription> { new NameDescription { Name = "Option1", Description = "Return Option 1" } },
+                                //    InvestmentPeriod = new NameDescription { Name = "1 Year", Description = "Investment period" },
+                                //    AdditionalInformation = new List<AdditionalInformation> { new AdditionalInformation { Type = "Info", Description = "Additional info" } }
+                                //},
+                                //FinanceProfitRate = new FinanceProfitRateData
+                                //{
+                                //    Name = "Dummy Finance Profit",
+                                //    Description = "Finance profit rate",
+                                //    CalculationMethod = "FlatRate",
+                                //    Rate = 1.0m,
+                                //    Frequency = "Monthly",
+                                //    Tiers = new List<Tier>
+                                //    {
+                                //        new Tier
+                                //        {
+                                //            Type = "Tier1",
+                                //            Description = "Tier for balances between 1,000 and 5,000 AED",
+                                //            Name = "Standard Tier",
+                                //            Unit = "Balance",
+                                //            MinimumTierValue = new Amount
+                                //            {
+                                //                AmountValue = "1000",
+                                //                Currency = "AED"
+                                //            },
+                                //            MaximumTierValue = new Amount
+                                //            {
+                                //                AmountValue = "5000",
+                                //                Currency = "AED"
+                                //            },
+                                //            MinimumTierRate = 0.5m,
+                                //            MaximumTierRate = 1.0m,
+                                //            Condition = "Applicable for standard savings accounts with minimum balance of 1,000 AED"
+                                //        }
+                                //    },
+                                //    AdditionalInformation = new List<AdditionalInformation> { new AdditionalInformation { Type = "Info", Description = "Additional info" } }
+                                //}
                             }
                         }
                     }

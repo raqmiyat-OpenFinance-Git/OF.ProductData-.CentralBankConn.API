@@ -1,4 +1,6 @@
-﻿namespace OF.ProductData.Model.EFModel.Products
+﻿using OF.ProductData.Model.CentralBank.Products;
+
+namespace OF.ProductData.Model.EFModel.Products
 {
     [Table("Lfi_ProductDataResponse")]
 
@@ -73,10 +75,16 @@
         public virtual ICollection<Mortgage>? Mortgage { get; set; }
 
         [NotMapped]
-        public virtual ICollection<ProfitSharingRate>? ProfitSharingRate { get; set; }
+        public virtual ICollection<DepositRates>? DepositRates { get; set; }
 
         [NotMapped]
-        public virtual ICollection<FinanceProfitRate>? FinanceProfitRate { get; set; }
+        public virtual FinanceInterestRate? FinanceRateMapped { get; set; }
+        [NotMapped]
+        public virtual ICollection<Tenor>? TenorMapped { get; set; }
+        [NotMapped]
+        public virtual ICollection<AssetBacked>? AssetBackedMapped { get; set; }
+        [NotMapped]
+        public virtual ICollection<RewardsBenefits>? RewardsMapped { get; set; }
 
         public virtual EFProductRequest? ProductRequest { get; set; }  // navigation
     }

@@ -97,26 +97,26 @@ public class ProductDataService : IProductDataService
             }
 
 
-            else if (ProductCategory?.Trim().Equals("ProfitSharingRate", StringComparison.OrdinalIgnoreCase) ?? false)
-            {
-                var ProfitSharingRate = response.ProfitSharingRate!.FirstOrDefault();
-                if (ProfitSharingRate == null) return;
+            //else if (ProductCategory?.Trim().Equals("DepositRates", StringComparison.OrdinalIgnoreCase) ?? false)
+            //{
+            //    var DepositRates = response.DepositRates!.FirstOrDefault();
+            //    if (DepositRates == null) return;
 
 
-                _context.ProfitSharingRate.Add(ProfitSharingRate);
-                await _context.SaveChangesAsync();
+            //    _context.DepositRatesModel.Add(DepositRates);
+            //    await _context.SaveChangesAsync();
 
-            }
+            //}
 
-            else if (ProductCategory?.Trim().Equals("FinanceProfitRate", StringComparison.OrdinalIgnoreCase) ?? false)
-            {
-                var FinanceProfitRate = response.FinanceProfitRate!.FirstOrDefault();
-                if (FinanceProfitRate == null) return;
+            //else if (ProductCategory?.Trim().Equals("FixedRateMapped", StringComparison.OrdinalIgnoreCase) ?? false)
+            //{
+            //    var FinanceProfitRate = response.FixedRateMapped;
+            //    if (FinanceProfitRate == null) return;
 
-                _context.FinanceProfitRate.Add(FinanceProfitRate);
-                await _context.SaveChangesAsync();
+            //    _context.FixedRateMapped.Add(FinanceProfitRate);
+            //    await _context.SaveChangesAsync();
 
-            }
+            //}
             else
             {
                 var currentAccount = response.CurrentAccount!.FirstOrDefault();
@@ -155,19 +155,19 @@ public class ProductDataService : IProductDataService
                 await _context.SaveChangesAsync();
 
 
-                var ProfitSharingRate = response.ProfitSharingRate!.FirstOrDefault();
-                if (ProfitSharingRate == null) return;
+                //var ProfitSharingRate = response.ProfitSharingRate!.FirstOrDefault();
+                //if (ProfitSharingRate == null) return;
 
 
-                _context.ProfitSharingRate.Add(ProfitSharingRate);
-                await _context.SaveChangesAsync();
+                //_context.ProfitSharingRate.Add(ProfitSharingRate);
+                //await _context.SaveChangesAsync();
 
 
-                var FinanceProfitRate = response.FinanceProfitRate!.FirstOrDefault();
-                if (FinanceProfitRate == null) return;
+                //var FinanceProfitRate = response.FinanceProfitRate!.FirstOrDefault();
+                //if (FinanceProfitRate == null) return;
 
-                _context.FinanceProfitRate.Add(FinanceProfitRate);
-                await _context.SaveChangesAsync();
+                //_context.FinanceProfitRate.Add(FinanceProfitRate);
+                //await _context.SaveChangesAsync();
 
             }
 
