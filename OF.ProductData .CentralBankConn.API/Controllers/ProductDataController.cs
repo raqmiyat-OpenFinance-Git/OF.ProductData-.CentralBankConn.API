@@ -72,8 +72,6 @@ public class ProductDataController : ControllerBase
         page = page;
 
 
-
-
         string? correlationId = string.Empty;
         string requestJson = string.Empty;
         string responseJson = string.Empty;
@@ -136,7 +134,8 @@ public class ProductDataController : ControllerBase
             centralBankProductResponseWrapper.CorrelationId = guid;
             if (apiResult.Success)
             {
-                cbResponse = _service.GetCentralBankProductByIdResponse(apiResult.Data!, _logger.Log);
+                //cbResponse = _service.GetCentralBankProductByIdResponse(apiResult.Data!, _logger.Log);
+                cbResponse = _service.ResponseProductDetails(apiResult.Data!, productCategory, _logger.Log);
                 centralBankProductResponseWrapper.centralBankProductResponse = cbResponse;
                 //await Task.Delay(5000);
                 await _sendPointInitialize.GetProductDataResponse!.Send(centralBankProductResponseWrapper);
