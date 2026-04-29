@@ -88,9 +88,7 @@ public class ProductDataController : ControllerBase
         try
         {
             _logger.Info("RetrieveProduct invoked.");
-
             _logger.Info("------------------------------------------------------------------------");
-
 
             endPointUrl = UrlHelper.CombineUrl(_coreBankApis.Value.BaseUrl!, _coreBankApis.Value.ProductServiceUrl!.GetProductUrl!);
             correlationId = HttpContext.Items["X-Correlation-ID"]?.ToString();
@@ -100,9 +98,8 @@ public class ProductDataController : ControllerBase
                 return BadRequest(new ErrorResponse { errorCode = "400", errorMessage = $"Invalid CorrelationId: {correlationId}" });
             }
 
-
             CbProductDataRequest centralRequest = MapHeadersToCentralRequest(xFapiCustomerIpAddress,productCategory,isShariaCompliant,lastUpdatedDateTime,page,pageSize,sortOrder,sortField,guid,
-          o3ProviderId,o3CallerOrgId,o3CallerClientId,o3CallerSoftwareStatementId,o3ApiUri,o3ApiOperation,o3CallerInteractionId,o3OzoneInteractionId);
+            o3ProviderId,o3CallerOrgId,o3CallerClientId,o3CallerSoftwareStatementId,o3ApiUri,o3ApiOperation,o3CallerInteractionId,o3OzoneInteractionId);
 
             requestJson = JsonConvert.SerializeObject(centralRequest, Formatting.Indented);
 
@@ -176,11 +173,8 @@ public class ProductDataController : ControllerBase
                    statusCode: "200",
                    requestType: MessageTypeMappings.ProductEnquiry,
                    executionTimeMs: (int)stopwatch.ElapsedMilliseconds);
-
                 await _sendPointInitialize.AuditLog!.Send(log);
-
                 return NotFound(new ErrorResponse { errorCode = "404", errorMessage = apiResult.Message ?? "Customer data not found." });
-
             }
         }
         catch (Exception ex)
@@ -197,9 +191,7 @@ public class ProductDataController : ControllerBase
                 requestType: MessageTypeMappings.ProductEnquiry,
                 executionTimeMs: (int)stopwatch.ElapsedMilliseconds,
                 errorMessage: ex.Message);
-
             await _sendPointInitialize.AuditLog!.Send(log);
-
             return StatusCode(500, new ErrorResponse { errorCode = "500", errorMessage = "An unexpected error occurred." });
 
         }
@@ -244,8 +236,6 @@ public class ProductDataController : ControllerBase
             SortOrder = sortOrder,
             SortField = sortField,
             CorrelationId = correlationId,
-
-            // O3 headers
             O3ProviderId = o3ProviderId.Trim(),
             O3CallerOrgId = o3CallerOrgId.Trim(),
             O3CallerClientId = o3CallerClientId.Trim(),

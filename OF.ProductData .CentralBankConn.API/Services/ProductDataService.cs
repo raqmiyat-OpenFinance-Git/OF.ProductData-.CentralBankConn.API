@@ -4,13 +4,12 @@ using OF.ProductData.CentralBankConn.API.Repositories;
 using OF.ProductData.Common.Custom;
 using OF.ProductData.Common.Helpers;
 using OF.ProductData.Common.NLog;
-using OF.ProductData.Model.CentralBank.CreateLead;
+using OF.ProductData.Model.CentralBank;
 using OF.ProductData.Model.CentralBank.Products;
 using OF.ProductData.Model.Common;
 using OF.ProductData.Model.CoreBank;
 using OF.ProductData.Model.CoreBank.Products;
 using Raqmiyat.Framework.Custom;
-using System;
 using System.Net.Http.Headers;
 
 namespace OF.ProductData.CentralBankConn.API.Services;
@@ -94,8 +93,9 @@ public class ProductDataService : IProductDataService
             {
                 _logger.Info($"CorrelationId: {cbProductRequest!.CorrelationId} || API Response: SUCCESS");
 
-                var coreBankProductResponse = JsonConvert.DeserializeObject<CbsProductResponse>(apiResponseBody) ?? throw new InvalidOperationException("Deserialized coreBankProductResponse is null.");
-                apiResult = ApiResultFactory.Success(data: coreBankProductResponse!, apiResponseBody, "200");
+                var json = JObject.Parse(apiResponseBody);
+                var coreBankProductResponse = json["data"]?.ToObject<CbsProductResponse>() ?? throw new InvalidOperationException("Deserialized coreBankProductResponse is null.");
+                apiResult = ApiResultFactory.Success(data: coreBankProductResponse, message: "Success", code: "200");
             }
             else
             {
@@ -143,7 +143,7 @@ public class ProductDataService : IProductDataService
                         {
                             ProductId = "Prod_" + random.Next(10000, 99999),
                             ProductName = "Banking Products",
-                            ProductCategory =ProductCategory.SavingsAccount,
+                            ProductCategory = Model.CentralBank.ProductCategory.SavingsAccount,
                             Description = "Dummy multi-product response",
                             EffectiveFromDateTime = DateTime.UtcNow.AddYears(-1),
                             EffectiveToDateTime = DateTime.UtcNow.AddYears(1),
@@ -167,244 +167,223 @@ public class ProductDataService : IProductDataService
                             },
                             Eligibility = new EligibilityData
                             {
-                                ResidenceStatus = new List<TypeDescription> { new TypeDescription { Type = "UaeResident", Description = "A person who is a resident of the UAE." } },
-                                EmploymentStatus = new List<TypeDescription> { new TypeDescription { Type = "Salaried", Description = "Salaried employee" } },
-                                CustomerType = new List<TypeDescription> { new TypeDescription { Type = "Retail", Description = "Retail customer" } },
-                                AccountOwnership = new List<TypeDescription> { new TypeDescription { Type = "Individual", Description = "Individual ownership" } },
-                                Age = new List<AgeEligibility> { new AgeEligibility { Type = "MinimumAge", Description = "Minimum 18 years", Value = 18 } },
-                                AdditionalEligibility = new List<TypeDescription> { new TypeDescription { Type = "Student", Description = "Student eligibility" } }
+                                ResidenceStatus = new List<ResidenceStatusItem> { new ResidenceStatusItem { Type = ResidenceStatusType.UaeResident, Description = "A person who is a resident of the UAE." } },
+                                EmploymentStatus = new List<EmploymentStatusItem> { new EmploymentStatusItem { Type = EmploymentStatusType.Salaried, Description = "Salaried employee" } },
+                                CustomerType = new List<CustomerTypeItem> { new CustomerTypeItem { Type = CustomerType.Retail, Description = "Retail customer" } },
+                                AccountOwnership = new List<AccountOwnershipItem> { new AccountOwnershipItem { Type = AccountOwnershipType.Individual, Description = "Individual ownership" } },
+                                Age = new List<AgeEligibilityItem> { new AgeEligibilityItem { Type = AgeType.MinimumAge, Description = "Minimum 18 years", Value = 18 } },
+                                AdditionalEligibility = new List<AdditionalEligibilityItem> { new AdditionalEligibilityItem { Type = AdditionalEligibilityType.Student, Description = "Student eligibility" } }
                             },
-                            Channels = new List<Channel> { new Channel { Type = "Phone", Description = "Apply via phone" } },
+                            Channels = new List<Channel> { new Channel { Type = ChannelType.Phone, Description = "Apply via phone" } },
                             Product = new ProductDetails
                             {
                                 CurrentAccount = new CurrentAccountData
                                 {
-                                    Type = "Basic",
-                                    Description = "Dummy current account",
+                                    Type = CurrentAccountType.Basic,
                                     IsOverdraftAvailable = false,
-                                    Documentation = new List<Document> { new Document { Type = "ApplicationForm", Description = "Fill application form" } },
-                                    Features = new List<Feature> { new Feature { Type = "IslamicBanking", Description = "Sharia compliant feature" } },
-                                    Fees = new List<Fee> { new Fee { Type = "MonthlyFees", Period = "Daily", Name = "Account Maintenance", Description = "Monthly account maintenance fee", Unit = "Amount", Amount = new Amount { AmountValue = "10", Currency = "AED" }, Percentage = 0.5, UnitValue = 0.5, MaximumUnitValue = 0.5 } },
-                                    Limits = new List<Limit> { new Limit { Type = "MinimumDeposit", Description = "Minimum deposit", Value = 0.5 } },
-                                    Benefits = new List<Benefit> { new Benefit { Type = "Cashback", Name = "Monthly Cashback", Description = "Cashback benefit", Value = 0.5 } }
+                                    //MinimumBalance = new Amount { AmountValue = 1000, Currency = "AED" },
+                                    Documentation = new List<Document>
+                                    {
+                                        new Document { Type = DocumentType.ApplicationForm, Description = "Fill application form" }
+                                    },
+                                    Features = new List<CurrentAccountFeature>
+                                    {
+                                        new CurrentAccountFeature
+                                        {
+                                            Type = FeatureTypeCurrentAccount.DebitCard,
+                                            Description = "Debit card feature"
+                                        }
+                                    },
+                                    Limits = new List<CurrentAccountLimit>
+                                    {
+                                        new CurrentAccountLimit
+                                        {
+                                            Type = LimitTypeCurrentAccount.MinimumDeposit,
+                                            Description = "Minimum deposit",
+                                            Value = 1000,
+                                            Amount = new Amount { AmountValue = 1000, Currency = "AED" }
+                                        }
+                                    },
+                                    Charges = new List<ProductCharge> { new ProductCharge() }
                                 },
                                 SavingsAccount = new SavingsAccountData
                                 {
-                                    Type = "Savings",
-                                    Description = "Dummy savings account",
-                                    MinimumBalance = new Amount { AmountValue = "1000", Currency = "AED" },
-                                    AnnualReturn = 1.5,
-                                    Documentation = new List<Document> { new Document { Type = "ApplicationForm", Description = "Fill application form" } },
-                                    Features = new List<Feature> { new Feature { Type = "IslamicBanking", Description = "Sharia compliant feature" } },
-                                    Fees = new List<Fee> { new Fee { Type = "MonthlyFees", Period = "Daily", Name = "Account Maintenance", Description = "Monthly account maintenance fee", Unit = "Amount", Amount = new Amount { AmountValue = "10", Currency = "AED" }, Percentage = 0.5, UnitValue = 0.5, MaximumUnitValue = 0.5 } },
-                                    Limits = new List<Limit> { new Limit { Type = "MinimumOpeningBalance", Description = "Minimum opening balance", Value = 1000 } },
-                                    Benefits = new List<Benefit> { new Benefit { Type = "Cashback", Name = "Monthly Cashback", Description = "Cashback benefit", Value = 50 } }
+                                    Type = SavingsAccountType.Savings,
+                                    MinimumBalance = new Amount { AmountValue = 1000, Currency = "AED" },
+                                    Documentation = new List<Document> { new Document { Type = DocumentType.ApplicationForm, Description = "Fill application form" } },
+                                    Features = new List<SavingsAccountFeature> { new SavingsAccountFeature { Type = FeatureTypeSavingsAccount.DebitCard, Description = "Debit card feature" } },
+                                    Limits = new List<SavingsAccountLimit> { new SavingsAccountLimit { Type = LimitTypeSavingsAccount.MinimumOpeningBalance, Description = "Minimum opening balance", Value = 1000, Amount = new Amount { AmountValue = 1000, Currency = "AED" }}}
                                 },
                                 CreditCard = new CreditCardData
                                 {
-                                    Type = "Visa",
-                                    Description = "Dummy credit card",
-                                    Rate = 0.5m,
-                                    Documentation = new List<Document> { new Document { Type = "ApplicationForm", Description = "Fill application form" } },
-                                    Features = new List<Feature> { new Feature { Type = "IslamicBanking", Description = "Sharia compliant feature" } },
-                                    Fees = new List<Fee> { new Fee { Type = "AnnualFee", Period = "Daily", Name = "Annual Fee", Description = "Annual fee", Unit = "Amount", Amount = new Amount { AmountValue = "100", Currency = "AED" }, Percentage = 0.5, UnitValue = 0.5, MaximumUnitValue = 0.5 } },
-                                    Limits = new List<Limit> { new Limit { Type = "MinimumCreditLimit", Description = "Minimum credit limit", Value = 5000 } },
-                                    Benefits = new List<Benefit> { new Benefit { Type = "Cashback", Name = "Cashback", Description = "Cashback benefit", Value = 50 } }
-                                },
-                                PersonalLoan = new PersonalLoanData
-                                {
-                                    Type = "PersonalFinance",
-                                    Description = "Dummy personal loan",
-                                    MinimumLoanAmount = new Amount { AmountValue = "5000", Currency = "AED" },
-                                    MaximumLoanAmount = new Amount { AmountValue = "50000", Currency = "AED" },
-                                    Tenure = new LoanTenure { MinimumLoanTenure = 1, MaximumLoanTenure = 5 },
-                                    CalculationMethod = "FlatRate",
-                                    Rate = new RateDetails
+                                    Type = CreditCardType.Visa,
+                                   
+                                    Documentation = new List<Document>
                                     {
-                                        Type = "Fixed",
-                                        Description = "Fixed rate",
-                                        ReviewFrequency = "Annually",
-                                        IndicativeRate = new APR { From = 0.5m, To = 1.0m },
-                                        ProfitRate = new APR { From = 0.5m, To = 1.0m }
+                                        new Document { Type = DocumentType.ApplicationForm, Description = "Fill application form" }
                                     },
-                                    AnnualPercentageRateRange = new APR { From = 0.5m, To = 1.5m },
-                                    FixedRatePeriod = "1 year",
-                                    DebtBurdenRatio = "40%",
-                                    Documentation = new List<Document> { new Document { Type = "ApplicationForm", Description = "Fill application form" } },
-                                    Features = new List<Feature> { new Feature { Type = "IslamicBanking", Description = "Sharia compliant feature" } },
-                                    Limits = new List<Limit> { new Limit { Type = "MinimumRequiredCreditScore", Description = "Minimum credit score", Value = 600 } },
-                                    Fees = new List<Fee> { new Fee { Type = "Processing", Period = "Daily", Name = "Processing Fee", Description = "Processing fee", Unit = "Amount", Amount = new Amount { AmountValue = "100", Currency = "AED" }, Percentage = 0.5, UnitValue = 0.5, MaximumUnitValue = 0.5 } },
-                                    Benefits = new List<Benefit> { new Benefit { Type = "Other", Name = "Other Benefit", Description = "Other benefit", Value = 0.5 } },
-                                    AdditionalInformation = new List<AdditionalInformation> { new AdditionalInformation { Type = "Other", Description = "Additional info" } }
-                                },
-                                Mortgage = new MortgageData
-                                {
-                                    Type = "FixedRate",
-                                    Description = "Dummy mortgage",
-                                    CalculationMethod = "FlatRate",
-                                    Structure = "Standard",
-                                    Rate = new RateDetails { Type = "Fixed", Description = "Fixed rate", ReviewFrequency = "Annually", IndicativeRate = new APR { From = 0.5m, To = 1.0m }, ProfitRate = new APR { From = 0.5m, To = 1.0m } },
-                                    IndicativeAPR = new APR { From = 0.5m, To = 1.0m },
-                                    FixedRatePeriod = "1 year",
-                                    MinimumLoanAmount = new Amount { AmountValue = "100000", Currency = "AED" },
-                                    MaximumLoanAmount = new Amount { AmountValue = "1000000", Currency = "AED" },
-                                    MaximumLTV = 0.8,
-                                    DownPayment = new Amount { AmountValue = "20000", Currency = "AED" },
-                                    Tenure = new LoanTenure { MinimumLoanTenure = 5, MaximumLoanTenure = 25 },
-                                    Documentation = new List<Document> { new Document { Type = "ApplicationForm", Description = "Fill application form" } },
-                                    Features = new List<Feature> { new Feature { Type = "IslamicBanking", Description = "Sharia compliant feature" } },
-                                    Fees = new List<Fee> { new Fee { Type = "Processing", Period = "Daily", Name = "Processing Fee", Description = "Processing fee", Unit = "Amount", Amount = new Amount { AmountValue = "100", Currency = "AED" }, Percentage = 0.5, UnitValue = 0.5, MaximumUnitValue = 0.5 } },
-                                    Limits = new List<Limit> { new Limit { Type = "MinimumRequiredCreditScore", Description = "Minimum credit score", Value = 600, Percentage = 0.5 } },
-                                    Benefits = new List<Benefit> { new Benefit { Type = "Other", Name = "Other Benefit", Description = "Other benefit", Value = 0.5 } }
-                                },
-                                //depositRates = new DepositRates
-                                //{
-                                //        RateType = RateType.FixedInterest,
-                                //        RateDetails = new RateDetailsRate
-                                //        {
-                                //            RateCategory = RateCategory.Standard,
-                                //            AnnualRate = 2.5m,
-                                //            AnnualRateRange = new AnnualRateRange
-                                //            {
-                                //                MinRate = 2.0m,
-                                //                MaxRate = 3.0m
-                                //            },
-                                //            Tier = new Tiers
-                                //            {
-                                //                MinBalance = "1000",
-                                //                MaxBalance = "50000"
-                                //            },
-                                //            Currency = "AED",
-                                //            Term = "P1Y",
-                                //            EffectiveDate = DateTime.UtcNow.AddMonths(-1),
-                                //            ExpiryDate = DateTime.UtcNow.AddYears(1),
-                                //            CalculationMethod = CalculationMethod.AverageMonthlyBalance,
-                                //            CalculationFrequency = Frequency.Monthly,
-                                //            ApplicationFrequency = Frequency.Monthly,
-                                //            Notes = "Dummy deposit rate"
-                                //        }
-                                //},
-                                FinanceInterestRate = new FinanceInterestRate
-                                {
-                                     
-                                },
-                                Tenor = new Tenor
-                                {
-                                    MinimumTenor = "P1Y",
-                                    MaximumTenor = "P5Y",
-                                    Condition = "Subject to bank approval"
-                                },
-                                AssetBacked = new AssetBacked
-                                {
-                                    Type = AssetBackedType.OwnershipTransfer,
-                                    AssetType = AssetType.Property,
-                                    Description = "Property pledged as collateral",
-                                    Valuation = new Valuation
+                                    Features = new List<CreditCardFeature>
                                     {
-                                        Date = DateTime.UtcNow,
-                                        Amount = new MoneyAmount
+                                        new CreditCardFeature
                                         {
-                                            Amount = "750000",
-                                            Currency = "AED"
+                                            Type = FeatureTypeCreditCard.InternationalPayments,
+                                            Description = "Make payments internationally with competitive exchange rates"
                                         }
                                     },
-                                    SupplementaryInformation = new SupplementaryInformation
+                                    Limits = new List<CreditCardLimit>
                                     {
-                                        AdditionalData = "Valuation done by approved valuer"
-                                    },
-                                    OwnershipTransfer = new OwnershipTransfer
-                                    {
-                                        TransferOfOwnershipDate = DateTime.UtcNow.AddYears(20),
-                                        Type = OwnershipTransferType.Gradual,
-                                        Method = OwnershipTransferMethod.Buyouts,
-                                        BuyoutSchedule = new BuyoutSchedule
+                                        new CreditCardLimit
                                         {
-                                            Frequency = PaymentFrequency.Monthly,
-                                            BuyoutAmount = new MoneyAmount
-                                            {
-                                                Amount = "2500",
-                                                Currency = "AED"
-                                            }
-                                        },
-                                        TransferConditions = new List<TransferCondition>
-                                        {
-                                            TransferCondition.AllLeasePaymentsCompleted
+                                            Type = LimitTypeCreditCard.MinimumCreditLimit,
+                                            Description = "Minimum credit limit",
+                                            Value = 5000,
+                                            Amount = new Amount { AmountValue = 5000, Currency = "AED" }
                                         }
                                     }
                                 },
-                                RewardsBenefits = new RewardsBenefits
+                                Finance = new FinanceData
                                 {
-                                    Name = "Monthly Cashback Program",
-                                    Description = "Earn cashback on eligible transactions",
-                                    Type = RewardType.Cashback,
-                                    Balance = new CashbackBalance
+                                    Type = FinanceType.AutoFinance,
+                                    MinimumFinanceAmount = new Amount { AmountValue = 50000, Currency = "AED" },
+                                    MaximumFinanceAmount = new Amount { AmountValue = 500000, Currency = "AED" },
+                                    Documentation = new List<Document>
                                     {
-                                        Amount = "150",
-                                        Currency = "AED"
+                                        new Document { Type = DocumentType.ApplicationForm, Description = "Fill application form" }
                                     },
-                                    RewardBasis = new List<string>
+                                    Features = new List<FinanceFeature>
                                     {
-                                        "Card spend",
-                                        "Bill payments"
+                                        new FinanceFeature
+                                        {
+                                            Type = FeatureTypeFinance.QuickApproval,
+                                            Description = "Quick approval feature"
+                                        }
                                     },
-                                    FrequencyPaid = FrequencyPaid.Monthly
-                                  },
-                                DenominationCurrency="AED"
+                                    Limits = new List<FinanceLimit>
+                                    {
+                                        new FinanceLimit
+                                        {
+                                            Type = LimitTypeFinance.MaximumOverpayment,
+                                            Description = "Maximum overpayment limit",
+                                            Value = 10000,
+                                            Amount = new Amount { AmountValue = 10000, Currency = "AED" }
+                                        }
+                                    }
+                                },
+                                Mortgage = new MortgageData
+                                {
+                                    MinimumFinanceAmount = new Amount { AmountValue = 250000, Currency = "AED" },
+                                    MaximumFinanceAmount = new Amount { AmountValue = 5000000, Currency = "AED" },
+                                    DownPayment = new List<DownPaymentRequirement>
+                                    {
+                                        new DownPaymentRequirement
+                                        {
+                                            CustomerCategory = "UaeResident",
+                                            MinimumPercent = 20,
+                                            Basis = "Percentage of property value"
+                                        }
+                                    },
+                                    Documentation = new List<Document>
+                                    {
+                                        new Document { Type = DocumentType.ApplicationForm, Description = "Fill application form" }
+                                    },
+                                    Features = new List<MortgageFeature>
+                                    {
+                                        new MortgageFeature
+                                        {
+                                            Type = FeatureTypeMortgage.PreApproval,
+                                            Description = "Pre-approval feature"
+                                        }
+                                    },
+                                    Limits = new List<MortgageLimit>
+                                    {
+                                        new MortgageLimit
+                                        {
+                                            Type = LimitTypeMortgage.MaximumOverpayment,
+                                            Description = "Maximum overpayment limit",
+                                            Value = 50000,
+                                            Amount = new Amount { AmountValue = 50000, Currency = "AED" }
+                                        }
+                                    }
+                                },
+                               
+                                Tenor = new List<Tenor>
+                                {
+                                    new Tenor
+                                    {
+                                        MinimumTenor = "P1Y",
+                                        MaximumTenor = "P5Y",
+                                        Condition = "Subject to bank approval"
+                                    }
+                                },
+                                AssetBacked = new List<AssetBacked>
+                                {
+                                    new AssetBacked
+                                    {
+                                        Type = AssetBackedType.OwnershipTransfer,
+                                        AssetType = AssetType.Property,
+                                        Description = "Property pledged as collateral",
+                                        Valuation = new List<Valuation>
+                                        {
+                                            new Valuation
+                                            {
+                                                Date = DateTime.UtcNow,
+                                                Amount = new MoneyAmount
+                                                {
+                                                    Amount= "750000",
+                                                    Currency = "AED"
+                                                }
+                                            }
+                                        },
+                                        SupplementaryInformation = new SupplementaryInformation
+                                        {
+                                            AdditionalData = "Valuation done by approved valuer"
+                                        },
+                                        OwnershipTransfer = new OwnershipTransfer
+                                        {
+                                            TransferOfOwnershipDate = DateTime.UtcNow.AddYears(20),
+                                            Type = OwnershipTransferType.Gradual,
+                                            Method = OwnershipTransferMethodType.Buyouts,
+                                            BuyoutSchedule = new BuyoutSchedule
+                                            {
+                                                Frequency = PaymentFrequencyType.Monthly,
+                                                BuyoutAmount = new MoneyAmount
+                                                {
+                                                    Amount = "2500",
+                                                    Currency = "AED"
+                                                }
+                                            },
+                                            TransferConditions = new List<TransferConditionType>
+                                            {
+                                                TransferConditionType.AllLeasePaymentsCompleted
+                                            }
+                                        }
+                                    }
+                                },
+                                RewardsBenefits = new List<RewardsBenefits>
+                                {
+                                    new RewardsBenefits
+                                    {
+                                        Name = "Monthly Cashback Program",
+                                        Description = "Earn cashback on eligible transactions",
+                                        Type = RewardBenefitType.Cashback,
+                                    }
+                                },
+                                
 
+                               
+                            },
+                            DenominationCurrency="AED"
 
-
-
-
-
-                                //ProfitSharingRate = new ProfitSharingRateData
-                                //{
-                                //    Name = "Dummy Profit Sharing",
-                                //    Description = "Profit sharing account",
-                                //    MinimumDepositAmount = new Amount { AmountValue = "1000", Currency = "AED" },
-                                //    AnnualReturn = 1.0m,
-                                //    AnnualReturnOptions = new List<NameDescription> { new NameDescription { Name = "Option1", Description = "Return Option 1" } },
-                                //    InvestmentPeriod = new NameDescription { Name = "1 Year", Description = "Investment period" },
-                                //    AdditionalInformation = new List<AdditionalInformation> { new AdditionalInformation { Type = "Info", Description = "Additional info" } }
-                                //},
-                                //FinanceProfitRate = new FinanceProfitRateData
-                                //{
-                                //    Name = "Dummy Finance Profit",
-                                //    Description = "Finance profit rate",
-                                //    CalculationMethod = "FlatRate",
-                                //    Rate = 1.0m,
-                                //    Frequency = "Monthly",
-                                //    Tiers = new List<Tier>
-                                //    {
-                                //        new Tier
-                                //        {
-                                //            Type = "Tier1",
-                                //            Description = "Tier for balances between 1,000 and 5,000 AED",
-                                //            Name = "Standard Tier",
-                                //            Unit = "Balance",
-                                //            MinimumTierValue = new Amount
-                                //            {
-                                //                AmountValue = "1000",
-                                //                Currency = "AED"
-                                //            },
-                                //            MaximumTierValue = new Amount
-                                //            {
-                                //                AmountValue = "5000",
-                                //                Currency = "AED"
-                                //            },
-                                //            MinimumTierRate = 0.5m,
-                                //            MaximumTierRate = 1.0m,
-                                //            Condition = "Applicable for standard savings accounts with minimum balance of 1,000 AED"
-                                //        }
-                                //    },
-                                //    AdditionalInformation = new List<AdditionalInformation> { new AdditionalInformation { Type = "Info", Description = "Additional info" } }
-                                //}
-                            }
                         }
                     }
                 }
             }
             };
-
+            response.Meta = new LFIMeta
+            {
+                TotalPages = 1,
+                TotalRecords = 1
+            };
             return response;
         }
         catch (Exception ex)
@@ -413,277 +392,8 @@ public class ProductDataService : IProductDataService
             throw;
         }
     }
-    //public CbProductDataResponse ResponseProductDetails(CbsProductResponse cbProductResponse, string productCategory, Logger logger)
-    //{
-    //    var random = new Random();
-    //    var response = new CbProductDataResponse();
-    //    try
-    //    {
 
-    //        var lfiDataList = new List<LFIData>();
-    //        // Dummy product data
-    //        LFIData lFIData = new LFIData();
-
-    //        lFIData.LFIId = Guid.NewGuid().ToString();
-    //        lFIData.LFIBrandId = Guid.NewGuid().ToString();
-    //        lFIData.Products = new List<ProductWrapper>();
-
-    //        logger.Info($"Product Category: {productCategory}");
-
-    //        if (productCategory!.ToUpper() == "SAVINGSACCOUNT")
-    //        {
-    //            var products = new ProductWrapper
-    //            {
-    //                ProductId = "SAV001",
-    //                ProductName = "Premium Savings Account",
-    //                ProductCategory = "SavingsAccount",
-    //                Description = "A high-yield savings account with flexible access to funds.",
-    //                EffectiveFromDateTime = new DateTime(2024, 1, 1),
-    //                EffectiveToDateTime = new DateTime(2026, 12, 31),
-    //                LastUpdatedDateTime = DateTime.UtcNow,
-    //                IsShariaCompliant = false,
-    //                ShariaInformation = "Conventional account, not Sharia-compliant.",
-    //                IsSalaryTransferRequired = false,
-    //                Links = new Links
-    //                {
-    //                    ApplicationUri = "https://example.com/apply/savings",
-    //                    ApplicationPhoneNumber = "+971600543210",
-    //                    ApplicationEmail = "savings@example.com",
-    //                    OverviewUri = "https://example.com/savings/overview",
-    //                    FeesAndPricingUri = "https://example.com/savings/fees",
-    //                    TermsUri = "https://example.com/savings/terms"
-    //                },
-    //                Eligibility = new EligibilityData
-    //                {
-    //                    ResidenceStatus = new List<TypeDescription>
-    //                    {
-    //                            new TypeDescription { Type = "UaeResident", Description = "Available for UAE residents" }
-    //                    },
-    //                    EmploymentStatus = new List<TypeDescription>
-    //                    {
-    //                            new TypeDescription { Type = "Salaried", Description = "For salaried employees" }
-    //                    },
-    //                    Age = new List<AgeEligibility>
-    //                    {
-    //                            new AgeEligibility { Type = "MinimumAge", Value = 21, Description = "Minimum age is 21 years" }
-    //                    }
-    //                },
-    //                Product = new ProductDetails
-    //                {
-    //                    SavingsAccount = new SavingsAccountData
-    //                    {
-    //                        Type = "Savings",
-    //                        Description = "Earn interest on your balance with flexible withdrawal options.",
-    //                        MinimumBalance = new OF.ProductData.Model.CentralBank.Products.Amount
-    //                        {
-    //                            AmountValue = "3000.00",
-    //                            Currency = "AED"
-    //                        },
-    //                        AnnualReturn = 2.5,
-    //                        Features = new List<Feature> { new Feature { Type = "IslamicBanking", Description = "Sharia compliant feature" } },
-    //                        Fees = new List<Fee> { new Fee { Type = "MonthlyFees", Period = "Daily", Name = "Account Maintenance", Description = "Monthly account maintenance fee", Unit = "Amount", Amount = new Amount { AmountValue = "10", Currency = "AED" }, Percentage = 0.5, UnitValue = 0.5, MaximumUnitValue = 0.5 } },
-    //                        Limits = new List<Limit> { new Limit { Type = "MinimumDeposit", Description = "Minimum deposit", Value = 0.5 } },
-    //                        Benefits = new List<Benefit> { new Benefit { Type = "Cashback", Name = "Monthly Cashback", Description = "Cashback benefit", Value = 0.5 } }
-
-    //                    }
-    //                },
-    //            };
-    //            lFIData.Products!.Add(products);
-    //        }
-    //        else if (productCategory!.ToUpper() == "CURRENTACCOUNT")
-    //        {
-    //            var products = new ProductWrapper
-    //            {
-    //                ProductId = "CUR001",
-    //                ProductName = "Business Current Account",
-    //                ProductCategory = "CurrentAccount",
-    //                Description = "Ideal for small and medium enterprises for day-to-day transactions.",
-    //                EffectiveFromDateTime = new DateTime(2024, 5, 1),
-    //                EffectiveToDateTime = new DateTime(2026, 12, 31),
-    //                LastUpdatedDateTime = DateTime.UtcNow,
-    //                IsShariaCompliant = true,
-    //                ShariaInformation = "Compliant with Islamic Banking principles.",
-    //                Product = new ProductDetails
-    //                {
-    //                    CurrentAccount = new CurrentAccountData
-    //                    {
-    //                        Type = "Business",
-    //                        Description = "No-interest current account for daily business use.",
-    //                        MinimumBalance = new OF.ProductData.Model.CentralBank.Products.Amount
-    //                        {
-    //                            AmountValue = "10000.00",
-    //                            Currency = "AED"
-    //                        },
-    //                        Fees = new List<Fee> { new Fee { Type = "MonthlyFees", Period = "Daily", Name = "Account Maintenance", Description = "Monthly account maintenance fee", Unit = "Amount", Amount = new Amount { AmountValue = "10", Currency = "AED" }, Percentage = 0.5, UnitValue = 0.5, MaximumUnitValue = 0.5 } },
-    //                        Limits = new List<Limit> { new Limit { Type = "MinimumDeposit", Description = "Minimum deposit", Value = 0.5 } },
-    //                        Benefits = new List<Benefit> { new Benefit { Type = "Cashback", Name = "Monthly Cashback", Description = "Cashback benefit", Value = 0.5 } }
-
-    //                    }
-    //                }
-    //            };
-    //            lFIData.Products!.Add(products);
-    //        }
-    //        else if (productCategory!.ToUpper() == "CREDITCARD")
-    //        {
-    //            var products = new ProductWrapper
-    //            {
-    //                ProductId = "CC001",
-    //                ProductName = "Platinum Rewards Credit Card",
-    //                ProductCategory = "CreditCard",
-    //                Description = "Premium card offering travel benefits and cashbacks.",
-    //                EffectiveFromDateTime = new DateTime(2024, 3, 1),
-    //                EffectiveToDateTime = new DateTime(2026, 12, 31),
-    //                LastUpdatedDateTime = DateTime.UtcNow,
-    //                IsShariaCompliant = false,
-    //                IsSalaryTransferRequired = true,
-    //                Product = new ProductDetails
-    //                {
-    //                    CreditCard = new CreditCardData
-    //                    {
-    //                        Type = "Visa",
-    //                        Description = "Visa Platinum with 1% cashback and free lounge access.",
-    //                        Rate = 15.99m,
-    //                        Documentation = new List<Document>
-    //                                            {
-    //                                                    new Document { Type = "IDCard", Description = "Valid Emirates ID" },
-    //                                                    new Document { Type = "BankStatement", Description = "3 months bank statements" }
-    //                                            },
-    //                        Features = new List<Feature>
-    //                                            {
-    //                                                    new Feature { Type = "Rewards", Description = "Earn 1 point per AED 1 spent" },
-    //                                                    new Feature { Type = "TravelInsurance", Description = "Free travel insurance" }
-    //                                            },
-    //                        Fees = new List<Fee>
-    //                                            {
-    //                                                    new Fee
-    //                                                    {
-    //                                                        Type = "AnnualFee",
-    //                                                        Period = "Yearly",
-    //                                                        Name = "Annual Membership Fee",
-    //                                                        Description = "Charged annually",
-    //                                                        Amount = new OF.ProductData.Model.CentralBank.Products.Amount
-    //                                                        {
-    //                                                            AmountValue = "500.00", Currency = "AED"
-    //                                                        },
-    //                                                        UnitValue = 500.00
-    //                                                    }
-    //                                            },
-    //                        Limits = new List<Limit> { new Limit { Type = "MinimumDeposit", Description = "Minimum deposit", Value = 0.5 } },
-    //                        Benefits = new List<Benefit> { new Benefit { Type = "Cashback", Name = "Monthly Cashback", Description = "Cashback benefit", Value = 0.5 } }
-
-    //                    }
-    //                }
-    //            };
-
-    //            lFIData.Products!.Add(products);
-    //        }
-    //        else if (productCategory!.ToUpper() == "LOAN")
-    //        {
-    //            var products = new ProductWrapper
-    //            {
-    //                ProductId = "LN001",
-    //                ProductName = "Personal Finance Loan",
-    //                ProductCategory = "Loan",
-    //                Description = "Flexible loan with low interest rates.",
-    //                EffectiveFromDateTime = new DateTime(2024, 2, 1),
-    //                EffectiveToDateTime = new DateTime(2026, 12, 31),
-    //                LastUpdatedDateTime = DateTime.UtcNow,
-    //                IsShariaCompliant = false,
-    //                Product = new ProductDetails
-    //                {
-    //                    PersonalLoan = new PersonalLoanData
-    //                    {
-    //                        Type = "PersonalFinance",
-    //                        Description = "Borrow up to AED 500,000 with flexible tenure.",
-    //                        MinimumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
-    //                        {
-    //                            AmountValue = "10000.00",
-    //                            Currency = "AED"
-    //                        },
-    //                        MaximumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
-    //                        {
-    //                            AmountValue = "500000.00",
-    //                            Currency = "AED"
-    //                        },
-    //                        Tenure = new LoanTenure { MinimumLoanTenure = 12, MaximumLoanTenure = 60 },
-    //                        Rate = new RateDetails
-    //                        {
-    //                            Type = "Fixed",
-    //                            Description = "Fixed annual rate",
-    //                            IndicativeRate = new APR { From = 5.99m, To = 11.99m }
-    //                        },
-    //                        Fees = new List<Fee>
-    //                                            {
-    //                                                    new Fee
-    //                                                    {
-    //                                                        Type = "ProcessingFee",
-    //                                                        Period = "OneOff",
-    //                                                        Name = "Processing Fee",
-    //                                                        Unit = "Percentage",
-    //                                                        Percentage = 1.0,
-    //                                                        UnitValue = 1.0
-    //                                                    }
-    //                                            },
-    //                        Limits = new List<Limit> { new Limit { Type = "MinimumDeposit", Description = "Minimum deposit", Value = 0.5 } },
-    //                        Benefits = new List<Benefit> { new Benefit { Type = "Cashback", Name = "Monthly Cashback", Description = "Cashback benefit", Value = 0.5 } }
-
-    //                    }
-    //                }
-    //            };
-    //            lFIData.Products!.Add(products);
-    //        }
-    //        else if (productCategory!.ToUpper() == "MORTGAGE")
-    //        {
-    //            var products = new ProductWrapper
-    //            {
-    //                ProductId = "MTG001",
-    //                ProductName = "Home Mortgage Loan",
-    //                ProductCategory = "Mortgage",
-    //                Description = "Competitive home loan for first-time buyers and investors.",
-    //                EffectiveFromDateTime = new DateTime(2024, 4, 1),
-    //                EffectiveToDateTime = new DateTime(2026, 12, 31),
-    //                LastUpdatedDateTime = DateTime.UtcNow,
-    //                IsShariaCompliant = false,
-    //                Product = new ProductDetails
-    //                {
-    //                    Mortgage = new MortgageData
-    //                    {
-    //                        Type = "HomeFinance",
-    //                        Description = "Home loan with fixed or variable rate options.",
-    //                        MinimumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
-    //                        {
-    //                            AmountValue = "250000.00",
-    //                            Currency = "AED"
-    //                        },
-    //                        MaximumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
-    //                        {
-    //                            AmountValue = "5000000.00",
-    //                            Currency = "AED"
-    //                        },
-    //                        Tenure = new LoanTenure { MinimumLoanTenure = 60, MaximumLoanTenure = 300 },
-    //                        Rate = new RateDetails
-    //                        {
-    //                            Type = "Variable",
-    //                            Description = "Variable rate linked to EIBOR",
-    //                            IndicativeRate = new APR { From = 3.5m, To = 6.5m }
-    //                        }
-    //                    }
-    //                }
-    //            };
-    //            lFIData.Products!.Add(products);
-    //        }
-
-    //        lfiDataList.Add(lFIData);
-    //        response.Data = lfiDataList;
-
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        logger.Error($"Error in ProductDetails(): {ex.Message}");
-    //    }
-    //    return response;
-    //}
-    public CbProductDataResponse ResponseProductDetails(CbsProductResponse cbProductResponse, string productCategory, Logger logger)
+    public CbProductDataResponse ResponseProductDetails(CbsProductResponse cbProductResponse, string category, Logger logger)
     {
         var random = new Random();
         var response = new CbProductDataResponse();
@@ -698,315 +408,910 @@ public class ProductDataService : IProductDataService
                 Products = new List<ProductWrapper>()
             };
 
-            logger.Info($"Product Category: {productCategory}");
+            logger.Info($"Category: {category}");
 
             // Helper functions
             string RandomAmount(int min, int max) => random.Next(min, max).ToString("N2");
             decimal RandomRate(decimal min, decimal max) => Math.Round((decimal)(random.NextDouble() * ((double)max - (double)min) + (double)min), 2);
 
-            // Random unique suffix for product names and IDs
             string suffix = random.Next(100, 999).ToString();
-
-            // Random effective period
             var effectiveFrom = DateTime.UtcNow.AddDays(-random.Next(10, 300));
             var effectiveTo = effectiveFrom.AddMonths(random.Next(12, 36));
 
-            ProductWrapper? product = null;
-
-            switch (productCategory?.ToUpper())
+            // Common Links
+            var commonLinks = new Links
             {
-                case "SAVINGSACCOUNT":
-                    product = new ProductWrapper
-                    {
-                        ProductId = $"SAV{suffix}",
-                        ProductName = $"Premium Savings Account {suffix}",
-                        ProductCategory = "SavingsAccount",
-                        Description = "A high-return savings account with easy fund access.",
-                        EffectiveFromDateTime = effectiveFrom,
-                        EffectiveToDateTime = effectiveTo,
-                        LastUpdatedDateTime = DateTime.UtcNow,
-                        IsShariaCompliant = random.Next(0, 2) == 1,
-                        ShariaInformation = "Complies with applicable banking principles.",
-                        IsSalaryTransferRequired = false,
-                        Links = new Links
-                        {
-                            ApplicationUri = $"https://bank.example.com/apply/savings/{suffix}",
-                            ApplicationPhoneNumber = $"+9716005{random.Next(10000, 99999)}",
-                            ApplicationEmail = $"savings{suffix}@bank.example.com",
-                            OverviewUri = $"https://bank.example.com/savings/{suffix}/overview",
-                            FeesAndPricingUri = $"https://bank.example.com/savings/{suffix}/fees",
-                            TermsUri = $"https://bank.example.com/savings/{suffix}/terms"
-                        },
-                        Product = new ProductDetails
-                        {
-                            SavingsAccount = new SavingsAccountData
-                            {
-                                Type = "Savings",
-                                Description = "Earn competitive returns with flexible withdrawals.",
-                                MinimumBalance = new OF.ProductData.Model.CentralBank.Products.Amount
-                                {
-                                    AmountValue = "1000",
-                                    Currency = "AED"
-                                },
-                                AnnualReturn = (double)RandomRate(1.5m, 3.5m),
-                                Documentation = new List<Document> { new Document { Type = "ApplicationForm", Description = "Fill application form" } },
-                                Features = new List<Feature> { new Feature { Type = "Interest", Description = "Attractive interest rate" } },
-                                Fees = new List<Fee>
-                                {
-                                    new Fee
-                                    {
-                                        Type = "Maintenance",
-                                        Period = "Monthly",
-                                        Name = "Account Maintenance Fee",
-                                        Description = "Charged monthly",
-                                        Unit = "Amount",
-                                        Amount = new Amount { AmountValue = RandomAmount(10, 25), Currency = "AED" }
-                                    }
-                                },
-                                Limits = new List<Limit> { new Limit { Type = "MinimumDeposit", Description = "Minimum deposit required", Value = 1000 } },
-                                Benefits = new List<Benefit> { new Benefit { Type = "Cashback", Name = "Loyalty Reward", Description = "Earn loyalty points", Value = 1.0 } }
-                            }
+                ApplicationUri = $"https://bank.example.com/apply/{category?.ToLower()}/{suffix}",
+                ApplicationPhoneNumber = $"+9716005{random.Next(10000, 99999)}",
+                ApplicationEmail = $"{category?.ToLower()}{suffix}@bank.example.com",
+                ApplicationDescription = "Apply online or visit any branch",
+                KfsUri = $"https://bank.example.com/kfs/{category?.ToLower()}/{suffix}",
+                OverviewUri = $"https://bank.example.com/{category?.ToLower()}/{suffix}/overview",
+                FeesAndPricingUri = $"https://bank.example.com/{category?.ToLower()}/{suffix}/fees",
+                TermsUri = $"https://bank.example.com/{category?.ToLower()}/{suffix}/terms",
+                ScheduleOfChargesUri = $"https://bank.example.com/{category?.ToLower()}/{suffix}/schedule",
+                EligibilityUri = $"https://bank.example.com/{category?.ToLower()}/{suffix}/eligibility",
+                CardImageUri = $"https://bank.example.com/{category?.ToLower()}/{suffix}/card.png"
+            };
 
-                        }
-                    };
-                    break;
+            // Common Eligibility
+            var commonEligibility = new EligibilityData
+            {
+                ResidenceStatus = new List<ResidenceStatusItem> { new ResidenceStatusItem { Type = ResidenceStatusType.UaeResident, Description = "UAE Resident" } },
+                EmploymentStatus = new List<EmploymentStatusItem> { new EmploymentStatusItem { Type = EmploymentStatusType.Salaried, Description = "Salaried Employee" } },
+                CustomerType = new List<CustomerTypeItem> { new CustomerTypeItem { Type = CustomerType.Retail, Description = "Individual" } },
+                AccountOwnership = new List<AccountOwnershipItem> { new AccountOwnershipItem { Type = AccountOwnershipType.Individual, Description = "Single Account" } },
+                Age = new List<AgeEligibilityItem> { new AgeEligibilityItem { Type = AgeType.MinimumAge, Description = "Minimum age requirement", Value = 18 } },
+                FinancialRequirements = new List<FinancialRequirementItem> { new FinancialRequirementItem { Type = FinancialRequirementType.MinimumDisposableIncome, Description = "Minimum monthly salary required", Value = 3000, Amount = new Amount { AmountValue = 3000, Currency = "AED" } } },
+                AdditionalEligibility = new List<AdditionalEligibilityItem> { new AdditionalEligibilityItem { Type = AdditionalEligibilityType.Other, Description = "Valid ID Proof Required" } }
+            };
+
+            // Common Documentation
+            var commonDocumentation = new List<Document> { new Document { Type = DocumentType.ApplicationForm, Description = "Fill application form" } };
+
+            // Base Product Wrapper
+            var product = new ProductWrapper
+            {
+                EffectiveFromDateTime = effectiveFrom,
+                EffectiveToDateTime = effectiveTo,
+                LastUpdatedDateTime = DateTime.UtcNow,
+                IsShariaCompliant = random.Next(0, 2) == 1,
+                ShariaInformation = "This financing product is structured under Murabaha principles. The bank purchases the asset and sells it to the customer at a pre-agreed profit margin. No interest is involved.",
+                Links = commonLinks,
+                Eligibility = commonEligibility,
+                DenominationCurrency = "AED",
+            };
+           
+
+            var productDetails = new ProductDetails();
+
+            switch (category?.ToUpper())
+            {
 
                 case "CURRENTACCOUNT":
-                    product = new ProductWrapper
+                    product.ProductCategory = Model.CentralBank.ProductCategory.CurrentAccount;
+                    product.ProductId = $"CUR{suffix}";
+                    product.ProductName = $"CurrentAccount";
+                    product.Description = "Ideal for small and medium enterprises for day-to-day transactions..";
+                    product.Channels = new List<Channel> { new Channel { Type = ChannelType.Phone, Description = "Apply via phone" }, new Channel { Type = ChannelType.Branch, Description = "Visit branch" } };
+
+                    productDetails.CurrentAccount = new CurrentAccountData
                     {
-                        ProductId = $"CUR{suffix}",
-                        ProductName = $"Business Current Account {suffix}",
-                        ProductCategory = "CurrentAccount",
-                        Description = "Ideal for daily business banking needs.",
-                        EffectiveFromDateTime = effectiveFrom,
-                        EffectiveToDateTime = effectiveTo,
-                        LastUpdatedDateTime = DateTime.UtcNow,
-                        IsShariaCompliant = random.Next(0, 2) == 1,
-                        Product = new ProductDetails
-                        {
-                            CurrentAccount = new CurrentAccountData
-                            {
-                                Type = "Business",
-                                Description = "Convenient account for regular transactions.",
-                                MinimumBalance = new OF.ProductData.Model.CentralBank.Products.Amount
-                                {
-                                    AmountValue = "1000",
-                                    Currency = "AED"
-                                },
-                                Documentation = new List<Document> { new Document { Type = "ApplicationForm", Description = "Fill application form" } },
-                                Fees = new List<Fee>
-                                {
-                                    new Fee
-                                    {
-                                        Type = "Maintenance",
-                                        Period = "Monthly",
-                                        Name = "Account Fee",
-                                        Description = "Standard account fee",
-                                        Unit = "Amount",
-                                        Amount = new Amount { AmountValue = RandomAmount(10, 50), Currency = "AED" }
-                                    }
-                                },
-                                IsOverdraftAvailable = false,
-                                Features = new List<Feature> { new Feature { Type = "IslamicBanking", Description = "Sharia compliant feature" } },
-                                Limits = new List<Limit> { new Limit { Type = "MinimumDeposit", Description = "Minimum deposit", Value = 0.5 } },
-                                Benefits = new List<Benefit> { new Benefit { Type = "Cashback", Name = "Monthly Cashback", Description = "Cashback benefit", Value = 0.5 } }
-                            }
-                        }
+                        Type = CurrentAccountType.Basic,
+                        IsOverdraftAvailable = false,
+                        //MinimumBalance = new Amount { AmountValue = 1000, Currency = "AED" },
+                        Documentation = commonDocumentation,
+                        Features = new List<CurrentAccountFeature> { new CurrentAccountFeature { Type = FeatureTypeCurrentAccount.DebitCard, Description = "Debit card feature" } },
+                        Charges = new List<ProductCharge> { new ProductCharge { Type = ChargeType.MonthlyFees, Name = "ATM Withdrawal Fee", Description = "Fee charged for ATM withdrawals beyond free limit", Charge = new List<ChargeComponent> { new ChargeComponent { Amount = new Amount { AmountValue = 2.50m, Currency = "AED" }, MaximumChargeAmount = new Amount { AmountValue = 20000.0m, Currency = "AED" }, Rate = 0, ApplicationFrequency = "Per Transaction", InterestCalculationMethod = "Flat", Basis = "Per Withdrawal" } }, Conditions = new List<Condition> { new Condition { Field = "WithdrawalCount", Operator = ">", Value = "5", Description = "Applicable after 5 free withdrawals per month" } }, Justification = "Covers operational ATM costs", Frequency = "Per Transaction", DonatedToCharity = false, Notes = "First 5 transactions are free", SupplementaryInformation = new { Info = "Applicable only for other bank ATMs" } } },
+                        Limits = new List<CurrentAccountLimit> { new CurrentAccountLimit { Type = LimitTypeCurrentAccount.MinimumBalance, Description = "Minimum balance", Value = 1000, Amount = new Amount { AmountValue = 1000, Currency = "AED" } } }
                     };
+
+                    productDetails.DepositRates = new DepositRatesData
+                    {
+                        RateType = RateType.FixedInterest,
+                        RateDetails = new List<RateDetail> { new RateDetail { RateCategory = RateCategoryType.Standard, AnnualRate = 0.5m, AnnualRateRange = new AnnualRateRange
+                        {  MinRate = 0.5m, MaxRate = 0.5m  },Tier = new TierDetail{  MinBalance= "1000",MaxBalance = "50000",Currency = "AED"},Term = "P2Y3M",
+                            EffectiveDate = new DateTime(1970, 1, 1),
+                            ExpiryDate = new DateTime(1970, 1, 1), CalculationMethod = CalculationMethodType.AverageDailyBalance, CalculationFrequency = CalculationFrequencyType.Monthly, ApplicationFrequency = ApplicationFrequencyType.Monthly, Notes = "Competitive interest rate" } }
+                    };
+                    productDetails.RewardsBenefits = new List<RewardsBenefits> { new RewardsBenefits { Name = "Cashback Rewards", Description = "Cashback rewards on every transaction", Type = RewardBenefitType.Cashback, RewardBasis = new List<string> { "Card spend" }} };
+                    break;
+
+                case "SAVINGSACCOUNT":
+                    product.ProductCategory = Model.CentralBank.ProductCategory.SavingsAccount;
+                    product.ProductId = $"SAV{suffix}";
+                    product.ProductName = $"SavingsAccount";
+                    product.Description = "High-return savings account with easy fund access.";
+                    product.Channels = new List<Channel> { new Channel { Type = ChannelType.MobileApp, Description = "Apply via app" }, new Channel { Type = ChannelType.Branch, Description = "Visit branch" } };
+
+                    productDetails.SavingsAccount = new SavingsAccountData
+                    {
+                        Type = SavingsAccountType.Savings,
+                        MinimumBalance = new Amount { AmountValue = 1000, Currency = "AED" },
+                        Documentation = commonDocumentation,
+                        Features = new List<SavingsAccountFeature> { new SavingsAccountFeature { Type = FeatureTypeSavingsAccount.SMSNotifications, Description = "SMS alerts" } },
+                        Charges = new List<ProductCharge> { new ProductCharge { Type = ChargeType.MonthlyFees, Name = "ATM Withdrawal Fee", Description = "Fee charged for ATM withdrawals beyond free limit", Charge = new List<ChargeComponent> { new ChargeComponent { Amount = new Amount { AmountValue = 2.50m, Currency = "AED" }, MaximumChargeAmount = new Amount { AmountValue = 20000.0m, Currency = "AED" }, Rate = 0, ApplicationFrequency = "Per Transaction", InterestCalculationMethod = "Flat", Basis = "Per Withdrawal" } }, Conditions = new List<Condition> { new Condition { Field = "WithdrawalCount", Operator = ">", Value = "5", Description = "Applicable after 5 free withdrawals per month" } }, Justification = "Covers operational ATM costs", Frequency = "Per Transaction", DonatedToCharity = false, Notes = "First 5 transactions are free", SupplementaryInformation = new { Info = "Applicable only for other bank ATMs" } } },
+                        Limits = new List<SavingsAccountLimit> { new SavingsAccountLimit { Type = LimitTypeSavingsAccount.MinimumOpeningBalance, Description = "Minimum opening balance", Value = 1000, Amount = new Amount { AmountValue = 1000, Currency = "AED" } } }
+                    };
+
+                    // Applicable optional sections for SavingsAccount
+                    productDetails.DepositRates = new DepositRatesData
+                    {
+                        RateType = RateType.FixedInterest,
+                        RateDetails = new List<RateDetail> { new RateDetail { RateCategory = RateCategoryType.Standard, AnnualRate = 0.5m, AnnualRateRange = new AnnualRateRange
+                        {  MinRate = 0.5m, MaxRate = 0.5m  },Tier = new TierDetail{  MinBalance= "1000",MaxBalance = "50000",Currency = "AED"},Term = "P2Y3M",
+                            EffectiveDate = new DateTime(1970, 1, 1),
+                            ExpiryDate = new DateTime(1970, 1, 1), CalculationMethod = CalculationMethodType.AverageDailyBalance, CalculationFrequency = CalculationFrequencyType.Monthly, ApplicationFrequency = ApplicationFrequencyType.Monthly, Notes = "Competitive interest rate" } }
+                    };
+                    productDetails.RewardsBenefits = new List<RewardsBenefits> { new RewardsBenefits { Name = "Welcome Bonus", Description = "Cashback rewards on every transaction", Type = RewardBenefitType.Cashback, RewardBasis = new List<string> { "First deposit" }} };
                     break;
 
                 case "CREDITCARD":
-                    product = new ProductWrapper
+                    product.ProductCategory = Model.CentralBank.ProductCategory.CreditCard;
+                    product.ProductId = $"CC{suffix}";
+                    product.ProductName = $"CreditCard";
+                    product.Description = "Premium credit card with rewards.";
+                    product.IsSalaryTransferRequired = random.Next(0, 2) == 1;
+                    product.Channels = new List<Channel> { new Channel { Type = ChannelType.MobileApp, Description = "Apply via app" }, new Channel { Type = ChannelType.Internet, Description = "Apply online" } };
+
+                    productDetails.CreditCard = new CreditCardData
                     {
-                        ProductId = $"CC{suffix}",
-                        ProductName = $"Platinum Rewards Card {suffix}",
-                        ProductCategory = "CreditCard",
-                        Description = "Premium credit card with travel and cashback rewards.",
-                        EffectiveFromDateTime = effectiveFrom,
-                        EffectiveToDateTime = effectiveTo,
-                        LastUpdatedDateTime = DateTime.UtcNow,
-                        IsSalaryTransferRequired = random.Next(0, 2) == 1,
-                        Product = new ProductDetails
+                        Type = CreditCardType.Visa,
+                        Documentation = commonDocumentation,
+                        Features = new List<CreditCardFeature> { new CreditCardFeature { Type = FeatureTypeCreditCard.InternationalPayments, Description = "International payments" } },
+                        Charges = new List<ProductCharge> { new ProductCharge { Type = ChargeType.MonthlyFees, Name = "ATM Withdrawal Fee", Description = "Fee charged for ATM withdrawals beyond free limit", Charge = new List<ChargeComponent> { new ChargeComponent { Amount = new Amount { AmountValue = 2.50m, Currency = "AED" }, MaximumChargeAmount = new Amount { AmountValue = 20000.0m, Currency = "AED" }, Rate = 2, ApplicationFrequency = "Per Transaction", InterestCalculationMethod = "Flat", Basis = "Per Withdrawal" } }, Conditions = new List<Condition> { new Condition { Field = "WithdrawalCount", Operator = ">", Value = "5", Description = "Applicable after 5 free withdrawals per month" } }, Justification = "Covers operational ATM costs", Frequency = "Per Transaction", DonatedToCharity = false, Notes = "First 5 transactions are free", SupplementaryInformation = new { Info = "Applicable only for other bank ATMs" } } },
+                        Limits = new List<CreditCardLimit> { new CreditCardLimit { Type = LimitTypeCreditCard.MinimumCreditLimit, Description = "Minimum credit limit", Value = 5000, Amount = new Amount { AmountValue = 5000, Currency = "AED" } } }
+                    };
+
+                    // Applicable optional sections for CreditCard
+                    productDetails.FinanceRates = new FinanceRatesData
+                    {
+                        RateType = RateType.FixedInterest.ToString(),
+
+                        RateOption = new List<RateOption>
                         {
-                            CreditCard = new CreditCardData
+                           new RateOption
+                    {
+                    RateType = RateType.FixedInterest,
+                         AnnualPercentageRate = new AnnualPercentageRate
+                        {
+                            StartingFrom = "12.0",
+                            UpTo = 15.0m,
+                            AdditionalInformation = "Fixed period APR"
+                        },
+
+                        Tiers = new List<Tier>
+                        {
+                            new Tier
                             {
-                                Type = "Visa",
-                                Description = "Platinum Visa card with exclusive privileges.",
-                                Rate = RandomRate(10.0m, 19.5m),
-                                Documentation = new List<Document> { new Document { Type = "ApplicationForm", Description = "Fill application form" } },
-                                Fees = new List<Fee>
+                                Name = "Fixed Tier",
+                                Unit = TierUnitType.Balance,
+                                ApplicationMethod = ApplicationMethodType.PerTier,
+
+                                BalanceTierDetails = new List<BalanceTierDetail>
                                 {
-                                    new Fee
+                                    new BalanceTierDetail
                                     {
-                                        Type = "AnnualFee",
-                                        Period = "Yearly",
-                                        Name = "Annual Membership Fee",
-                                        Description = "Charged once per year",
-                                        Unit = "Amount",
-                                        Amount = new OF.ProductData.Model.CentralBank.Products.Amount
-                                        {
-                                            AmountValue = RandomAmount(300, 800),
-                                            Currency = "AED"
-                                        }
+                                        MinimumTierValue = new MoneyAmount { Amount = "10", Currency = "AED" },
+                                        MaximumTierValue = new MoneyAmount { Amount = "500000", Currency = "AED" },
+                                        TierRate = 13.5m
                                     }
                                 },
-                                Features = new List<Feature>
+                                LTVTierDetails=new List<LTVTierDetail>
                                 {
-                                    new Feature { Type = "Rewards", Description = "Earn 1 point per AED 1 spent" },
-                                    new Feature { Type = "TravelInsurance", Description = "Free travel insurance coverage" }
+                                    new LTVTierDetail
+                                    {
+                                        LTVStart=0.5m,
+                                        LTVEnd=0.5m,
+                                        TierRate=0.5m
+                                    }
                                 },
-                                Limits = new List<Limit> { new Limit { Type = "MinimumCreditLimit", Description = "Minimum credit limit", Value = 5000 } },
-                                Benefits = new List<Benefit> { new Benefit { Type = "Cashback", Name = "Cashback", Description = "Cashback benefit", Value = 50 } }
-
+                                RateRange = new RateRange()
+                                {
+                                    MinimumRate=0.5m,
+                                    MaximumRate=0.5m,
+                                     AdditionalInformation = "Fixed promotional rate for selected customers"
+                                }
                             }
+                        },
+                   // ✅ FIXED RATE
+                    FixedRate = new FixedRateData
+                    {
+                        Description = "Fixed interest for initial period",
+                        Rate = RandomRate(12.0m, 15.0m),
+                        FixedRateEndDate = DateTime.UtcNow.AddYears(2),
+
+                        CalculationFrequency = "Monthly",
+                        ApplicationFrequency = "Monthly",
+                        ProfitCalculationMethod = InterestCalculationMethodType.OutstandingBalance.ToString(),
+
+                        AnnualPercentageRate = new AnnualPercentageRate
+                        {
+                            StartingFrom = "12.0",
+                            UpTo = 15.0m,
+                            AdditionalInformation = "Fixed period APR"
+                        },
+
+                        Tiers = new List<Tier>
+                        {
+                            new Tier
+                            {
+                                Name = "Fixed Tier",
+                                Unit = TierUnitType.Balance,
+                                ApplicationMethod = ApplicationMethodType.PerTier,
+
+                                BalanceTierDetails = new List<BalanceTierDetail>
+                                {
+                                    new BalanceTierDetail
+                                    {
+                                        MinimumTierValue = new MoneyAmount { Amount = "10", Currency = "AED" },
+                                        MaximumTierValue = new MoneyAmount { Amount = "500000", Currency = "AED" },
+                                        TierRate = 13.5m
+                                    }
+                                },
+                                LTVTierDetails=new List<LTVTierDetail>
+                                {
+                                    new LTVTierDetail
+                                    {
+                                        LTVStart=0.5m,
+                                        LTVEnd=0.5m,
+                                        TierRate=0.5m
+                                    }
+                                },
+                                RateRange = new RateRange()
+                                {
+                                    MinimumRate=0.5m,
+                                    MaximumRate=0.5m,
+                                     AdditionalInformation = "Fixed promotional rate for selected customers"
+                                }
+                            }
+                        },
+                        FixedRateEnd= "2028-12-31",
+                    },
+
+                    // ✅ VARIABLE RATE
+                    VariableRate = new VariableRateData
+                    {
+                        Description = "Variable interest after fixed period",
+                        Rate = RandomRate(15.0m, 22.0m),
+                        BenchMark = "EIBOR",
+                        BenchMarkRate = RandomRate(10.0m, 15.0m),
+                        Margin = RandomRate(2.0m, 4.0m),
+
+                        RateReviewFrequency = "P6M",
+                        RateReviewNextDate = DateTime.UtcNow.AddMonths(6),
+
+                        CalculationFrequency = "Monthly",
+                        ApplicationFrequency = "Monthly",
+                        ProfitCalculationMethod = InterestCalculationMethodType.OutstandingBalance.ToString(),
+
+                        AnnualPercentageRate = new AnnualPercentageRate
+                        {
+                            StartingFrom = "12.0",
+                            UpTo = 22.0m,
+                            AdditionalInformation = "Variable APR"
+                        },
+
+                        Tiers = new List<Tier>
+                        {
+                            new Tier
+                            {
+                                Name = "Variable Tier",
+                                Unit = TierUnitType.Balance,
+                                ApplicationMethod = ApplicationMethodType.PerTier,
+
+                                BalanceTierDetails = new List<BalanceTierDetail>
+                                {
+                                    new BalanceTierDetail
+                                    {
+                                        MinimumTierValue = new MoneyAmount { Amount= "10", Currency = "AED" },
+                                        MaximumTierValue = new MoneyAmount { Amount = "500000", Currency = "AED" },
+                                        TierRate = 18.5m
+                                    }
+                                },
+                                 LTVTierDetails=new List<LTVTierDetail>
+                                {
+                                    new LTVTierDetail
+                                    {
+                                        LTVStart=0.5m,
+                                        LTVEnd=0.5m,
+                                        TierRate=0.5m
+                                    }
+                                },
+                                RateRange = new RateRange()
+                                {
+                                    MinimumRate=0.5m,
+                                    MaximumRate=0.5m,
+                                     AdditionalInformation = "Fixed promotional rate for selected customers"
+                                }
+                            }
+                        },
+
+                        VariableTerm = "P2Y3M"
+                    },
+
+                    // ✅ COMMON
+                    Conditions = new List<Condition>
+                    {
+                        new Condition
+                        {
+                            Field = "CreditScore",
+                            Operator = ">=",
+                            Value = "700",
+                            Description = "Better rates for high credit score"
                         }
+                    },
+                    Notes="string",
+                    AdditionalInformation = new List<AdditionalInformationItem>
+                    {
+                        new AdditionalInformationItem
+                        {
+                            Type = AdditionalInformationType.Other,
+                            Description = "Hybrid loan: fixed + variable"
+                        }
+                    }
+        }
+    }
                     };
+                    productDetails.Tenor = new List<Tenor> { new Tenor { MinimumTenor = "P1M", MaximumTenor = "P12M", Condition = "Instalment plans available" } };
+                    productDetails.RewardsBenefits = new List<RewardsBenefits> { new RewardsBenefits { Name = "Reward Points", Description = "Cashback rewards on every transaction", Type = RewardBenefitType.Points, RewardBasis = new List<string> { "Every AED 1 spent" } } };
                     break;
 
-                case "LOAN":
-                    product = new ProductWrapper
+                case "FINANCE":
+                    product.ProductCategory = Model.CentralBank.ProductCategory.Finance;
+                    product.ProductId = $"FIN{suffix}";
+                    product.ProductName = $"Finance";
+                    product.Description = "Flexible personal finance solution.";
+                    product.Channels = new List<Channel> { new Channel { Type = ChannelType.Phone, Description = "Call to apply" }, new Channel { Type = ChannelType.RelationshipManager, Description = "Contact RM" } };
+
+                    productDetails.Finance = new FinanceData
                     {
-                        ProductId = $"LN{suffix}",
-                        ProductName = $"Personal Loan {suffix}",
-                        ProductCategory = "Loan",
-                        Description = "Flexible personal loan with attractive interest rates.",
-                        EffectiveFromDateTime = effectiveFrom,
-                        EffectiveToDateTime = effectiveTo,
-                        LastUpdatedDateTime = DateTime.UtcNow,
-                        Product = new ProductDetails
+                        Type = FinanceType.Finance,
+                        MinimumFinanceAmount = new Amount { AmountValue = 10000, Currency = "AED" },
+                        MaximumFinanceAmount = new Amount { AmountValue = 250000, Currency = "AED" },
+                        Documentation = commonDocumentation,
+                        Features = new List<FinanceFeature> { new FinanceFeature { Type = FeatureTypeFinance.FlexibleRepaymentPeriods, Description = "Flexible repayments" } },
+                        Charges = new List<ProductCharge> { new ProductCharge { Type = ChargeType.MonthlyFees, Name = "ATM Withdrawal Fee", Description = "Fee charged for ATM withdrawals beyond free limit", Charge = new List<ChargeComponent> { new ChargeComponent { Amount = new Amount { AmountValue = 2.50m, Currency = "AED" }, MaximumChargeAmount = new Amount { AmountValue = 20000.0m, Currency = "AED" }, Rate = 0, ApplicationFrequency = "Per Transaction", InterestCalculationMethod = "Flat", Basis = "Per Withdrawal" } }, Conditions = new List<Condition> { new Condition { Field = "WithdrawalCount", Operator = ">", Value = "5", Description = "Applicable after 5 free withdrawals per month" } }, Justification = "Covers operational ATM costs", Frequency = "Per Transaction", DonatedToCharity = false, Notes = "First 5 transactions are free", SupplementaryInformation = new { Info = "Applicable only for other bank ATMs" } } },
+                        Limits = new List<FinanceLimit> { new FinanceLimit { Type = LimitTypeFinance.MaximumOverpayment, Description = "Max overpayment", Value = 5000, Amount = new Amount { AmountValue = 5000, Currency = "AED" } } }
+                    };
+
+                    // Applicable optional sections for Finance
+                    productDetails.FinanceRates = new FinanceRatesData
+                    {
+                        RateType = RateType.FixedInterest.ToString(),
+
+                        RateOption = new List<RateOption>
                         {
-                            PersonalLoan = new PersonalLoanData
+                           new RateOption
+                    {
+                    RateType = RateType.FixedInterest,
+                         AnnualPercentageRate = new AnnualPercentageRate
+                        {
+                            StartingFrom = "12.0",
+                            UpTo = 15.0m,
+                            AdditionalInformation = "Fixed period APR"
+                        },
+
+                        Tiers = new List<Tier>
+                        {
+                            new Tier
                             {
-                                Type = "PersonalFinance",
-                                Description = "Borrow funds for personal needs with easy repayment options.",
-                                MinimumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
+                                Name = "Fixed Tier",
+                                Unit = TierUnitType.Balance,
+                                ApplicationMethod = ApplicationMethodType.PerTier,
+
+                                BalanceTierDetails = new List<BalanceTierDetail>
                                 {
-                                    AmountValue = "100000",
-                                    Currency = "AED"
-                                },
-                                MaximumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
-                                {
-                                    AmountValue = "5000000",
-                                    Currency = "AED"
-                                },
-                                Tenure = new LoanTenure
-                                {
-                                    MinimumLoanTenure = 3,
-                                    MaximumLoanTenure = 36
-                                },
-                                Rate = new RateDetails
-                                {
-                                    Type = "Fixed",
-                                    Description = "Fixed annual interest rate",
-                                    IndicativeRate = new APR
+                                    new BalanceTierDetail
                                     {
-                                        From = RandomRate(3.5m, 6.5m),
-                                        To = RandomRate(7.0m, 10.0m)
+                                        MinimumTierValue = new MoneyAmount { Amount = "10", Currency = "AED" },
+                                        MaximumTierValue = new MoneyAmount { Amount = "500000", Currency = "AED" },
+                                        TierRate = 13.5m
                                     }
                                 },
-                                Documentation = new List<Document> { new Document { Type = "ApplicationForm", Description = "Fill application form" } },
-                                Fees = new List<Fee>
+                                LTVTierDetails=new List<LTVTierDetail>
                                 {
-                                    new Fee
+                                    new LTVTierDetail
                                     {
-                                        Type = "ProcessingFee",
-                                        Period = "OneOff",
-                                        Name = "Processing Fee",
-                                        Unit = "Percentage",
-                                        Percentage = 1.0,
-                                        UnitValue = 1.0,
-                                        Amount = new OF.ProductData.Model.CentralBank.Products.Amount
+                                        LTVStart=0.5m,
+                                        LTVEnd=0.5m,
+                                        TierRate=0.5m
+                                    }
+                                },
+                                RateRange = new RateRange()
+                                {
+                                    MinimumRate=0.5m,
+                                    MaximumRate=0.5m,
+                                     AdditionalInformation = "Fixed promotional rate for selected customers"
+                                }
+                            }
+                        },
+                   // ✅ FIXED RATE
+                    FixedRate = new FixedRateData
+                    {
+                        Description = "Fixed interest for initial period",
+                        Rate = RandomRate(12.0m, 15.0m),
+                        FixedRateEndDate = DateTime.UtcNow.AddYears(2),
+
+                        CalculationFrequency = "Monthly",
+                        ApplicationFrequency = "Monthly",
+                        ProfitCalculationMethod = InterestCalculationMethodType.OutstandingBalance.ToString(),
+
+                        AnnualPercentageRate = new AnnualPercentageRate
+                        {
+                            StartingFrom = "12.0",
+                            UpTo = 15.0m,
+                            AdditionalInformation = "Fixed period APR"
+                        },
+
+                        Tiers = new List<Tier>
+                        {
+                            new Tier
+                            {
+                                Name = "Fixed Tier",
+                                Unit = TierUnitType.Balance,
+                                ApplicationMethod = ApplicationMethodType.PerTier,
+
+                                BalanceTierDetails = new List<BalanceTierDetail>
+                                {
+                                    new BalanceTierDetail
+                                    {
+                                        MinimumTierValue = new MoneyAmount { Amount= "10", Currency = "AED" },
+                                        MaximumTierValue = new MoneyAmount { Amount = "500000", Currency = "AED" },
+                                        TierRate = 13.5m
+                                    }
+                                },
+                                LTVTierDetails=new List<LTVTierDetail>
+                                {
+                                    new LTVTierDetail
+                                    {
+                                        LTVStart=0.5m,
+                                        LTVEnd=0.5m,
+                                        TierRate=0.5m
+                                    }
+                                },
+                                RateRange = new RateRange()
+                                {
+                                    MinimumRate=0.5m,
+                                    MaximumRate=0.5m,
+                                     AdditionalInformation = "Fixed promotional rate for selected customers"
+                                }
+                            }
+                        },
+                        FixedRateEnd= "2028-12-31",
+                    },
+
+                    // ✅ VARIABLE RATE
+                    VariableRate = new VariableRateData
+                    {
+                        Description = "Variable interest after fixed period",
+                        Rate = RandomRate(15.0m, 22.0m),
+                        BenchMark = "EIBOR",
+                        BenchMarkRate = RandomRate(10.0m, 15.0m),
+                        Margin = RandomRate(2.0m, 4.0m),
+
+                        RateReviewFrequency = "P6M",
+                        RateReviewNextDate = DateTime.UtcNow.AddMonths(6),
+
+                        CalculationFrequency = "Monthly",
+                        ApplicationFrequency = "Monthly",
+                        ProfitCalculationMethod = InterestCalculationMethodType.OutstandingBalance.ToString(),
+
+                        AnnualPercentageRate = new AnnualPercentageRate
+                        {
+                            StartingFrom = "12.0",
+                            UpTo = 22.0m,
+                            AdditionalInformation = "Variable APR"
+                        },
+
+                        Tiers = new List<Tier>
+                        {
+                            new Tier
+                            {
+                                Name = "Variable Tier",
+                                Unit = TierUnitType.Balance,
+                                ApplicationMethod = ApplicationMethodType.PerTier,
+
+                                BalanceTierDetails = new List<BalanceTierDetail>
+                                {
+                                    new BalanceTierDetail
+                                    {
+                                        MinimumTierValue = new MoneyAmount { Amount = "10", Currency = "AED" },
+                                        MaximumTierValue = new MoneyAmount { Amount = "500000", Currency = "AED" },
+                                        TierRate = 18.5m
+                                    }
+                                },
+                                 LTVTierDetails=new List<LTVTierDetail>
+                                {
+                                    new LTVTierDetail
+                                    {
+                                        LTVStart=0.5m,
+                                        LTVEnd=0.5m,
+                                        TierRate=0.5m
+                                    }
+                                },
+                                RateRange = new RateRange()
+                                {
+                                    MinimumRate=0.5m,
+                                    MaximumRate=0.5m,
+                                     AdditionalInformation = "Fixed promotional rate for selected customers"
+                                }
+                            }
+                        },
+
+                        VariableTerm = "P2Y3M"
+                    },
+
+                        // ✅ COMMON
+                        Conditions = new List<Condition>
+                        {
+                            new Condition
+                            {
+                                Field = "CreditScore",
+                                Operator = ">=",
+                                Value = "700",
+                                Description = "Better rates for high credit score"
+                            }
+                        },
+                        Notes="string",
+                        AdditionalInformation = new List<AdditionalInformationItem>
+                        {
+                            new AdditionalInformationItem
+                            {
+                                Type = AdditionalInformationType.Other,
+                                Description = "Hybrid loan: fixed + variable"
+                            }
+                        }
+        }
+    }
+                    };
+                    productDetails.Tenor = new List<Tenor> { new Tenor { MinimumTenor = "P1Y", MaximumTenor = "P5Y", Condition = "Flexible repayment terms" } };
+                    productDetails.AssetBacked = new List<AssetBacked>
+                    {
+                            new AssetBacked
+                            {
+                                Type = AssetBackedType.Collateral,
+                                AssetType = AssetType.Property,
+                                Description = "string",
+
+                                Valuation = new List<Valuation>
+                                {
+                                    new Valuation
+                                    {
+                                        Date = new DateTime(1970, 1, 1),
+                                        Amount = new MoneyAmount
                                         {
-                                            AmountValue = RandomAmount(300, 800),
+                                            Amount= "100000", // replace with actual value
                                             Currency = "AED"
                                         }
                                     }
                                 },
-                                CalculationMethod = "FlatRate",
-                                AnnualPercentageRateRange = new APR { From = 0.5m, To = 1.5m },
-                                FixedRatePeriod = "1 year",
-                                DebtBurdenRatio = "40%",
-                                Features = new List<Feature> { new Feature { Type = "IslamicBanking", Description = "Sharia compliant feature" } },
-                                Limits = new List<Limit> { new Limit { Type = "MinimumRequiredCreditScore", Description = "Minimum credit score", Value = 600 } },
-                                Benefits = new List<Benefit> { new Benefit { Type = "Other", Name = "Other Benefit", Description = "Other benefit", Value = 0.5 } },
-                                AdditionalInformation = new List<AdditionalInformation> { new AdditionalInformation { Type = "Other", Description = "Additional info" } }
+
+                                SupplementaryInformation = new Dictionary<string, object>(),
+
+                                OwnershipTransfer = new OwnershipTransfer
+                                {
+                                    TransferOfOwnershipDate = new DateTime(1970, 1, 1),
+                                    Type = OwnershipTransferType.Gift,
+                                    Method = OwnershipTransferMethodType.EndOfLease,
+
+                                    TokenPurchaseAmount = new MoneyAmount
+                                    {
+                                        Amount = "5000",
+                                        Currency = "AED"
+                                    },
+
+                                    BuyoutSchedule = new BuyoutSchedule
+                                    {
+                                        Frequency = PaymentFrequencyType.Weekly,
+                                        BuyoutAmount = new MoneyAmount
+                                        {
+                                            Amount = "1000",
+                                            Currency = "AED"
+                                        }
+                                    },
+
+                                    SaleAgreement = new SaleAgreement
+                                    {
+                                        Required = false,
+                                        Execution =SaleAgreementExecutionType.AtLeaseCompletion,
+                                        Price = new MoneyAmount
+                                        {
+                                            Amount= "120000",
+                                            Currency = "AED"
+                                        }
+                                    },
+
+                                    TransferConditions = new List<TransferConditionType>
+                                    {
+                                        TransferConditionType.AllLeasePaymentsCompleted
+                                    }
+                                }
                             }
-                        }
                     };
                     break;
 
                 case "MORTGAGE":
-                    product = new ProductWrapper
+                    product.ProductCategory = Model.CentralBank.ProductCategory.Mortgage;
+                    product.ProductId = $"MTG{suffix}";
+                    product.ProductName = $"Mortgage";
+                    product.Description = "Competitive home mortgage.";
+                    product.Channels = new List<Channel> { new Channel { Type = ChannelType.RelationshipManager, Description = "Contact specialist" }, new Channel { Type = ChannelType.Branch, Description = "Visit branch" } };
+
+                    productDetails.Mortgage = new MortgageData
                     {
-                        ProductId = $"MTG{suffix}",
-                        ProductName = $"Home Mortgage {suffix}",
-                        ProductCategory = "Mortgage",
-                        Description = "Competitive mortgage for home buyers and investors.",
-                        EffectiveFromDateTime = effectiveFrom,
-                        EffectiveToDateTime = effectiveTo,
-                        LastUpdatedDateTime = DateTime.UtcNow,
-                        Product = new ProductDetails
+                        MinimumFinanceAmount = new Amount { AmountValue = 250000, Currency = "AED" },
+                        MaximumFinanceAmount = new Amount { AmountValue = 5000000, Currency = "AED" },
+                        DownPayment = new List<DownPaymentRequirement> { new DownPaymentRequirement { CustomerCategory = "UaeResident", MinimumPercent = 20, Basis = "Percentage of property value" } },
+                        Documentation = commonDocumentation,
+                        Features = new List<MortgageFeature> { new MortgageFeature { Type = FeatureTypeMortgage.PreApproval, Description = "Pre-approval available" } },
+                        Charges = new List<ProductCharge> { new ProductCharge { Type = ChargeType.MonthlyFees, Name = "ATM Withdrawal Fee", Description = "Fee charged for ATM withdrawals beyond free limit", Charge = new List<ChargeComponent> { new ChargeComponent { Amount = new Amount { AmountValue = 2.50m, Currency = "AED" }, MaximumChargeAmount = new Amount { AmountValue = 20000.0m, Currency = "AED" }, Rate = 0, ApplicationFrequency = "Per Transaction", InterestCalculationMethod = "Flat", Basis = "Per Withdrawal" } }, Conditions = new List<Condition> { new Condition { Field = "WithdrawalCount", Operator = ">", Value = "5", Description = "Applicable after 5 free withdrawals per month" } }, Justification = "Covers operational ATM costs", Frequency = "Per Transaction", DonatedToCharity = false, Notes = "First 5 transactions are free", SupplementaryInformation = new { Info = "Applicable only for other bank ATMs" } } },
+                        Limits = new List<MortgageLimit> { new MortgageLimit { Type = LimitTypeMortgage.MaximumOverpayment,
+                        Description = "Max overpayment", Value = 50000,
+                        Amount = new Amount { AmountValue = 50000, Currency = "AED" },Percentage=0.5m} }
+                    };
+
+                    // Applicable optional sections for Mortgage
+                    productDetails.FinanceRates = new FinanceRatesData
+                    {
+                        RateType = RateType.FixedInterest.ToString(),
+
+                        RateOption = new List<RateOption>
                         {
-                            Mortgage = new MortgageData
+                           new RateOption
+                    {
+                    RateType = RateType.FixedInterest,
+                         AnnualPercentageRate = new AnnualPercentageRate
+                        {
+                            StartingFrom = "12.0",
+                            UpTo = 15.0m,
+                            AdditionalInformation = "Fixed period APR"
+                        },
+
+                        Tiers = new List<Tier>
+                        {
+                            new Tier
                             {
-                                Type = "HomeFinance",
-                                Description = "Flexible home financing solution.",
-                                MinimumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
+                                Name = "Fixed Tier",
+                                Unit = TierUnitType.Balance,
+                                ApplicationMethod = ApplicationMethodType.PerTier,
+                                BalanceTierDetails = new List<BalanceTierDetail>
                                 {
-                                    AmountValue = "10000",
-                                    Currency = "AED"
-                                },
-                                MaximumLoanAmount = new OF.ProductData.Model.CentralBank.Products.Amount
-                                {
-                                    AmountValue = "500000",
-                                    Currency = "AED"
-                                },
-                                Tenure = new LoanTenure
-                                {
-                                    MinimumLoanTenure = 3,
-                                    MaximumLoanTenure = 36
-                                },
-                                Rate = new RateDetails
-                                {
-                                    Type = "Variable",
-                                    Description = "Rate linked to EIBOR",
-                                    IndicativeRate = new APR
+                                    new BalanceTierDetail
                                     {
-                                        From = RandomRate(3.0m, 5.0m),
-                                        To = RandomRate(5.5m, 7.5m)
+                                        MinimumTierValue = new MoneyAmount { Amount = "10", Currency = "AED" },
+                                        MaximumTierValue = new MoneyAmount { Amount = "500000", Currency = "AED" },
+                                        TierRate = 13.9m
                                     }
                                 },
-                                Documentation = new List<Document> { new Document { Type = "ApplicationForm", Description = "Fill application form" } },
-                                Features = new List<Feature> { new Feature { Type = "IslamicBanking", Description = "Sharia compliant feature" } },
-                                Fees = new List<Fee> { new Fee { Type = "Processing", Period = "Daily", Name = "Processing Fee", Description = "Processing fee", Unit = "Amount", Amount = new Amount { AmountValue = "100", Currency = "AED" }, Percentage = 0.5, UnitValue = 0.5, MaximumUnitValue = 0.5 } },
-                                Limits = new List<Limit> { new Limit { Type = "MinimumRequiredCreditScore", Description = "Minimum credit score", Value = 600, Percentage = 0.5 } },
-                                Benefits = new List<Benefit> { new Benefit { Type = "Other", Name = "Other Benefit", Description = "Other benefit", Value = 0.5 } },
-                                CalculationMethod = "FlatRate",
-                                Structure = "Standard",
-                                IndicativeAPR = new APR { From = 0.5m, To = 1.0m },
-                                FixedRatePeriod = "1 year",
-                                MaximumLTV = 0.8,
-                                DownPayment = new Amount { AmountValue = "20000", Currency = "AED" },
+                                LTVTierDetails=new List<LTVTierDetail>
+                                {
+                                    new LTVTierDetail
+                                    {
+                                        LTVStart=0.5m,
+                                        LTVEnd=0.5m,
+                                        TierRate=0.5m
+                                    }
+                                },
+                                RateRange = new RateRange()
+                                {
+                                    MinimumRate=0.5m,
+                                    MaximumRate=0.5m,
+                                     AdditionalInformation = "Fixed promotional rate for selected customers"
+                                }
                             }
+                        },
+                   // ✅ FIXED RATE
+                    FixedRate = new FixedRateData
+                    {
+                        Description = "Fixed interest for initial period",
+                        Rate = RandomRate(12.0m, 15.0m),
+                        FixedRateEndDate = DateTime.UtcNow.AddYears(2),
+
+                        CalculationFrequency = "Monthly",
+                        ApplicationFrequency = "Monthly",
+                        ProfitCalculationMethod = InterestCalculationMethodType.OutstandingBalance.ToString(),
+
+                        AnnualPercentageRate = new AnnualPercentageRate
+                        {
+                            StartingFrom = "12.0",
+                            UpTo = 15.0m,
+                            AdditionalInformation = "Fixed period APR"
+                        },
+
+                        Tiers = new List<Tier>
+                        {
+                            new Tier
+                            {
+                                Name = "Fixed Tier",
+                                Unit = TierUnitType.Balance,
+                                ApplicationMethod = ApplicationMethodType.PerTier,
+
+                                BalanceTierDetails = new List<BalanceTierDetail>
+                                {
+                                    new BalanceTierDetail
+                                    {
+                                        MinimumTierValue = new MoneyAmount { Amount = "10", Currency = "AED" },
+                                        MaximumTierValue = new MoneyAmount { Amount = "500000", Currency = "AED" },
+                                        TierRate = 13.5m
+                                    }
+                                },
+                                LTVTierDetails=new List<LTVTierDetail>
+                                {
+                                    new LTVTierDetail
+                                    {
+                                        LTVStart=0.5m,
+                                        LTVEnd=0.5m,
+                                        TierRate=0.5m
+                                    }
+                                },
+                                RateRange = new RateRange()
+                                {
+                                    MinimumRate=0.5m,
+                                    MaximumRate=0.5m,
+                                     AdditionalInformation = "Fixed promotional rate for selected customers"
+                                }
+                            }
+                        },
+                        FixedRateEnd= "2028-12-31",
+                        IntroductoryPeriodOptions = new List<IntroductoryPeriodOptions>
+                        {
+                           new IntroductoryPeriodOptions
+                           {
+                                Period = "P2Y3M",
+                                IndicativeRate = new IndicativeRate
+                                {
+                                    StartingFrom = 2.1m,
+                                    UpTo = 3.05m
+                                }
+                           } 
                         }
+                    },
+                    // ✅ VARIABLE RATE
+                    VariableRate = new VariableRateData
+                    {
+                        Description = "Variable interest after fixed period",
+                        Rate = RandomRate(15.0m, 22.0m),
+                        BenchMark = "EIBOR",
+                        BenchMarkRate = RandomRate(10.0m, 15.0m),
+                        Margin = RandomRate(2.0m, 4.0m),
+
+                        RateReviewFrequency = "P6M",
+                        RateReviewNextDate = DateTime.UtcNow.AddMonths(6),
+
+                        CalculationFrequency = "Monthly",
+                        ApplicationFrequency = "Monthly",
+                        ProfitCalculationMethod = InterestCalculationMethodType.OutstandingBalance.ToString(),
+
+                        AnnualPercentageRate = new AnnualPercentageRate
+                        {
+                            StartingFrom = "12.0",
+                            UpTo = 22.0m,
+                            AdditionalInformation = "Variable APR"
+                        },
+
+                        Tiers = new List<Tier>
+                        {
+                            new Tier
+                            {
+                                Name = "Variable Tier",
+                                Unit = TierUnitType.Balance,
+                                ApplicationMethod = ApplicationMethodType.PerTier,
+
+                                BalanceTierDetails = new List<BalanceTierDetail>
+                                {
+                                    new BalanceTierDetail
+                                    {
+                                        MinimumTierValue = new MoneyAmount { Amount = "10", Currency = "AED" },
+                                        MaximumTierValue = new MoneyAmount { Amount = "500000", Currency = "AED" },
+                                        TierRate = 18.5m
+                                    }
+                                },
+                                 LTVTierDetails=new List<LTVTierDetail>
+                                {
+                                    new LTVTierDetail
+                                    {
+                                        LTVStart=0.5m,
+                                        LTVEnd=0.5m,
+                                        TierRate=0.5m
+                                    }
+                                },
+                                RateRange = new RateRange()
+                                {
+                                    MinimumRate=0.5m,
+                                    MaximumRate=0.5m,
+                                     AdditionalInformation = "Fixed promotional rate for selected customers"
+                                }
+                            }
+                        },
+
+                        VariableTerm = "P2Y3M"
+                    },
+
+                   // ✅ COMMON
+                    Conditions = new List<Condition>
+                    {
+                        new Condition
+                        {
+                            Field = "CreditScore",
+                            Operator = ">=",
+                            Value = "700",
+                            Description = "Better rates for high credit score"
+                        }
+                    },
+                    Notes="string",
+                    AdditionalInformation = new List<AdditionalInformationItem>
+                    {
+                        new AdditionalInformationItem
+                        {
+                            Type = AdditionalInformationType.Other,
+                            Description = "Hybrid loan: fixed + variable"
+                        }
+                    }
+        }
+    }
+                    };
+                    productDetails.Tenor = new List<Tenor> { new Tenor { MinimumTenor = "P5Y", MaximumTenor = "P25Y", Condition = "Subject to approval" } };
+                    productDetails.AssetBacked = new List<AssetBacked>
+                    {
+                            new AssetBacked
+                            {
+                                Type = AssetBackedType.Collateral,
+                                AssetType = AssetType.Property,
+                                Description = "string",
+
+                                Valuation = new List<Valuation>
+                                {
+                                    new Valuation
+                                    {
+                                        Date = new DateTime(1970, 1, 1),
+                                        Amount = new MoneyAmount
+                                        {
+                                            Amount = "100000", // replace with actual value
+                                            Currency = "AED"
+                                        }
+                                    }
+                                },
+
+                                SupplementaryInformation = new Dictionary<string, object>(),
+
+                                OwnershipTransfer = new OwnershipTransfer
+                                {
+                                    TransferOfOwnershipDate = new DateTime(1970, 1, 1),
+                                    Type = OwnershipTransferType.Gift,
+                                    Method = OwnershipTransferMethodType.EndOfLease,
+
+                                    TokenPurchaseAmount = new MoneyAmount
+                                    {
+                                        Amount = "5000",
+                                        Currency = "AED"
+                                    },
+
+                                    BuyoutSchedule = new BuyoutSchedule
+                                    {
+                                        Frequency = PaymentFrequencyType.Weekly,
+                                        BuyoutAmount = new MoneyAmount
+                                        {
+                                            Amount = "1000",
+                                            Currency = "AED"
+                                        }
+                                    },
+
+                                    SaleAgreement = new SaleAgreement
+                                    {
+                                        Required = false,
+                                        Execution =SaleAgreementExecutionType.AtLeaseCompletion,
+                                        Price = new MoneyAmount
+                                        {
+                                            Amount = "120000",
+                                            Currency = "AED"
+                                        }
+                                    },
+
+                                    TransferConditions = new List<TransferConditionType>
+                                    {
+                                        TransferConditionType.AllLeasePaymentsCompleted
+                                    }
+                                }
+                            }
                     };
                     break;
-
+                
                 default:
-                    logger.Warn($"Unknown product category: {productCategory}");
-                    break;
+                    logger.Warn($"Unknown category: {category}");
+                    return response;
             }
 
-            if (product != null)
-            {
-                lFIData.Products!.Add(product);
-                lfiDataList.Add(lFIData);
-                response.Data = lfiDataList;
-            }
+            product.Product = productDetails;
+            lFIData.Products!.Add(product);
+            lfiDataList.Add(lFIData);
+            response.Data = lfiDataList;
+            response.Meta = new LFIMeta { TotalPages = 1, TotalRecords = 1 };
         }
         catch (Exception ex)
         {
-            logger.Error($"Error in ProductDetails(): {ex}");
+            logger.Error($"Error in ResponseProductDetails(): {ex}");
+            throw;
         }
 
         return response;
@@ -1023,5 +1328,4 @@ public class ProductDataService : IProductDataService
             throw new InvalidOperationException("Error during encryption/decryption", ex);
         }
     }
-
 }

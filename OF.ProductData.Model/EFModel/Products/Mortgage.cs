@@ -1,61 +1,81 @@
 ﻿namespace OF.ProductData.Model.EFModel.Products
 {
+    using System;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+
     [Table("Lfi_Mortgage")]
     public class Mortgage
     {
-
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
+
         [ForeignKey(nameof(ProductRequest))]
         public long RequestId { get; set; }
-        public string? Type { get; set; }
-        public string? Description { get; set; }
 
-        public decimal? MinimumLoanAmount { get; set; }
-        public string? MinimumLoanCurrency { get; set; }
-        public decimal? MaximumLoanAmount { get; set; }
-        public string? MaximumLoanCurrency { get; set; }
-        public decimal? MinTenure { get; set; }
-        public decimal? MaxTenure { get; set; }
-        public string? CalculationMethod { get; set; }
-        public string? Structure { get; set; }
-        public string? RateType { get; set; }
-        public string? RateDescription { get; set; }
-        public string? ReviewFrequency { get; set; }
-        public decimal? IndicativeRateFrom { get; set; }
-        public decimal? IndicativeRateTo { get; set; }
-        public decimal? ProfitRateFrom { get; set; }
-        public decimal? ProfitRateTo { get; set; }
-        public decimal? IndicativeAPRFrom { get; set; }
-        public decimal? IndicativeAPRTo { get; set; }
+        // Finance Amounts
+        public decimal? MinimumFinanceAmount { get; set; }
+        public string? MinimumFinanceCurrency { get; set; }
 
-        public decimal AnnualPercentageRateFrom { get; set; }
-        public decimal AnnualPercentageRateTo { get; set; }
-        public string? FixedRatePeriod { get; set; }
+        public decimal? MaximumFinanceAmount { get; set; }
+        public string? MaximumFinanceCurrency { get; set; }
+
+        // Down Payment
+        public string? DownPaymentCustomerCategory { get; set; }
+        public decimal? DownPaymentMinimumPercent { get; set; }
+        public string? DownPaymentBasis { get; set; }
+
+        // Documentation
         public string? DocumentationType { get; set; }
         public string? DocumentationDescription { get; set; }
+
+        // Features
         public string? FeaturesType { get; set; }
         public string? FeaturesDescription { get; set; }
-        public string? FeesType { get; set; }
-        public string? FeesPeriod { get; set; }
-        public string? FeesName { get; set; }
-        public string? FeesDescription { get; set; }
-        public string? FeesUnit { get; set; }
-        public decimal? FeesAmount { get; set; }
-        public string? FeesCurrency { get; set; }
-        public decimal? FeesPercentage { get; set; }
-        public decimal? FeesUnitValue { get; set; }
-        public decimal? FeesMaximumUnitValue { get; set; }
+
+        // Charges
+        public string? ChargesType { get; set; }
+        public string? ChargesName { get; set; }
+        public string? ChargesDescription { get; set; }
+
+        public decimal? ChargeAmount { get; set; }
+        public string? ChargeCurrency { get; set; }
+        public decimal? ChargeRate { get; set; }
+
+        public string? ChargeApplicationFrequency { get; set; }
+        public string? ChargeInterestCalculationMethod { get; set; }
+
+        public decimal? MaximumChargeAmount { get; set; }
+        public string? MaximumChargeCurrency { get; set; }
+
+        public string? ChargeBasis { get; set; }
+
+        // Charge Conditions
+        public string? ConditionsField { get; set; }
+        public string? ConditionsOperator { get; set; }
+        public string? ConditionsValue { get; set; }
+        public string? ConditionsDescription { get; set; }
+
+        public string? Justification { get; set; }
+        public string? Frequency { get; set; }
+
+        public bool? DonatedToCharity { get; set; }
+
+        public string? Notes { get; set; }
+        public string? SupplementaryInformation { get; set; }
+
+        // Limits
         public string? LimitsType { get; set; }
         public string? LimitsDescription { get; set; }
+
+        public decimal? LimitsAmount { get; set; }
+        public string? LimitsCurrency { get; set; }
+
         public decimal? LimitsValue { get; set; }
-        public string? BenefitsType { get; set; }
-        public string? BenefitsName { get; set; }
-        public string? BenefitsDescription { get; set; }
-        public decimal? BenefitsValue { get; set; }
-        public virtual EFProductRequest? ProductRequest { get; set; }  // navigation
+        public decimal? LimitsPercentage { get; set; }
 
+        // Navigation Property
+        public virtual EFProductRequest? ProductRequest { get; set; }
     }
-
 }

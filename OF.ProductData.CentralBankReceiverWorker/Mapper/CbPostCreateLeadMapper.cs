@@ -2,7 +2,6 @@
 using OF.DataSharing.Model.CentralBank.CoPQuery;
 using OF.ProductData.Model.CentralBank.Products;
 using OF.ProductData.Model.EFModel.CreateLead;
-using OF.ProductData.Model.EFModel.Products;
 
 namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
 {
@@ -121,7 +120,7 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
 
                 // Product info
                 ProductType = leadData.ProductCategories != null
-                    ? string.Join(", ", leadData.ProductCategories.Select(p => p.Type))
+                    ? string.Join(", ", leadData.ProductCategories.Select(p => p.ToString()))
                     : null,
 
                 // Audit metadata

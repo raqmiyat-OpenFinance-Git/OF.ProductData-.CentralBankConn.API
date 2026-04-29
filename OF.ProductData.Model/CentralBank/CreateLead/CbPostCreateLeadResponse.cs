@@ -15,7 +15,7 @@ public class LeadResponseData
     public LeadResponseResidentialAddress? ResidentialAddress { get; set; }
     public string? LeadInformation { get; set; }
     public bool? MarketingOptOut { get; set; }
-    public List<LeadResponseProductCategory>? ProductCategories { get; set; }
+    public List<ProductCategory>? ProductCategories { get; set; }
 }
 
 public class LeadResponseName
@@ -39,7 +39,3 @@ public class LeadResponseResidentialAddress
     public string? Country { get; set; }
 }
 
-public class LeadResponseProductCategory
-{
-    public string? Type { get; set; }
-}

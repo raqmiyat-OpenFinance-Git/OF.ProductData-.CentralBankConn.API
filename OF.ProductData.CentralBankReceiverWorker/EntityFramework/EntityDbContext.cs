@@ -12,15 +12,14 @@ public class EntityDbContext : DbContext
     public DbSet<SavingsAccount> SavingsAccounts { get; set; }
     public DbSet<CurrentAccounts> CurrentAccounts { get; set; }
     public DbSet<CreditCard> CreditCards { get; set; }
-    public DbSet<PersonalLoan> PersonalLoans { get; set; }
     public DbSet<Mortgage> Mortgages { get; set; }
     public DbSet<ProfitSharingRate> ProfitSharingRate { get; set; }
-    public DbSet<FinanceProfitRate> FinanceProfitRate { get; set; }
-    public DbSet<DepositRatesModel> DepositRatesModel { get; set; }
-    public DbSet<FinanceRates> FixedRateMapped { get; set; }
-    public DbSet<Tenor> TenorMapped { get; set; }
-    public DbSet<AssetBacked> AssetBackedMapped { get; set; }
-    public DbSet<RewardsBenefits> RewardsMapped { get; set; }
+    public DbSet<Finance> Finance { get; set; }
+    public DbSet<DepositRates> DepositRates{ get; set; }
+    public DbSet<FinanceRates> FinanceRates { get; set; }
+    public DbSet<Tenor> Tenor { get; set; }
+    public DbSet<AssetBacked> AssetBacked { get; set; }
+    public DbSet<RewardsBenefits> RewardsBenefits { get; set; }
     public DbSet<EFCreateLeadRequest>? createLeadRequest { get; set; }
     public DbSet<EFCreateLeadResponse>? createLeadResponse { get; set; }
     public DbSet<EFCreateLeadHeaderRequest>? createLeadHeaderRequest { get; set; }
@@ -52,7 +51,7 @@ public class EntityDbContext : DbContext
                 .HasForeignKey(c => c.RequestId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<PersonalLoan>()
+            modelBuilder.Entity<Finance>()
                 .HasOne(c => c.ProductRequest)
                 .WithMany()
                 .HasForeignKey(c => c.RequestId)
@@ -70,7 +69,7 @@ public class EntityDbContext : DbContext
                 .HasForeignKey(c => c.RequestId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<FinanceProfitRate>()
+            modelBuilder.Entity<FinanceRates>()
                 .HasOne(c => c.ProductRequest)
                 .WithMany()
                 .HasForeignKey(c => c.RequestId)

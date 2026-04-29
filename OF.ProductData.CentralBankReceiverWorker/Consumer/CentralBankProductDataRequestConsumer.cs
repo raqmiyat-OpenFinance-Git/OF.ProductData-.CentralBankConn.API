@@ -64,14 +64,13 @@ public class CentralBankProductDataRequestConsumer : IConsumer<CbProductDataRequ
                 O3OzoneInteractionId = request.O3OzoneInteractionId ?? string.Empty,
                 ProductCategory = request.ProductCategory ?? string.Empty,
                 IsShariaCompliant = request.IsShariaCompliant,
-                LastUpdatedDateTime = Convert.ToString(request.LastUpdatedDateTime),
+                LastUpdatedDateTime = request.LastUpdatedDateTime,
                 SortOrder = request.SortOrder ?? string.Empty,
                 SortField = request.SortField ?? string.Empty,
                 CreatedBy = "System",
                 CreatedOn = DateTime.UtcNow,
                 Status = "PENDING",
                 RequestJson = request.RequestJson ?? string.Empty
-
             };
 
             await _Service.AddProductAsync(productRequest, _logger.Log);

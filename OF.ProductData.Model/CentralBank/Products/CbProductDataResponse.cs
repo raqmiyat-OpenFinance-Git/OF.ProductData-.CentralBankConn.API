@@ -1,18 +1,22 @@
-﻿using OF.ProductData.Model.CentralBank.CreateLead;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace OF.ProductData.Model.CentralBank.Products;
 public class CbProductDataResponse
 {
     public List<LFIData>? Data { get; set; }
+    public LFIMeta? Meta { get; set; }
 }
 public class LFIData
 {
-    public string LFIId { get; set; }
-    public string LFIBrandId { get; set; }
+    public string? LFIId { get; set; }
+    public string? LFIBrandId { get; set; }
     public List<ProductWrapper>? Products { get; set; }
 }
-
+public class LFIMeta
+{
+    public int? TotalPages { get; set; }
+    public int? TotalRecords { get; set; }
+}
 public class ProductWrapper
 {
     public string? ProductId { get; set; }
@@ -23,7 +27,7 @@ public class ProductWrapper
     public DateTime EffectiveToDateTime { get; set; }
     public DateTime LastUpdatedDateTime { get; set; }
     public bool IsShariaCompliant { get; set; }
-    public ShariaStructure ShariaStructure { get; set; }
+    public ShariaStructure? ShariaStructure { get; set; }
     public string? AlternativeBrandName { get; set; }
     public string? ShariaInformation { get; set; }
     public bool IsSalaryTransferRequired { get; set; }
@@ -31,6 +35,7 @@ public class ProductWrapper
     public EligibilityData? Eligibility { get; set; }
     public List<Channel>? Channels { get; set; }
     public ProductDetails? Product { get; set; }
+    public string? DenominationCurrency { get; set; }
 }
 
 public class Links
@@ -50,28 +55,69 @@ public class Links
 
 public class EligibilityData
 {
-    public List<TypeDescription>? ResidenceStatus { get; set; }
-    public List<TypeDescription>? EmploymentStatus { get; set; }
-    public List<TypeDescription>? CustomerType { get; set; }
-    public List<TypeDescription>? AccountOwnership { get; set; }
-    public List<AgeEligibility>? Age { get; set; }
-    public List<TypeDescription>? AdditionalEligibility { get; set; }
+    public List<ResidenceStatusItem>? ResidenceStatus { get; set; }
+    public List<EmploymentStatusItem>? EmploymentStatus { get; set; }
+    public List<CustomerTypeItem>? CustomerType { get; set; }
+    public List<AccountOwnershipItem>? AccountOwnership { get; set; }
+    public List<AgeEligibilityItem>? Age { get; set; }
+    public List<FinancialRequirementItem>? FinancialRequirements { get; set; }
+    public List<AdditionalEligibilityItem>? AdditionalEligibility { get; set; }
 }
-
-public class TypeDescription
+public class ResidenceStatusItem
 {
-    public string? Type { get; set; }
+    public ResidenceStatusType Type { get; set; }
     public string? Description { get; set; }
 }
 
-public class AgeEligibility : TypeDescription
+public class EmploymentStatusItem
 {
+    public EmploymentStatusType Type { get; set; }
+    public string? Description { get; set; }
+}
+
+public class CustomerTypeItem
+{
+    public CustomerType Type { get; set; }
+    public string? Description { get; set; }
+}
+
+
+public class AccountOwnershipItem
+{
+    public AccountOwnershipType Type { get; set; }
+    public string? Description { get; set; }
+}
+
+public class AgeEligibilityItem
+{
+    public AgeType Type { get; set; }
+    public string? Description { get; set; }
     public decimal Value { get; set; }
+}
+
+public class FinancialRequirementItem
+{
+    public FinancialRequirementType Type { get; set; }
+    public string? Description { get; set; }
+    public decimal? Value { get; set; }
+    public Amount? Amount { get; set; }
+}
+
+public class AdditionalEligibilityItem
+{
+    public AdditionalEligibilityType Type { get; set; }
+    public string? Description { get; set; }
+}
+
+public class AdditionalInformationItem
+{
+    public AdditionalInformationType? Type { get; set; }
+    public string? Description { get; set; }
 }
 
 public class Channel
 {
-    public string? Type { get; set; }
+    public ChannelType? Type { get; set; }
     public string? Description { get; set; }
 }
 
@@ -80,51 +126,76 @@ public class ProductDetails
     public CurrentAccountData? CurrentAccount { get; set; }
     public SavingsAccountData? SavingsAccount { get; set; }
     public CreditCardData? CreditCard { get; set; }
-    public PersonalLoanData? PersonalLoan { get; set; }
+    public FinanceData? Finance { get; set; }
     public MortgageData? Mortgage { get; set; }
-    public DepositRates ? depositRates { get; set; }
-    public FinanceInterestRate? FinanceInterestRate { get; set; }
-    public Tenor? Tenor { get; set; }
-    public AssetBacked? AssetBacked { get; set; }
-    public RewardsBenefits? RewardsBenefits { get; set; }
-    public string?  DenominationCurrency { get; set; }
-
-
-    //public ProfitSharingRateData? ProfitSharingRate { get; set; }
-    //public FinanceProfitRateData? FinanceProfitRate { get; set; }
+    public DepositRatesData? DepositRates { get; set; }
+    public FinanceRatesData? FinanceRates { get; set; }
+    public List<Tenor>? Tenor { get; set; }
+    public List<AssetBacked>? AssetBacked { get; set; }
+    public List<RewardsBenefits>? RewardsBenefits { get; set; }
 }
 
-public class CurrentAccountData : AccountBase {
+
+public class CurrentAccountData
+{
+    public CurrentAccountType? Type { get; set; }
+    public bool IsOverdraftAvailable { get; set; }
+    public List<Document>? Documentation { get; set; }
+    public List<CurrentAccountFeature>? Features { get; set; }
+    public List<ProductCharge>? Charges { get; set; }
+    public List<CurrentAccountLimit>? Limits { get; set; }
+}
+public class SavingsAccountData 
+{
+    public SavingsAccountType? Type { get; set; }
     public Amount? MinimumBalance { get; set; }
-    public double AnnualReturn { get; set; }
+    public List<Document>? Documentation { get; set; }
+    public List<SavingsAccountFeature>? Features { get; set; }
+    public List<ProductCharge>? Charges { get; set; }
+    public List<SavingsAccountLimit>? Limits { get; set; }
 }
-public class SavingsAccountData : AccountBase
+public class CreditCardData
 {
-    public Amount? MinimumBalance { get; set; }
-    public double AnnualReturn { get; set; }
+    public CreditCardType? Type { get; set; }
+    public List<Document>? Documentation { get; set; }
+    public List<CreditCardFeature>? Features { get; set; }
+    public List<ProductCharge>? Charges { get; set; }
+    public List<CreditCardLimit>? Limits { get; set; }
 }
-public class CreditCardData : AccountBase
+public class FinanceData 
 {
-    public decimal Rate { get; set; }
+    public FinanceType? Type { get; set; }
+    public Amount? MinimumFinanceAmount { get; set; }
+    public Amount? MaximumFinanceAmount { get; set; }
+    public List<Document>? Documentation { get; set; }
+    public List<FinanceFeature>? Features { get; set; }
+    public List<FinanceLimit>? Limits { get; set; }
+    public List<ProductCharge>? Charges { get; set; }
+    public List<AdditionalInformationItem>? AdditionalInformation { get; set; }
 }
-public class PersonalLoanData : AccountBase
+
+public class DownPayment
 {
-    public Amount? MinimumLoanAmount { get; set; }
-    public Amount? MaximumLoanAmount { get; set; }
-    public LoanTenure? Tenure { get; set; }
-    public string? CalculationMethod { get; set; }
-    public RateDetails? Rate { get; set; }
-    public APR? AnnualPercentageRateRange { get; set; }
-    public string? FixedRatePeriod { get; set; }
-    public string? DebtBurdenRatio { get; set; }
-    public List<AdditionalInformation>? AdditionalInformation { get; set; }
+    public string? CustomerCategory { get; set; }
+    public decimal MinimumPercent { get; set; }
+    public string? Basis { get; set; }
 }
-public class MortgageData : PersonalLoanData
+
+public class MortgageData 
 {
-    public string? Structure { get; set; }
-    public double MaximumLTV { get; set; }
-    public Amount? DownPayment { get; set; }
-    public APR? IndicativeAPR { get; set; }
+    public Amount? MinimumFinanceAmount { get; set; }
+    public Amount? MaximumFinanceAmount { get; set; }
+    public List<DownPaymentRequirement>? DownPayment { get; set; }
+    public List<Document>? Documentation { get; set; }
+    public List<MortgageFeature>? Features { get; set; }
+    public List<ProductCharge>? Charges { get; set; }
+    public List<MortgageLimit>? Limits { get; set; }
+}
+public class DownPaymentRequirement
+{
+    public string? CustomerCategory { get; set; }
+    public decimal MinimumPercent { get; set; }
+    public string? Basis { get; set; }
 }
 
 public class ProfitSharingRateData
@@ -135,39 +206,160 @@ public class ProfitSharingRateData
     public decimal AnnualReturn { get; set; }
     public List<NameDescription>? AnnualReturnOptions { get; set; }
     public NameDescription? InvestmentPeriod { get; set; }
-    public List<AdditionalInformation>? AdditionalInformation { get; set; }
+    public List<AdditionalInformationItem>? AdditionalInformation { get; set; }
 }
 
-public class FinanceProfitRateData
+public class BaseProductDetails
 {
-    public string? Name { get; set; }
-    public string? Description { get; set; }
-    public string? CalculationMethod { get; set; }
-    public decimal Rate { get; set; }
-    public string? Frequency { get; set; }
-    public List<Tier>? Tiers { get; set; }
-    public List<AdditionalInformation>? AdditionalInformation { get; set; }
-}
-
-public class AccountBase
-{
-    public string? Type { get; set; }
-    public string? Description { get; set; }
+    public CurrentAccountType? Type { get; set; }
     public bool IsOverdraftAvailable { get; set; }
     public List<Document>? Documentation { get; set; }
-    public List<Feature>? Features { get; set; }
-    public List<Fee>? Fees { get; set; }
-    public List<Limit>? Limits { get; set; }
-    public List<Benefit>? Benefits { get; set; }
+    public List<CurrentAccountFeature>? Features { get; set; }
+    public List<ProductCharge>? Charges { get; set; }
+
+    public List<CurrentAccountLimit>? Limits { get; set; }
+}
+public class BaseAccountDetails : BaseProductDetails
+{
+    public Amount? MinimumBalance { get; set; }
+}
+
+
+public class BaseLimit
+{
+    public string? Description { get; set; }
+    public Amount? Amount { get; set; }
+    public decimal Value { get; set; }
+    public decimal? Percentage { get; set; }
+}
+
+public class CurrentAccountLimit 
+{
+    public LimitTypeCurrentAccount Type { get; set; }
+    public string? Description { get; set; }
+    public Amount? Amount { get; set; }
+    public decimal Value { get; set; }
+}
+public class SavingsAccountLimit 
+{
+    public LimitTypeSavingsAccount Type { get; set; }
+    public string? Description { get; set; }
+    public Amount? Amount { get; set; }
+    public decimal Value { get; set; }
+}
+
+public class CreditCardLimit 
+{
+    public LimitTypeCreditCard Type { get; set; }
+    public string? Description { get; set; }
+    public Amount? Amount { get; set; }
+    public decimal Value { get; set; }
+}
+
+public class FinanceLimit : BaseLimit
+{
+    public LimitTypeFinance Type { get; set; }
+    public string? Description { get; set; }
+    public Amount? Amount { get; set; }
+    public decimal Value { get; set; }
+}
+
+public class MortgageLimit : BaseLimit
+{
+    public LimitTypeMortgage Type { get; set; }
+    public string? Description { get; set; }
+    public Amount? Amount { get; set; }
+    public decimal Value { get; set; }
+    public decimal Percentage { get; set; }
+}
+
+public class CurrentAccountFeature
+{
+    public string? Description { get; set; }
+    public FeatureTypeCurrentAccount Type { get; set; }
+}
+
+public class SavingsAccountFeature
+{
+    public string? Description { get; set; }
+    public FeatureTypeSavingsAccount Type { get; set; }
+}
+
+public class CreditCardFeature
+{
+    public string? Description { get; set; }
+    public FeatureTypeCreditCard Type { get; set; }
+}
+public class FinanceFeature
+{
+    public string? Description { get; set; }
+    public FeatureTypeFinance Type { get; set; }
+}
+
+public class MortgageFeature
+{
+    public string? Description { get; set; }
+    public FeatureTypeMortgage Type { get; set; }
 }
 
 public class Document
 {
+    public DocumentType? Type { get; set; }
+    public string? Description { get; set; }
+}
+
+public class Feature
+{
     public string? Type { get; set; }
     public string? Description { get; set; }
 }
 
-public class Feature : Document { }
+public class ChargeComponent
+{
+    public Amount? Amount { get; set; }
+    public decimal? Rate { get; set; }
+    public string? ApplicationFrequency { get; set; }
+    public string? InterestCalculationMethod { get; set; }
+    public Amount? MaximumChargeAmount { get; set; }
+    public string? Basis { get; set; }
+}
+public class ProductCharge
+{
+    public ChargeType? Type { get; set; }
+    public string? Name { get; set; }
+    public string? Description { get; set; }
+    public List<ChargeComponent>? Charge { get; set; }
+    public List<Condition>? Conditions { get; set; }
+    public string? Justification { get; set; }
+    public string? Frequency { get; set; }
+    public bool? DonatedToCharity { get; set; }
+    public string? Notes { get; set; }
+    public object? SupplementaryInformation { get; set; }
+}
+public class Charges : Document
+{
+    public string? Name { get; set; }
+    public List<ProductCharge>? Charge { get; set; }
+    public string? Rate { get; set; }
+    public string? ApplicationFrequency { get; set; }
+    public string? InterestCalculationMethod { get; set; }
+    public List<ProductCharge>? MaximumChargeAmount { get; set; }
+    public string? Basis { get; set; }
+    public List<Conditions>? Conditions { get; set; }
+    public string? Justification { get; set; }
+    public string? Frequency { get; set; }
+    public bool DonatedToCharity { get; set; }
+    public string? Notes { get; set; }
+    public string? SupplementaryInformation { get; set; }
+}
+
+public class Conditions     
+{
+    public string? Field { get; set; }
+    public string? Operator { get; set; }
+    public string? Value { get; set; }
+    public string? Description { get; set; }
+}
 
 public class Fee
 {
@@ -186,8 +378,9 @@ public class Limit
 {
     public string? Type { get; set; }
     public string? Description { get; set; }
-    public double Value { get; set; }
-    public double? Percentage { get; set; }
+    public Amount? Amount { get; set; }
+    public decimal Value { get; set; }
+    public decimal? Percentage { get; set; }
 }
 
 public class Benefit : Limit
@@ -198,7 +391,7 @@ public class Benefit : Limit
 public class Amount
 {
     [JsonPropertyName("Amount")]
-    public string? AmountValue { get; set; }
+    public decimal? AmountValue { get; set; }
     [JsonPropertyName("Currency")]
     public string? Currency { get; set; }
 }
@@ -223,32 +416,26 @@ public class APR
     public decimal From { get; set; }
     public decimal To { get; set; }
 }
-
-public class AdditionalInformation : TypeDescription { }
 public class NameDescription
 {
-
     public string? Name { get; set; }
-
-
     public string? Description { get; set; }
 }
 
 public class Tier 
 {
-
     public string? Name { get; set; }
-    public string? Unit { get; set; }
-    public string? ApplicationMethod { get; set; }
+    public TierUnitType? Unit { get; set; }
+    public ApplicationMethodType? ApplicationMethod { get; set; }
     public List<BalanceTierDetail>? BalanceTierDetails { get; set; }
     public List<LTVTierDetail>? LTVTierDetails { get; set; }
     public RateRange? RateRange { get; set; }
 }
 
-public class DepositRates
+public class DepositRatesData
 {
     public RateType RateType { get; set; }
-    public List<RateDetailsRate>? RateDetails { get; set; }
+    public List<RateDetail>? RateDetails { get; set; }
 }
 public class BalanceTierDetail
 {
@@ -279,34 +466,72 @@ public class Condition
     public string? Description { get; set; }
 }
 
-
-public class RateDetailsRate
+public class RateDetail
 {
-    public RateCategory RateCategory { get; set; }
-
+    public RateCategoryType? RateCategory { get; set; }
     public decimal? AnnualRate { get; set; }
-
     public AnnualRateRange? AnnualRateRange { get; set; }
-
-    public Tiers? Tier { get; set; }
-
-    public string Currency { get; set; } = string.Empty;
+    public TierDetail? Tier { get; set; }
     public string? Term { get; set; }
-
     public DateTime? EffectiveDate { get; set; }
-
     public DateTime? ExpiryDate { get; set; }
-
-    public CalculationMethod CalculationMethod { get; set; }
-
-    public Frequency CalculationFrequency { get; set; }
-
-    public Frequency ApplicationFrequency { get; set; }
-
+    public CalculationMethodType? CalculationMethod { get; set; }
+    public CalculationFrequencyType? CalculationFrequency { get; set; }
+    public ApplicationFrequencyType? ApplicationFrequency { get; set; }
     public string? Notes { get; set; }
 }
 
-public class FinanceInterestRate
+public class TierDetail
+{
+    public string? MinBalance { get; set; }
+    public string? MaxBalance { get; set; }
+    public string? Currency { get; set; }
+}
+
+public class FinanceRatesData
+{
+    public string? RateType { get; set; }
+    public List<RateOption>? RateOption { get; set; } 
+}
+public class RateOption
+{
+    public AnnualPercentageRate? AnnualPercentageRate { get; set; }
+    public List<Tier>? Tiers { get; set; }
+    public List<Condition>? Conditions { get; set; }
+    public string? Notes { get; set; }
+    public List<AdditionalInformationItem>? AdditionalInformation { get; set; }
+    public RateType? RateType { get; set; }
+    public FixedRateData? FixedRate { get; set; } // Added
+    public VariableRateData? VariableRate { get; set; } // Added
+}
+public class FixedRateData
+{
+    public string? Description { get; set; }
+    public decimal? Rate { get; set; }
+    public DateTime? FixedRateEndDate { get; set; }
+    public string? CalculationFrequency { get; set; }
+    public string? ApplicationFrequency { get; set; }
+    public string? ProfitCalculationMethod { get; set; }
+    public AnnualPercentageRate? AnnualPercentageRate { get; set; }
+    public List<Tier>? Tiers { get; set; }
+    public List<Condition>? Conditions { get; set; }
+    public string? Notes { get; set; }
+    public List<AdditionalInformationItem>? AdditionalInformation { get; set; }
+    public string? FixedRateEnd { get; set; }
+    public List<IntroductoryPeriodOptions>? IntroductoryPeriodOptions { get; set; }
+}
+public class IntroductoryPeriodOptions
+{
+    public string? Period { get; set; }
+    public IndicativeRate? IndicativeRate { get; set; }
+}
+public class IndicativeRate
+{
+    public decimal? StartingFrom { get; set; }
+    public decimal? UpTo { get; set; }
+}
+
+public class VariableRateData
 {
     public string? Description { get; set; }
     public decimal? Rate { get; set; }
@@ -317,18 +542,17 @@ public class FinanceInterestRate
     public DateTime? RateReviewNextDate { get; set; }
     public string? CalculationFrequency { get; set; }
     public string? ApplicationFrequency { get; set; }
-    public string? InterestCalculationMethod { get; set; }
+    public string? ProfitCalculationMethod { get; set; }
     public AnnualPercentageRate? AnnualPercentageRate { get; set; }
     public List<Tier>? Tiers { get; set; }
     public List<Condition>? Conditions { get; set; }
     public string? Notes { get; set; }
-    public List<AdditionalInformation>? AdditionalInformation { get; set; }
-    public string? RateType { get; set; }
-
+    public List<AdditionalInformationItem>? AdditionalInformation { get; set; }
+    public string? VariableTerm { get; set; }
 }
 public class AnnualPercentageRate
 {
-    public decimal? StartingFrom { get; set; }
+    public string? StartingFrom { get; set; }
 
     public decimal? UpTo { get; set; }
 
@@ -370,47 +594,26 @@ public class Tiers
 }
 public class Tenor
 {
-    [RegularExpression(@"^P(\d+Y)?(\d+M)?$",
-        ErrorMessage = "Invalid ISO 8601 duration format (e.g. P1Y, P6M, P2Y6M)")]
     public string? MinimumTenor { get; set; }
-
-    [RegularExpression(@"^P(\d+Y)?(\d+M)?$",
-        ErrorMessage = "Invalid ISO 8601 duration format (e.g. P1Y, P6M, P2Y6M)")]
     public string? MaximumTenor { get; set; }
-
     public string? Condition { get; set; }
 }
 public class AssetBacked
 {
-    public AssetBackedType Type { get; set; }
-
-    public AssetType AssetType { get; set; }
-
-    public string Description { get; set; } = string.Empty;
-
-    public Valuation? Valuation { get; set; }
-
-    public SupplementaryInformation? SupplementaryInformation { get; set; }
-
+    public AssetBackedType? Type { get; set; }
+    public AssetType? AssetType { get; set; }
+    public string? Description { get; set; }
+    public List<Valuation>? Valuation { get; set; }
+    public object? SupplementaryInformation { get; set; }
     public OwnershipTransfer? OwnershipTransfer { get; set; }
 }
 public class RewardsBenefits
 {
-
-    [Required]
-    public string Name { get; set; } = string.Empty;
-
+    public string? Name { get; set; }
     public string? Description { get; set; }
-    [Required]
-    public RewardType Type { get; set; } = RewardType.Cashback;
-
-    [Required]
-    public CashbackBalance Balance { get; set; } = new();
-
+    public RewardBenefitType? Type { get; set; }
     public List<string>? RewardBasis { get; set; }
-
-
-    public FrequencyPaid? FrequencyPaid { get; set; }
+  
 }
 
 public class CashbackBalance
@@ -423,22 +626,6 @@ public class CashbackBalance
     [Required]
     [RegularExpression(@"^[A-Z]{3}$")]
     public string Currency { get; set; } = string.Empty;
-}
-public enum RewardType
-{
-    Cashback
-}
-
-public enum FrequencyPaid
-{
-    Daily,
-    Weekly,
-    Monthly,
-    Quarterly,
-    HalfYearly,
-    Annually,
-    UponRequest,
-    Other
 }
 
 public class Valuation
@@ -455,14 +642,14 @@ public class SupplementaryInformation
 public class MoneyAmount
 {
     [RegularExpression(@"^\d{1,13}$|^\d{1,13}\.\d{1,5}$")]
-    public string Amount { get; set; } = string.Empty;
+    public string Amount{ get; set; } = string.Empty;
 
     [RegularExpression(@"^[A-Z]{3}$")]
     public string Currency { get; set; } = string.Empty;
 }
 public class BuyoutSchedule
 {
-    public PaymentFrequency Frequency { get; set; }
+    public PaymentFrequencyType? Frequency { get; set; }
 
     public MoneyAmount BuyoutAmount { get; set; } = new();
 }
@@ -471,7 +658,8 @@ public class SaleAgreement
 {
     public bool Required { get; set; }
 
-    public SaleAgreementExecution Execution { get; set; }
+    public SaleAgreementExecutionType? Execution { get; set; }
+    public MoneyAmount? Price { get; set; }
 }
 
 public class OwnershipTransfer
@@ -480,7 +668,7 @@ public class OwnershipTransfer
 
     public OwnershipTransferType Type { get; set; }
 
-    public OwnershipTransferMethod? Method { get; set; }
+    public OwnershipTransferMethodType? Method { get; set; }
 
     public MoneyAmount? TokenPurchaseAmount { get; set; }
 
@@ -488,115 +676,5 @@ public class OwnershipTransfer
 
     public SaleAgreement? SaleAgreement { get; set; }
 
-    public MoneyAmount? Price { get; set; }
-
-    public List<TransferCondition>? TransferConditions { get; set; }
-}
-
-public enum ShariaStructure
-{
-    Ijara, ServiceIjara, Murabaha, Musharaka, Tawarruq
-}
-public enum RateType
-{
-    FixedInterest,
-    FixedProfit,
-    VariableInterest,
-    VariableProfit
-}
-
-public enum RateCategory
-{
-    Applied,
-    Standard,
-    Bonus,
-    Introductory,
-    Other
-}
-
-public enum CalculationMethod
-{
-    DailyClosingBalance,
-    MinimumMonthlyBalance,
-    AverageDailyBalance,
-    AverageMonthlyBalance,
-    AccountOpeningBalance,
-    NotApplicable,
-    Other
-}
-
-public enum Frequency
-{
-    Daily,
-    Monthly,
-    Quarterly,
-    HalfYearly,
-    Annually,
-    NotApplicable
-}
-
-
-
-public enum InterestCalculationMethod
-{
-    PrincipalBalance,
-    OutstandingBalance,
-    InitialDrawdownAmount
-}
-
-
-public enum AssetBackedType
-{
-    Collateral,
-    OwnershipTransfer
-}
-
-public enum AssetType
-{
-    Property,
-    SalaryAssignment,
-    EndOfServiceGratuity,
-    SalaryAndGratuityAssignment,
-    FixedDepositLien,
-    Vehicle,
-    TakafulPolicy,
-    Rahn,
-    PostDatedCheque,
-    Other
-}
-
-public enum OwnershipTransferType
-{
-    Gift,
-    TokenPurchase,
-    Gradual,
-    SeparateSaleContract
-}
-
-public enum OwnershipTransferMethod
-{
-    EndOfLease,
-    Buyouts
-}
-
-public enum PaymentFrequency
-{
-    Weekly,
-    Fortnightly,
-    Monthly,
-    Quarterly,
-    HalfYearly,
-    Annual,
-    Other
-}
-
-public enum SaleAgreementExecution
-{
-    AtLeaseCompletion,
-    CustomerRequestPostLease
-}
-
-public enum TransferCondition
-{
-    AllLeasePaymentsCompleted
+    public List<TransferConditionType>? TransferConditions { get; set; }
 }

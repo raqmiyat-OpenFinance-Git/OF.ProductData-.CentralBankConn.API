@@ -54,7 +54,8 @@ public class CentralBankProductDataResponseConsumer : IConsumer<CbProductRespons
             CbProductDataResponse productModel = new();
             long productRequestId = await _productService.GetPostProductIdAsync(centralBankProductResponseWrapper.CorrelationId, _logger.Log);
             var productResponse = CbPostProductMapper.MapCbPostProductResponsetToEF(centralBankProductResponseWrapper, productRequestId);
-            await Task.Delay(9000);
+            //await Task.Delay(9000);
+            await Task.Delay(3000);
             await _productService.AddProductResponseAsync(productRequestId, centralBankProductResponseWrapper.CorrelationId, productResponse, _logger.Log);
             await _productService.UpdateProductRequestStatusAsync(productRequestId, centralBankProductResponseWrapper.CorrelationId, _logger.Log);
 

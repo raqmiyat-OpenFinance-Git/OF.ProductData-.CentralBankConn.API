@@ -20,7 +20,7 @@ public class EFProductRequest
     public string? O3ApiOperation { get; set; }
     public string? ProductCategory { get; set; }
     public bool? IsShariaCompliant { get; set; }
-    public string? LastUpdatedDateTime { get; set; }
+    public DateTime? LastUpdatedDateTime { get; set; }
     public string? SortOrder { get; set; } = "asc";
     public string? SortField { get; set; }
     public string? CustomerIpAddress { get; set; }

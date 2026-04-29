@@ -4,6 +4,7 @@ using OF.ProductData.CentralBankConn.API.Repositories;
 using OF.ProductData.Common.Custom;
 using OF.ProductData.Common.Helpers;
 using OF.ProductData.Common.NLog;
+using OF.ProductData.Model.CentralBank;
 using OF.ProductData.Model.CentralBank.CreateLead;
 using OF.ProductData.Model.CentralBank.Products;
 using OF.ProductData.Model.Common;
@@ -159,10 +160,10 @@ public class CreateLeadService : ICreateLeadService
                     },
                     LeadInformation = "Interested in new savings account",
                     MarketingOptOut = false,
-                    ProductCategories = new List<LeadResponseProductCategory>
-                {
-                    new LeadResponseProductCategory { Type = "SavingsAccount" },
-                }
+                    ProductCategories = new List<ProductCategory>
+                    {
+                           ProductCategory.SavingsAccount
+                    }
                 }
             };
         }
@@ -179,7 +180,7 @@ public class CreateLeadService : ICreateLeadService
 
         try
         {
-            var productType = leadRequest.Data.ProductCategories!.Select(c => c.Type).FirstOrDefault();
+            var productType = leadRequest.Data.ProductCategories!.Select(c => c.ToString()).FirstOrDefault();
             // ✅ Create and return dummy data
             return new CbPostCreateLeadResponse
             {
@@ -212,10 +213,10 @@ public class CreateLeadService : ICreateLeadService
                     LeadInformation = "Interested in new " + productType,
 
                     MarketingOptOut = leadRequest.Data.MarketingOptOut,
-                    ProductCategories = new List<LeadResponseProductCategory>
-                {
-                    new LeadResponseProductCategory { Type = productType },
-                }
+                    ProductCategories = new List<ProductCategory>
+                    {
+                          ProductCategory.SavingsAccount
+                    }
                 }
             };
         }

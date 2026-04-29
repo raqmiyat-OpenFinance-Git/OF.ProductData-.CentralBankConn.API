@@ -1,4 +1,4 @@
-﻿using OF.ProductData.Model.CentralBank.Products;
+﻿using OF.ProductData.Model.CentralBank;
 
 namespace OF.ProductData.Model.EFModel.Products
 {
@@ -36,7 +36,7 @@ namespace OF.ProductData.Model.EFModel.Products
         public string? ScheduleOfChargesUri { get; set; }
         public string? EligibilityUri { get; set; }
         public string? CardImageUri { get; set; }
-        public string? ChannelsType { get; set; }
+        public ChannelType? ChannelsType { get; set; }
         public string? ChannelsDescription { get; set;}
         public string? ResidenceStatusType { get; set; }
         public string? ResidenceStatusDescription { get; set; }
@@ -49,6 +49,11 @@ namespace OF.ProductData.Model.EFModel.Products
         public string? AgeEligibilityType { get; set; }
         public string? AgeEligibilityDescription { get; set; }
         public decimal? AgeEligibilityValue { get; set; }
+        public string? FinancialRequirementsType { get; set; }
+        public string? FinancialRequirementsDescription { get; set; }
+        public string? FinancialRequirementsValue { get; set; }
+        public decimal? FinancialRequirementsAmount { get; set; }
+        public string? FinancialRequirementsCurrency { get; set; }
         public string? AdditionalEligibilityType { get; set; }
         public string? AdditionalEligibilityDescription { get; set; }
         public string? CreatedBy { get; set; }
@@ -69,7 +74,7 @@ namespace OF.ProductData.Model.EFModel.Products
         public virtual ICollection<CreditCard>? CreditCard { get; set; }
 
         [NotMapped]
-        public virtual ICollection<PersonalLoan>? PersonalLoan { get; set; }
+        public virtual ICollection<Finance>? Finance { get; set; }
 
         [NotMapped]
         public virtual ICollection<Mortgage>? Mortgage { get; set; }
@@ -78,13 +83,13 @@ namespace OF.ProductData.Model.EFModel.Products
         public virtual ICollection<DepositRates>? DepositRates { get; set; }
 
         [NotMapped]
-        public virtual FinanceInterestRate? FinanceRateMapped { get; set; }
+        public virtual ICollection<FinanceRates>? FinanceRates { get; set; }
         [NotMapped]
-        public virtual ICollection<Tenor>? TenorMapped { get; set; }
+        public virtual ICollection<Tenor>? Tenor { get; set; }
         [NotMapped]
-        public virtual ICollection<AssetBacked>? AssetBackedMapped { get; set; }
+        public virtual ICollection<AssetBacked>? AssetBacked { get; set; }
         [NotMapped]
-        public virtual ICollection<RewardsBenefits>? RewardsMapped { get; set; }
+        public virtual ICollection<RewardsBenefits>? RewardsBenefits { get; set; }
 
         public virtual EFProductRequest? ProductRequest { get; set; }  // navigation
     }

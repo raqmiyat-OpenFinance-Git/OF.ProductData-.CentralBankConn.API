@@ -54,8 +54,10 @@ public static class Program
         builder.Services.AddControllers()
         .AddJsonOptions(options =>
         {
+            options.JsonSerializerOptions.PropertyNamingPolicy = null; 
             options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
         });
+
 
         var redisSettings = builder.Configuration
            .GetSection("RedisCacheSettings")

@@ -34,89 +34,156 @@ public class ProductDataService : IProductDataService
         }
     }
 
-
     public async Task AddProductResponseAsync(long id, Guid CorrelationId, List<EFProductResponse> ProductResponse, Logger logger)
     {
         try
         {
-           
-
             var ProductCategory = _context.ProductRequest!.Where(r => r.RequestId == id).Select(s => s.ProductCategory).FirstOrDefault();
-
             var response = ProductResponse.FirstOrDefault();
             if (response == null) return;
 
-            // Add parent only; EF tracks children
             _context.ProductResponse!.Add(response);
             await _context.SaveChangesAsync();
 
             if (ProductCategory?.Trim().Equals("CurrentAccount", StringComparison.OrdinalIgnoreCase) ?? false)
             {
                 var currentAccount = response.CurrentAccount!.FirstOrDefault();
+                var depositRates = response.DepositRates!.FirstOrDefault();
+                var RewardsBenefits = response.RewardsBenefits!.FirstOrDefault();
+
                 if (currentAccount == null) return;
 
                 _context.CurrentAccounts.Add(currentAccount);
                 await _context.SaveChangesAsync();
+                if (depositRates != null)
+                {
+                    depositRates.RequestId = currentAccount.RequestId; 
+                    _context.DepositRates.Add(depositRates);
+                    await _context.SaveChangesAsync();
+                }
+                if (RewardsBenefits != null)
+                {
+                    RewardsBenefits.RequestId = currentAccount.RequestId;
+                    _context.RewardsBenefits.Add(RewardsBenefits);
+                    await _context.SaveChangesAsync();
+                }
             }
             else if(ProductCategory?.Trim().Equals("SavingsAccount", StringComparison.OrdinalIgnoreCase) ?? false)
             {
                 var SavingsAccount = response.SavingsAccount!.FirstOrDefault();
+                var depositRates = response.DepositRates!.FirstOrDefault();
+                var RewardsBenefits = response.RewardsBenefits!.FirstOrDefault();
+
                 if (SavingsAccount == null) return;
 
                 _context.SavingsAccounts.Add(SavingsAccount);
                 await _context.SaveChangesAsync();
 
+                if (depositRates != null)
+                {
+                    depositRates.RequestId = SavingsAccount.RequestId;
+                    _context.DepositRates.Add(depositRates);
+                    await _context.SaveChangesAsync();
+                }
+                if (RewardsBenefits != null)
+                {
+                    RewardsBenefits.RequestId = SavingsAccount.RequestId;
+                    _context.RewardsBenefits.Add(RewardsBenefits);
+                    await _context.SaveChangesAsync();
+                }
             }
             else if(ProductCategory?.Trim().Equals("CreditCard", StringComparison.OrdinalIgnoreCase) ?? false)
             {
                 var CreditCard = response.CreditCard!.FirstOrDefault();
+                var FinanceRate = response.FinanceRates!.FirstOrDefault();
+                var tenor = response.Tenor!.FirstOrDefault();
+                var RewardsBenefits = response.RewardsBenefits!.FirstOrDefault();
                 if (CreditCard == null) return;
 
                 _context.CreditCards.Add(CreditCard);
                 await _context.SaveChangesAsync();
 
-            }
-            else if (ProductCategory?.Trim().Equals("Loan", StringComparison.OrdinalIgnoreCase) ?? false)
-            {
-                var PersonalLoan = response.PersonalLoan!.FirstOrDefault();
-                if (PersonalLoan == null) return;
+                if(FinanceRate != null)
+                {
+                    FinanceRate.RequestId = CreditCard.RequestId;
+                    _context.FinanceRates.Add(FinanceRate);
+                    await _context.SaveChangesAsync();
+                }
+                if(tenor != null)
+                {
+                    tenor.RequestId = CreditCard.RequestId;
+                    _context.Tenor.Add(tenor);
+                    await _context.SaveChangesAsync();
+                }
+                if(RewardsBenefits != null)
+                {
+                    RewardsBenefits.RequestId = CreditCard.RequestId;
+                    _context.RewardsBenefits.Add(RewardsBenefits);
+                    await _context.SaveChangesAsync();
+                }
 
-                _context.PersonalLoans.Add(PersonalLoan);
+            }
+            else if (ProductCategory?.Trim().Equals("Finance", StringComparison.OrdinalIgnoreCase) ?? false)
+            {
+                var Finance = response.Finance!.FirstOrDefault();
+                var FinanceRate = response.FinanceRates!.FirstOrDefault();
+                var tenor = response.Tenor!.FirstOrDefault();
+                var AssetBacked = response.AssetBacked!.FirstOrDefault();
+                if (Finance == null) return;
+
+                _context.Finance.Add(Finance);
                 await _context.SaveChangesAsync();
 
+                if(FinanceRate != null)
+                {
+                    FinanceRate.RequestId = Finance.RequestId;
+                    _context.FinanceRates.Add(FinanceRate);
+                    await _context.SaveChangesAsync();
+                }
+                if(tenor != null)
+                {
+                    tenor.RequestId = Finance.RequestId;
+                    _context.Tenor.Add(tenor);
+                    await _context.SaveChangesAsync();
+                }
+                if (AssetBacked != null)
+                {
+                    AssetBacked.RequestId = Finance.RequestId;
+                    _context.AssetBacked.Add(AssetBacked);
+                    await _context.SaveChangesAsync();
+                }
             }   
 
             else if (ProductCategory?.Trim().Equals("Mortgage", StringComparison.OrdinalIgnoreCase) ?? false)
             {
                 var Mortgage = response.Mortgage!.FirstOrDefault();
+                var FinanceRate = response.FinanceRates!.FirstOrDefault();
+                var tenor = response.Tenor!.FirstOrDefault();
+                var AssetBacked = response.AssetBacked!.FirstOrDefault();
                 if (Mortgage == null) return;
 
                 _context.Mortgages.Add(Mortgage);
                 await _context.SaveChangesAsync();
 
+                if (FinanceRate != null)
+                {
+                    FinanceRate.RequestId = Mortgage.RequestId;
+                    _context.FinanceRates.Add(FinanceRate);
+                    await _context.SaveChangesAsync();
+                }
+                if (tenor != null)
+                {
+                    tenor.RequestId = Mortgage.RequestId;
+                    _context.Tenor.Add(tenor);
+                    await _context.SaveChangesAsync();
+                }
+                if (AssetBacked != null)
+                {
+                    AssetBacked.RequestId = Mortgage.RequestId;
+                    _context.AssetBacked.Add(AssetBacked);
+                    await _context.SaveChangesAsync();
+                }
             }
-
-
-            //else if (ProductCategory?.Trim().Equals("DepositRates", StringComparison.OrdinalIgnoreCase) ?? false)
-            //{
-            //    var DepositRates = response.DepositRates!.FirstOrDefault();
-            //    if (DepositRates == null) return;
-
-
-            //    _context.DepositRatesModel.Add(DepositRates);
-            //    await _context.SaveChangesAsync();
-
-            //}
-
-            //else if (ProductCategory?.Trim().Equals("FixedRateMapped", StringComparison.OrdinalIgnoreCase) ?? false)
-            //{
-            //    var FinanceProfitRate = response.FixedRateMapped;
-            //    if (FinanceProfitRate == null) return;
-
-            //    _context.FixedRateMapped.Add(FinanceProfitRate);
-            //    await _context.SaveChangesAsync();
-
-            //}
             else
             {
                 var currentAccount = response.CurrentAccount!.FirstOrDefault();
@@ -125,8 +192,6 @@ public class ProductDataService : IProductDataService
                 _context.CurrentAccounts.Add(currentAccount);
                 await _context.SaveChangesAsync();
 
-
-
                 var SavingsAccount = response.SavingsAccount!.FirstOrDefault();
                 if (SavingsAccount == null) return;
 
@@ -141,10 +206,10 @@ public class ProductDataService : IProductDataService
                 await _context.SaveChangesAsync();
 
 
-                var PersonalLoan = response.PersonalLoan!.FirstOrDefault();
-                if (PersonalLoan == null) return;
+                var Finance = response.Finance!.FirstOrDefault();
+                if (Finance == null) return;
 
-                _context.PersonalLoans.Add(PersonalLoan);
+                _context.Finance.Add(Finance);
                 await _context.SaveChangesAsync();
 
 
@@ -153,21 +218,6 @@ public class ProductDataService : IProductDataService
 
                 _context.Mortgages.Add(Mortgage);
                 await _context.SaveChangesAsync();
-
-
-                //var ProfitSharingRate = response.ProfitSharingRate!.FirstOrDefault();
-                //if (ProfitSharingRate == null) return;
-
-
-                //_context.ProfitSharingRate.Add(ProfitSharingRate);
-                //await _context.SaveChangesAsync();
-
-
-                //var FinanceProfitRate = response.FinanceProfitRate!.FirstOrDefault();
-                //if (FinanceProfitRate == null) return;
-
-                //_context.FinanceProfitRate.Add(FinanceProfitRate);
-                //await _context.SaveChangesAsync();
 
             }
 
@@ -202,7 +252,7 @@ public class ProductDataService : IProductDataService
                 transaction: null
             );
 
-            result = dbResult ?? 0; // If null, set to 0 or any default you want
+            result = dbResult ?? 0; 
 
             logger.Info($"GetPostPaymentRequestsIdAsync is done. CorrelationId: {correlationId}, Result: {result}");
         }
@@ -211,7 +261,6 @@ public class ProductDataService : IProductDataService
             logger.Error(ex, $"CorrelationId: {correlationId} || An error occurred while executing GetPostPaymentRequestsIdAsync.");
             throw;
         }
-
         return result;
     }
 
@@ -223,7 +272,7 @@ public class ProductDataService : IProductDataService
             parameters.Add("@Id", id, DbType.Int64);
             parameters.Add("@Status", "PROCESSED", DbType.String);
 
-            logger.Info($"Calling OF_UpdateProductRequests with Transaction: Id={id}, Status={"PROCESSED"}");
+            logger.Info($"Calling OF_UpdateProductRequests with Product: Id={id}, Status={"PROCESSED"}");
 
             await _dbConnection.ExecuteAsync(
                 "OF_UpdateProductRequests",
@@ -241,5 +290,4 @@ public class ProductDataService : IProductDataService
             throw;
         }
     }
-
 }
