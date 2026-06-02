@@ -11,6 +11,7 @@ using OF.ProductData.Common.Custom;
 using OF.ProductData.Common.NLog;
 using OF.ProductData.Model.Common;
 using Raqmiyat.Framework.Custom;
+using System.Text.Json.Serialization;
 
 namespace OF.ProductData.CentralBankConn.API;
 
@@ -56,6 +57,8 @@ public static class Program
         {
             options.JsonSerializerOptions.PropertyNamingPolicy = null; 
             options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+            options.JsonSerializerOptions.Converters.Add(
+              new JsonStringEnumConverter());
         });
 
 
