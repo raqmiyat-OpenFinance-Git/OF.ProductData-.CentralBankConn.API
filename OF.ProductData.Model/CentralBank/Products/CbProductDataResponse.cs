@@ -129,7 +129,7 @@ public class ProductDetails
     public FinanceData? Finance { get; set; }
     public MortgageData? Mortgage { get; set; }
     public DepositRatesData? DepositRates { get; set; }
-    public FinanceRatesData? FinanceRates { get; set; }
+    public ProductFinanceRate? FinanceRates { get; set; }
     public List<Tenor>? Tenor { get; set; }
     public List<AssetBacked>? AssetBacked { get; set; }
     public List<RewardsBenefits>? RewardsBenefits { get; set; }
@@ -488,68 +488,454 @@ public class TierDetail
     public string? Currency { get; set; }
 }
 
-public class FinanceRatesData
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "RateType")]
+[JsonDerivedType(typeof(FixedInterest), "FixedInterest")]
+[JsonDerivedType(typeof(FixedProfit), "FixedProfit")]
+[JsonDerivedType(typeof(VariableInterest), "VariableInterest")]
+[JsonDerivedType(typeof(VariableProfit), "VariableProfit")]
+[JsonDerivedType(typeof(HybridInterest), "HybridInterest")]
+[JsonDerivedType(typeof(HybridProfit), "HybridProfit")]
+[JsonDerivedType(typeof(InterestRateOptions), "InterestRateOptions")]
+[JsonDerivedType(typeof(ProfitRateOptions), "ProfitRateOptions")]
+public abstract class ProductFinanceRate
 {
-    public string? RateType { get; set; }
-    public List<RateOption>? RateOption { get; set; } 
+    public FinanceRateType RateType { get; set; }
 }
-public class RateOption
+
+public abstract class FinanceRateBase : ProductFinanceRate
 {
     public AnnualPercentageRate? AnnualPercentageRate { get; set; }
+
     public List<Tier>? Tiers { get; set; }
+
     public List<Condition>? Conditions { get; set; }
+
     public string? Notes { get; set; }
+
     public List<AdditionalInformationItem>? AdditionalInformation { get; set; }
-    public RateType? RateType { get; set; }
-    public FixedRateData? FixedRate { get; set; } // Added
-    public VariableRateData? VariableRate { get; set; } // Added
 }
-public class FixedRateData
+
+public abstract class FixedRateBase : FinanceRateBase
 {
     public string? Description { get; set; }
+
     public decimal? Rate { get; set; }
+
     public DateTime? FixedRateEndDate { get; set; }
-    public string? CalculationFrequency { get; set; }
-    public string? ApplicationFrequency { get; set; }
-    public string? ProfitCalculationMethod { get; set; }
-    public AnnualPercentageRate? AnnualPercentageRate { get; set; }
-    public List<Tier>? Tiers { get; set; }
-    public List<Condition>? Conditions { get; set; }
-    public string? Notes { get; set; }
-    public List<AdditionalInformationItem>? AdditionalInformation { get; set; }
+
+    public FRCalculationFrequencyType? CalculationFrequency { get; set; }
+
+    public FRApplicationFrequencyType? ApplicationFrequency { get; set; }
+}
+
+public abstract class VariableRateBase : FinanceRateBase
+{
+    public string? Description { get; set; }
+
+    public decimal? Rate { get; set; }
+
+    public string? BenchMark { get; set; }
+
+    public decimal? BenchMarkRate { get; set; }
+
+    public decimal? Margin { get; set; }
+
+    public string? RateReviewFrequency { get; set; }
+
+    public DateTime? RateReviewNextDate { get; set; }
+
+    public FRCalculationFrequencyType? CalculationFrequency { get; set; }
+
+    public FRApplicationFrequencyType? ApplicationFrequency { get; set; }
+}
+
+public class FixedInterest : FixedRateBase
+{
+    public InterestCalculationMethodType? InterestCalculationMethod { get; set; }
+}
+
+public class FixedProfit : FixedRateBase
+{
+    public ProfitCalculationMethodType? ProfitCalculationMethod { get; set; }
+}
+
+public class VariableInterest : VariableRateBase
+{
+    public InterestCalculationMethodType? InterestCalculationMethod { get; set; }
+}
+
+public class VariableProfit : VariableRateBase
+{
+    public ProfitCalculationMethodType? ProfitCalculationMethod { get; set; }
+}
+
+public class HybridInterest : FinanceRateBase
+{
+    public FixedRateInterest? FixedRate { get; set; }
+
+    public VariableRateInterest? VariableRate { get; set; }
+}
+
+public class HybridProfit : FinanceRateBase
+{
+    public FixedRateProfit? FixedRate { get; set; }
+
+    public VariableRateProfit? VariableRate { get; set; }
+}
+
+public class FixedRateInterest : FixedRateBase
+{
+    public InterestCalculationMethodType? InterestCalculationMethod { get; set; }
+
     public string? FixedRateEnd { get; set; }
+}
+
+public class VariableRateInterest : VariableRateBase
+{
+    public InterestCalculationMethodType? InterestCalculationMethod { get; set; }
+
+    public string? VariableTerm { get; set; }
+}
+
+public class FixedRateProfit : FixedRateBase
+{
+    public ProfitCalculationMethodType? ProfitCalculationMethod { get; set; }
+
+    public string? FixedRateEnd { get; set; }
+}
+
+public class VariableRateProfit : VariableRateBase
+{
+    public ProfitCalculationMethodType? ProfitCalculationMethod { get; set; }
+
+    public string? VariableTerm { get; set; }
+}
+
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "RateType")]
+[JsonDerivedType(typeof(FixedInterestRateOption), "FixedInterest")]
+[JsonDerivedType(typeof(VariableInterestRateOption), "VariableInterest")]
+[JsonDerivedType(typeof(HybridInterestRateOption), "HybridInterest")]
+public abstract class InterestRateOptionBase
+{
+    public FinanceRateType? RateType { get; set; }
+}
+
+public class InterestRateOptions : ProductFinanceRate
+{
+    public List<InterestRateOptionBase>? RateOptions { get; set; }
+}
+
+public class FixedInterestRateOption : InterestRateOptionBase
+{
+    public string? Description { get; set; }
+
+    public decimal? Rate { get; set; }
+
+    public DateTime? FixedRateEndDate { get; set; }
+
+    public FRCalculationFrequencyType? CalculationFrequency { get; set; }
+
+    public FRApplicationFrequencyType? ApplicationFrequency { get; set; }
+
+    public InterestCalculationMethodType? InterestCalculationMethod { get; set; }
+
+    public AnnualPercentageRate? AnnualPercentageRate { get; set; }
+
+    public List<Tier>? Tiers { get; set; }
+
+    public List<Condition>? Conditions { get; set; }
+
+    public string? Notes { get; set; }
+
+    public List<AdditionalInformationItem>? AdditionalInformation { get; set; }
+
     public List<IntroductoryPeriodOptions>? IntroductoryPeriodOptions { get; set; }
 }
+
+public class VariableInterestRateOption : InterestRateOptionBase
+{
+    public string? Description { get; set; }
+
+    public decimal? Rate { get; set; }
+
+    public string? BenchMark { get; set; }
+
+    public decimal? BenchMarkRate { get; set; }
+
+    public decimal? Margin { get; set; }
+
+    public string? RateReviewFrequency { get; set; }
+
+    public DateTime? RateReviewNextDate { get; set; }
+
+    public FRCalculationFrequencyType? CalculationFrequency { get; set; }
+
+    public FRApplicationFrequencyType? ApplicationFrequency { get; set; }
+
+    public InterestCalculationMethodType? InterestCalculationMethod { get; set; }
+
+    public AnnualPercentageRate? AnnualPercentageRate { get; set; }
+
+    public List<Tier>? Tiers { get; set; }
+
+    public List<Condition>? Conditions { get; set; }
+
+    public string? Notes { get; set; }
+
+    public List<AdditionalInformationItem>? AdditionalInformation { get; set; }
+}
+
+public class HybridInterestRateOption : InterestRateOptionBase
+{
+    public AnnualPercentageRate? AnnualPercentageRate { get; set; }
+
+    public List<Tier>? Tiers { get; set; }
+
+    public List<Condition>? Conditions { get; set; }
+
+    public string? Notes { get; set; }
+
+    public List<AdditionalInformationItem>? AdditionalInformation { get; set; }
+
+    public HybridIntroductoryFixedInterest? FixedRate { get; set; }
+
+    public VariableRateInterestOption? VariableRate { get; set; }
+}
+
+public class HybridIntroductoryFixedInterest
+{
+    public string? Description { get; set; }
+
+    public decimal? Rate { get; set; }
+
+    public DateTime? FixedRateEndDate { get; set; }
+
+    public FRCalculationFrequencyType? CalculationFrequency { get; set; }
+
+    public FRApplicationFrequencyType? ApplicationFrequency { get; set; }
+
+    public InterestCalculationMethodType? InterestCalculationMethod { get; set; }
+
+    public AnnualPercentageRate? AnnualPercentageRate { get; set; }
+
+    public List<Tier>? Tiers { get; set; }
+
+    public List<Condition>? Conditions { get; set; }
+
+    public string? Notes { get; set; }
+
+    public List<AdditionalInformationItem>? AdditionalInformation { get; set; }
+
+    public string? FixedRateEnd { get; set; }
+
+    public List<IntroductoryPeriodOptions>? IntroductoryPeriodOptions { get; set; }
+}
+
+public class VariableRateInterestOption
+{
+    public string? Description { get; set; }
+
+    public decimal? Rate { get; set; }
+
+    public string? BenchMark { get; set; }
+
+    public decimal? BenchMarkRate { get; set; }
+
+    public decimal? Margin { get; set; }
+
+    public string? RateReviewFrequency { get; set; }
+
+    public DateTime? RateReviewNextDate { get; set; }
+
+    public FRCalculationFrequencyType? CalculationFrequency { get; set; }
+
+    public FRApplicationFrequencyType? ApplicationFrequency { get; set; }
+
+    public InterestCalculationMethodType? InterestCalculationMethod { get; set; }
+
+    public AnnualPercentageRate? AnnualPercentageRate { get; set; }
+
+    public List<Tier>? Tiers { get; set; }
+
+    public List<Condition>? Conditions { get; set; }
+
+    public string? Notes { get; set; }
+
+    public List<AdditionalInformationItem>? AdditionalInformation { get; set; }
+
+    public string? VariableTerm { get; set; }
+}
+
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "RateType")]
+[JsonDerivedType(typeof(FixedProfitRateOption), "FixedProfit")]
+[JsonDerivedType(typeof(VariableProfitRateOption), "VariableProfit")]
+[JsonDerivedType(typeof(HybridProfitRateOption), "HybridProfit")]
+public abstract class ProfitRateOptionBase
+{
+    public FinanceRateType? RateType { get; set; }
+}
+
+public class ProfitRateOptions : ProductFinanceRate
+{
+    public List<ProfitRateOptionBase>? RateOptions { get; set; }
+}
+
+public class FixedProfitRateOption : ProfitRateOptionBase
+{
+    public string? Description { get; set; }
+
+    public decimal? Rate { get; set; }
+
+    public DateTime? FixedRateEndDate { get; set; }
+
+    public FRCalculationFrequencyType? CalculationFrequency { get; set; }
+
+    public FRApplicationFrequencyType? ApplicationFrequency { get; set; }
+
+    public ProfitCalculationMethodType? ProfitCalculationMethod { get; set; }
+
+    public AnnualPercentageRate? AnnualPercentageRate { get; set; }
+
+    public List<Tier>? Tiers { get; set; }
+
+    public List<Condition>? Conditions { get; set; }
+
+    public string? Notes { get; set; }
+
+    public List<AdditionalInformationItem>? AdditionalInformation { get; set; }
+
+    public List<IntroductoryPeriodOptions>? IntroductoryPeriodOptions { get; set; }
+}
+
+public class VariableProfitRateOption : ProfitRateOptionBase
+{
+    public string? Description { get; set; }
+
+    public decimal? Rate { get; set; }
+
+    public string? BenchMark { get; set; }
+
+    public decimal? BenchMarkRate { get; set; }
+
+    public decimal? Margin { get; set; }
+
+    public string? RateReviewFrequency { get; set; }
+
+    public DateTime? RateReviewNextDate { get; set; }
+
+    public FRCalculationFrequencyType? CalculationFrequency { get; set; }
+
+    public FRApplicationFrequencyType? ApplicationFrequency { get; set; }
+
+    public ProfitCalculationMethodType? ProfitCalculationMethod { get; set; }
+
+    public AnnualPercentageRate? AnnualPercentageRate { get; set; }
+
+    public List<Tier>? Tiers { get; set; }
+
+    public List<Condition>? Conditions { get; set; }
+
+    public string? Notes { get; set; }
+
+    public List<AdditionalInformationItem>? AdditionalInformation { get; set; }
+}
+
+public class HybridProfitRateOption : ProfitRateOptionBase
+{
+    public AnnualPercentageRate? AnnualPercentageRate { get; set; }
+
+    public List<Tier>? Tiers { get; set; }
+
+    public List<Condition>? Conditions { get; set; }
+
+    public string? Notes { get; set; }
+
+    public List<AdditionalInformationItem>? AdditionalInformation { get; set; }
+
+    public HybridIntroductoryFixedProfit? FixedRate { get; set; }
+
+    public VariableRateProfitOption? VariableRate { get; set; }
+}
+
+public class HybridIntroductoryFixedProfit
+{
+    public string? Description { get; set; }
+
+    public decimal? Rate { get; set; }
+
+    public DateTime? FixedRateEndDate { get; set; }
+
+    public FRCalculationFrequencyType? CalculationFrequency { get; set; }
+
+    public FRApplicationFrequencyType? ApplicationFrequency { get; set; }
+
+    public ProfitCalculationMethodType? ProfitCalculationMethod { get; set; }
+
+    public AnnualPercentageRate? AnnualPercentageRate { get; set; }
+
+    public List<Tier>? Tiers { get; set; }
+
+    public List<Condition>? Conditions { get; set; }
+
+    public string? Notes { get; set; }
+
+    public List<AdditionalInformationItem>? AdditionalInformation { get; set; }
+
+    public string? FixedRateEnd { get; set; }
+
+    public List<IntroductoryPeriodOptions>? IntroductoryPeriodOptions { get; set; }
+}
+
+public class VariableRateProfitOption
+{
+    public string? Description { get; set; }
+
+    public decimal? Rate { get; set; }
+
+    public string? BenchMark { get; set; }
+
+    public decimal? BenchMarkRate { get; set; }
+
+    public decimal? Margin { get; set; }
+
+    public string? RateReviewFrequency { get; set; }
+
+    public DateTime? RateReviewNextDate { get; set; }
+
+    public FRCalculationFrequencyType? CalculationFrequency { get; set; }
+
+    public FRApplicationFrequencyType? ApplicationFrequency { get; set; }
+
+    public ProfitCalculationMethodType? ProfitCalculationMethod { get; set; }
+
+    public AnnualPercentageRate? AnnualPercentageRate { get; set; }
+
+    public List<Tier>? Tiers { get; set; }
+
+    public List<Condition>? Conditions { get; set; }
+
+    public string? Notes { get; set; }
+
+    public List<AdditionalInformationItem>? AdditionalInformation { get; set; }
+
+    public string? VariableTerm { get; set; }
+}
+
 public class IntroductoryPeriodOptions
 {
     public string? Period { get; set; }
+
     public IndicativeRate? IndicativeRate { get; set; }
 }
+
 public class IndicativeRate
 {
     public decimal? StartingFrom { get; set; }
+
     public decimal? UpTo { get; set; }
 }
 
-public class VariableRateData
-{
-    public string? Description { get; set; }
-    public decimal? Rate { get; set; }
-    public string? BenchMark { get; set; }
-    public decimal? BenchMarkRate { get; set; }
-    public decimal? Margin { get; set; }
-    public string? RateReviewFrequency { get; set; }
-    public DateTime? RateReviewNextDate { get; set; }
-    public string? CalculationFrequency { get; set; }
-    public string? ApplicationFrequency { get; set; }
-    public string? ProfitCalculationMethod { get; set; }
-    public AnnualPercentageRate? AnnualPercentageRate { get; set; }
-    public List<Tier>? Tiers { get; set; }
-    public List<Condition>? Conditions { get; set; }
-    public string? Notes { get; set; }
-    public List<AdditionalInformationItem>? AdditionalInformation { get; set; }
-    public string? VariableTerm { get; set; }
-}
+
 public class AnnualPercentageRate
 {
     public string? StartingFrom { get; set; }
@@ -558,39 +944,11 @@ public class AnnualPercentageRate
 
     public string? AdditionalInformation { get; set; }
 }
-public class RateTiers
-{
-    public List<RateTier>? TierList { get; set; }
-}
-public class RateConditions
-{
-    public string? Description { get; set; }
-}
-
-public class AdditionalRateInformation
-{
-    public string? Details { get; set; }
-}
-
-public class RateTier
-{
-    public decimal FromAmount { get; set; }
-
-    public decimal ToAmount { get; set; }
-
-    public decimal Rate { get; set; }
-}
 
 public class AnnualRateRange
 {
     public decimal MinRate { get; set; }
     public decimal MaxRate { get; set; }
-}
-public class Tiers
-{
-    public string MinBalance { get; set; } = string.Empty;
-    public string MaxBalance { get; set; } = string.Empty;
-    public string Currency { get; set; } = string.Empty;
 }
 public class Tenor
 {

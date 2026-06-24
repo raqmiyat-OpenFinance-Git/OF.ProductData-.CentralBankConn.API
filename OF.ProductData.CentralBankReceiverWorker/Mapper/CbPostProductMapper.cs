@@ -393,151 +393,373 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
                 }
             };
         }
-        public static ICollection<FinanceRates> MapFinanaceRate(FinanceRatesData src, long paymentRequestId)
+
+        public static ICollection<FinanceRates> MapFinanaceRate(ProductFinanceRate src, long paymentRequestId)
         {
-            var rateOption = src?.RateOption?.FirstOrDefault();
-            var tier = rateOption?.Tiers?.FirstOrDefault();
-            var balanceTier = tier?.BalanceTierDetails?.FirstOrDefault();
-            var LvtTier = tier?.LTVTierDetails?.FirstOrDefault();
+            if (src == null)
+                return null;
 
-            var FixedTier = rateOption?.FixedRate?.Tiers?.FirstOrDefault();
-            var FixedbalanceTier = FixedTier?.BalanceTierDetails?.FirstOrDefault();
-            var FixedLvtTier = FixedTier?.LTVTierDetails?.FirstOrDefault();
-            var FixedIntroductoryPeriodOptions = rateOption?.FixedRate?.IntroductoryPeriodOptions?.FirstOrDefault();
-
-            var VariableTiers = rateOption?.VariableRate?.Tiers?.FirstOrDefault();
-            var VariablebalanceTier = VariableTiers?.BalanceTierDetails?.FirstOrDefault();
-            var VariableLvtTier = VariableTiers?.LTVTierDetails?.FirstOrDefault();
-
-            var Conditions = rateOption?.Conditions?.FirstOrDefault();
-            var Additionalinfo = rateOption?.AdditionalInformation?.FirstOrDefault();
-
-            if (src == null) return null;
             var finance = new FinanceRates
             {
-
                 RequestId = paymentRequestId,
-                FinanceRateType = src?.RateType,
-                RateOption_RateType = rateOption?.RateType.ToString(),
-                APR_StartingFrom = rateOption?.AnnualPercentageRate?.StartingFrom,
-                APR_UpTo = rateOption?.AnnualPercentageRate?.UpTo,
-                APR_AdditionalInformation = rateOption?.AnnualPercentageRate?.AdditionalInformation,
-                Tier_Name = tier?.Name,
-                Tier_Unit = tier?.Unit?.ToString(),
-                Tier_ApplicationMethod = tier?.ApplicationMethod?.ToString(),
-
-                // Balance
-                Balance_MinAmount = balanceTier?.MinimumTierValue?.Amount,
-                Balance_MinCurrency = balanceTier?.MinimumTierValue?.Currency,
-                Balance_MaxCurrency = balanceTier?.MinimumTierValue?.Currency,
-                Balance_MaxAmount = balanceTier?.MaximumTierValue?.Amount,
-                Balance_TierRate = balanceTier?.TierRate,
-                // LTVTierDetails
-                LTV_Start = LvtTier?.LTVStart,
-                LTV_End = LvtTier?.LTVEnd,
-                LTV_TierRate = LvtTier?.TierRate,
-
-                RateRange_MaxRate = tier?.RateRange?.MaximumRate,
-                RateRange_MinRate = tier?.RateRange?.MinimumRate,
-                RateRange_AdditionalInformation = tier?.RateRange?.AdditionalInformation,
-                Condition_Field = Conditions?.Field,
-                Condition_Description = Conditions?.Description,
-                Condition_Operator = Conditions?.Operator,
-                Condition_Value = Conditions?.Value,
-                Notes = rateOption?.Notes,
-                AddInfo_Type = Additionalinfo?.Type.ToString(),
-                AddInfo_Description = Additionalinfo?.Description
-
+                FinanceRateType = src.RateType.ToString(),
+                RateOption_RateType = src.RateType.ToString()
             };
-            if (rateOption?.FixedRate != null && src?.RateType?.Contains("Fixed", StringComparison.OrdinalIgnoreCase) == true)
+
+            switch (src)
             {
-                finance.Fixed_Description = rateOption.FixedRate.Description;
-                finance.Fixed_Rate = rateOption.FixedRate.Rate;
-                finance.Fixed_EndDate = rateOption.FixedRate.FixedRateEndDate;
-                finance.Fixed_CalculationFrequency = rateOption.FixedRate.CalculationFrequency;
-                finance.Fixed_ApplicationFrequency = rateOption.FixedRate.ApplicationFrequency;
-                finance.Fixed_ProfitCalculationMethod = rateOption.FixedRate.ProfitCalculationMethod;
+                // ================= FIXED INTEREST =================
+                case FixedInterest fixedInterest:
+                    MapBaseFinanceRate(finance, fixedInterest);
 
-                finance.Fixed_APR_StartingFrom = rateOption.FixedRate.AnnualPercentageRate?.StartingFrom?.ToString();
-                finance.Fixed_APR_UpTo = rateOption.FixedRate.AnnualPercentageRate?.UpTo;
-                finance.Fixed_APR_AdditionalInformation = rateOption.FixedRate.AnnualPercentageRate?.AdditionalInformation;
-                finance.Fixed_Tier_Name = FixedTier?.Name;
-                finance.Fixed_Tier_Unit = FixedTier?.Unit?.ToString();
-                finance.Fixed_Tier_ApplicationMethod = FixedTier?.ApplicationMethod?.ToString();
+                    finance.Fixed_Description = fixedInterest.Description;
+                    finance.Fixed_Rate = fixedInterest.Rate;
+                    finance.Fixed_EndDate = fixedInterest.FixedRateEndDate;
+                    finance.Fixed_CalculationFrequency = fixedInterest.CalculationFrequency?.ToString();
+                    finance.Fixed_ApplicationFrequency = fixedInterest.ApplicationFrequency?.ToString();
+                    finance.Fixed_ProfitCalculationMethod = fixedInterest.InterestCalculationMethod?.ToString();
+                    break;
 
-                // Balance
-                finance.Fixed_Balance_MinAmount = FixedbalanceTier?.MinimumTierValue?.Amount;
-                finance.Fixed_Balance_MaxAmount = FixedbalanceTier?.MaximumTierValue?.Amount;
-                finance.Fixed_Balance_MinCurrency = balanceTier?.MinimumTierValue?.Currency;
-                finance.Fixed_Balance_MaxCurrency = balanceTier?.MaximumTierValue?.Currency;
-                finance.Fixed_Balance_TierRate = FixedbalanceTier?.TierRate;
-                // LTVTierDetails
-                finance.Fixed_LTV_Start = FixedLvtTier?.LTVStart;
-                finance.Fixed_LTV_End = FixedLvtTier?.LTVEnd;
-                finance.Fixed_LTV_TierRate = FixedLvtTier?.TierRate;
+                // ================= FIXED PROFIT =================
+                case FixedProfit fixedProfit:
+                    MapBaseFinanceRate(finance, fixedProfit);
 
-                finance.Fixed_RateRange_MaxRate = FixedTier?.RateRange?.MaximumRate;
-                finance.Fixed_RateRange_MinRate = FixedTier?.RateRange?.MinimumRate;
-                finance.Fixed_RateRange_AdditionalInformation = FixedTier?.RateRange?.AdditionalInformation;
-                finance.Fixed_Condition_Field = Conditions?.Field;
-                finance.Fixed_Condition_Description = Conditions?.Description;
-                finance.Fixed_Condition_Operator = Conditions?.Operator;
-                finance.Fixed_Condition_Value = Conditions?.Value;
-                finance.Notes = rateOption?.Notes;
-                finance.Fixed_AddInfo_Type = Additionalinfo?.Type.ToString();
-                finance.Fixed_AddInfo_Description = Additionalinfo?.Description;
-                finance.FixedRateEnd = rateOption?.FixedRate.FixedRateEnd;
-                finance.Intro_Period = FixedIntroductoryPeriodOptions?.Period;
-                finance.Intro_Indicative_Start = FixedIntroductoryPeriodOptions?.IndicativeRate?.StartingFrom;
-                finance.Intro_Indicative_End = FixedIntroductoryPeriodOptions?.IndicativeRate?.UpTo;
+                    finance.Fixed_Description = fixedProfit.Description;
+                    finance.Fixed_Rate = fixedProfit.Rate;
+                    finance.Fixed_EndDate = fixedProfit.FixedRateEndDate;
+                    finance.Fixed_CalculationFrequency = fixedProfit.CalculationFrequency?.ToString();
+                    finance.Fixed_ApplicationFrequency = fixedProfit.ApplicationFrequency?.ToString();
+                    finance.Fixed_ProfitCalculationMethod = fixedProfit.ProfitCalculationMethod?.ToString();
+                    break;
+
+                // ================= VARIABLE INTEREST =================
+                case VariableInterest variableInterest:
+                    MapBaseFinanceRate(finance, variableInterest);
+
+                    finance.Variable_Description = variableInterest.Description;
+                    finance.Variable_Rate = variableInterest.Rate;
+                    finance.Variable_CalculationFrequency = variableInterest.CalculationFrequency?.ToString();
+                    finance.Variable_ApplicationFrequency = variableInterest.ApplicationFrequency?.ToString();
+                    finance.Variable_Benchmark = variableInterest.BenchMark;
+                    finance.Variable_BenchmarkRate = variableInterest.BenchMarkRate;
+                    finance.Variable_Margin = variableInterest.Margin;
+                    finance.Variable_ProfitCalculationMethod = variableInterest.InterestCalculationMethod?.ToString();
+
+                    finance.Variable_ReviewFrequency = variableInterest.RateReviewFrequency;
+                    finance.Variable_ReviewNextDate = variableInterest.RateReviewNextDate;
+                    break;
+
+                // ================= VARIABLE PROFIT =================
+                case VariableProfit variableProfit:
+                    MapBaseFinanceRate(finance, variableProfit);
+
+                    finance.Variable_Description = variableProfit.Description;
+                    finance.Variable_Rate = variableProfit.Rate;
+                    finance.Variable_CalculationFrequency = variableProfit.CalculationFrequency?.ToString();
+                    finance.Variable_ApplicationFrequency = variableProfit.ApplicationFrequency?.ToString();
+                    finance.Variable_Benchmark = variableProfit.BenchMark;
+                    finance.Variable_BenchmarkRate = variableProfit.BenchMarkRate;
+                    finance.Variable_Margin = variableProfit.Margin;
+                    finance.Variable_ProfitCalculationMethod = variableProfit.ProfitCalculationMethod?.ToString();
+
+                    finance.Variable_ReviewFrequency = variableProfit.RateReviewFrequency;
+                    finance.Variable_ReviewNextDate = variableProfit.RateReviewNextDate;
+                    break;
+
+                // ================= HYBRID INTEREST =================
+                case HybridInterest hybridInterest:
+                    MapBaseFinanceRate(finance, hybridInterest);
+
+                    if (hybridInterest.FixedRate != null)
+                    {
+                        var fixedTier = hybridInterest.FixedRate.Tiers?.FirstOrDefault();
+                        var fixedBalance = fixedTier?.BalanceTierDetails?.FirstOrDefault();
+                        var fixedLtv = fixedTier?.LTVTierDetails?.FirstOrDefault();
+                        var fixedCondition = hybridInterest.FixedRate.Conditions?.FirstOrDefault();
+                        var fixedAddInfo = hybridInterest.FixedRate.AdditionalInformation?.FirstOrDefault();
+
+                        finance.Fixed_Description = hybridInterest.FixedRate.Description;
+                        finance.Fixed_Rate = hybridInterest.FixedRate.Rate;
+                        finance.Fixed_EndDate = hybridInterest.FixedRate.FixedRateEndDate;
+                        finance.Fixed_CalculationFrequency = hybridInterest.FixedRate.CalculationFrequency?.ToString();
+                        finance.Fixed_ApplicationFrequency = hybridInterest.FixedRate.ApplicationFrequency?.ToString();
+                        finance.Fixed_ProfitCalculationMethod = hybridInterest.FixedRate.InterestCalculationMethod?.ToString();
+                        finance.FixedRateEnd = hybridInterest.FixedRate.FixedRateEnd;
+
+                        finance.Fixed_APR_StartingFrom = hybridInterest.FixedRate.AnnualPercentageRate?.StartingFrom;
+                        finance.Fixed_APR_UpTo = hybridInterest.FixedRate.AnnualPercentageRate?.UpTo;
+                        finance.Fixed_APR_AdditionalInformation = hybridInterest.FixedRate.AnnualPercentageRate?.AdditionalInformation;
+
+                        finance.Fixed_Tier_Name = fixedTier?.Name;
+                        finance.Fixed_Tier_Unit = fixedTier?.Unit?.ToString();
+                        finance.Fixed_Tier_ApplicationMethod = fixedTier?.ApplicationMethod?.ToString();
+
+                        finance.Fixed_Balance_MinAmount = fixedBalance?.MinimumTierValue?.Amount;
+                        finance.Fixed_Balance_MaxAmount = fixedBalance?.MaximumTierValue?.Amount;
+                        finance.Fixed_Balance_MinCurrency = fixedBalance?.MinimumTierValue?.Currency;
+                        finance.Fixed_Balance_MaxCurrency = fixedBalance?.MaximumTierValue?.Currency;
+                        finance.Fixed_Balance_TierRate = fixedBalance?.TierRate;
+
+                        finance.Fixed_LTV_Start = fixedLtv?.LTVStart;
+                        finance.Fixed_LTV_End = fixedLtv?.LTVEnd;
+                        finance.Fixed_LTV_TierRate = fixedLtv?.TierRate;
+
+                        finance.Fixed_Condition_Field = fixedCondition?.Field;
+                        finance.Fixed_Condition_Operator = fixedCondition?.Operator;
+                        finance.Fixed_Condition_Value = fixedCondition?.Value;
+                        finance.Fixed_Condition_Description = fixedCondition?.Description;
+
+                        finance.Fixed_AddInfo_Type = fixedAddInfo?.Type?.ToString();
+                        finance.Fixed_AddInfo_Description = fixedAddInfo?.Description;
+
+                        finance.Fixed_RateRange_MinRate = fixedTier?.RateRange?.MinimumRate;
+                        finance.Fixed_RateRange_MaxRate = fixedTier?.RateRange?.MaximumRate;
+                        finance.Fixed_RateRange_AdditionalInformation = fixedTier?.RateRange?.AdditionalInformation;
+                    }
+
+                    if (hybridInterest.VariableRate != null)
+                    {
+                        var variableTier = hybridInterest.VariableRate.Tiers?.FirstOrDefault();
+                        var variableBalance = variableTier?.BalanceTierDetails?.FirstOrDefault();
+                        var variableLtv = variableTier?.LTVTierDetails?.FirstOrDefault();
+                        var variableCondition = hybridInterest.VariableRate.Conditions?.FirstOrDefault();
+                        var variableAddInfo = hybridInterest.VariableRate.AdditionalInformation?.FirstOrDefault();
+
+                        finance.Variable_Description = hybridInterest.VariableRate.Description;
+                        finance.Variable_Rate = hybridInterest.VariableRate.Rate;
+                        finance.Variable_CalculationFrequency = hybridInterest.VariableRate.CalculationFrequency?.ToString();
+                        finance.Variable_ApplicationFrequency = hybridInterest.VariableRate.ApplicationFrequency?.ToString();
+                        finance.Variable_Benchmark = hybridInterest.VariableRate.BenchMark;
+                        finance.Variable_BenchmarkRate = hybridInterest.VariableRate.BenchMarkRate;
+                        finance.Variable_Margin = hybridInterest.VariableRate.Margin;
+                        finance.Variable_ProfitCalculationMethod = hybridInterest.VariableRate.InterestCalculationMethod?.ToString();
+                        finance.Variable_Term = hybridInterest.VariableRate.VariableTerm;
+
+                        finance.Variable_ReviewFrequency = hybridInterest.VariableRate.RateReviewFrequency;
+                        finance.Variable_ReviewNextDate = hybridInterest.VariableRate.RateReviewNextDate;
+
+                        finance.Variable_APR_StartingFrom = hybridInterest.VariableRate.AnnualPercentageRate?.StartingFrom;
+                        finance.Variable_APR_UpTo = hybridInterest.VariableRate.AnnualPercentageRate?.UpTo;
+                        finance.Variable_APR_AdditionalInformation = hybridInterest.VariableRate.AnnualPercentageRate?.AdditionalInformation;
+
+                        finance.Variable_Tier_Name = variableTier?.Name;
+                        finance.Variable_Tier_Unit = variableTier?.Unit?.ToString();
+                        finance.Variable_Tier_ApplicationMethod = variableTier?.ApplicationMethod?.ToString();
+
+                        finance.Variable_Balance_MinAmount = variableBalance?.MinimumTierValue?.Amount;
+                        finance.Variable_Balance_MaxAmount = variableBalance?.MaximumTierValue?.Amount;
+                        finance.Variable_Balance_MinCurrency = variableBalance?.MinimumTierValue?.Currency;
+                        finance.Variable_Balance_MaxCurrency = variableBalance?.MaximumTierValue?.Currency;
+                        finance.Variable_Balance_TierRate = variableBalance?.TierRate;
+
+                        finance.Variable_LTV_Start = variableLtv?.LTVStart;
+                        finance.Variable_LTV_End = variableLtv?.LTVEnd;
+                        finance.Variable_LTV_TierRate = variableLtv?.TierRate;
+
+                        finance.Variable_RateRange_MinRate = variableTier?.RateRange?.MinimumRate;
+                        finance.Variable_RateRange_MaxRate = variableTier?.RateRange?.MaximumRate;
+                        finance.Variable_RateRange_AdditionalInformation = variableTier?.RateRange?.AdditionalInformation;
+
+                        finance.Variable_Condition_Field = variableCondition?.Field;
+                        finance.Variable_Condition_Operator = variableCondition?.Operator;
+                        finance.Variable_Condition_Value = variableCondition?.Value;
+                        finance.Variable_Condition_Description = variableCondition?.Description;
+
+                        finance.Variable_AddInfo_Type = variableAddInfo?.Type?.ToString();
+                        finance.Variable_AddInfo_Description = variableAddInfo?.Description;
+                    }
+                    break;
+
+                // ================= HYBRID PROFIT =================
+                case HybridProfit hybridProfit:
+                    MapBaseFinanceRate(finance, hybridProfit);
+
+                    if (hybridProfit.FixedRate != null)
+                    {
+                        finance.Fixed_Description = hybridProfit.FixedRate.Description;
+                        finance.Fixed_Rate = hybridProfit.FixedRate.Rate;
+                        finance.Fixed_EndDate = hybridProfit.FixedRate.FixedRateEndDate;
+                        finance.Fixed_CalculationFrequency = hybridProfit.FixedRate.CalculationFrequency?.ToString();
+                        finance.Fixed_ApplicationFrequency = hybridProfit.FixedRate.ApplicationFrequency?.ToString();
+                        finance.Fixed_ProfitCalculationMethod = hybridProfit.FixedRate.ProfitCalculationMethod?.ToString();
+                        finance.FixedRateEnd = hybridProfit.FixedRate.FixedRateEnd;
+                    }
+
+                    if (hybridProfit.VariableRate != null)
+                    {
+                        finance.Variable_Description = hybridProfit.VariableRate.Description;
+                        finance.Variable_Rate = hybridProfit.VariableRate.Rate;
+                        finance.Variable_CalculationFrequency = hybridProfit.VariableRate.CalculationFrequency?.ToString();
+                        finance.Variable_ApplicationFrequency = hybridProfit.VariableRate.ApplicationFrequency?.ToString();
+                        finance.Variable_Benchmark = hybridProfit.VariableRate.BenchMark;
+                        finance.Variable_BenchmarkRate = hybridProfit.VariableRate.BenchMarkRate;
+                        finance.Variable_Margin = hybridProfit.VariableRate.Margin;
+                        finance.Variable_ProfitCalculationMethod = hybridProfit.VariableRate.ProfitCalculationMethod?.ToString();
+                        finance.Variable_Term = hybridProfit.VariableRate.VariableTerm;
+                    }
+                    break;
+
+                // ================= INTEREST RATE OPTIONS =================
+                case InterestRateOptions interestOptions:
+                    var interestOption = interestOptions.RateOptions?.FirstOrDefault();
+
+                    switch (interestOption)
+                    {
+                        case FixedInterestRateOption fixedOption:
+                            var tier = fixedOption.Tiers?.FirstOrDefault();
+                            var balance = tier?.BalanceTierDetails?.FirstOrDefault();
+                            var ltv = tier?.LTVTierDetails?.FirstOrDefault();
+                            var condition = fixedOption.Conditions?.FirstOrDefault();
+                            var addInfo = fixedOption.AdditionalInformation?.FirstOrDefault();
+                            var intro = fixedOption.IntroductoryPeriodOptions?.FirstOrDefault();
+
+                            finance.Fixed_Description = fixedOption.Description;
+                            finance.Fixed_Rate = fixedOption.Rate;
+                            finance.Fixed_EndDate = fixedOption.FixedRateEndDate;
+                            finance.Fixed_CalculationFrequency = fixedOption.CalculationFrequency?.ToString();
+                            finance.Fixed_ApplicationFrequency = fixedOption.ApplicationFrequency?.ToString();
+                            finance.Fixed_ProfitCalculationMethod = fixedOption.InterestCalculationMethod?.ToString();
+
+                            // APR
+                            finance.Fixed_APR_StartingFrom = fixedOption.AnnualPercentageRate?.StartingFrom;
+                            finance.Fixed_APR_UpTo = fixedOption.AnnualPercentageRate?.UpTo;
+                            finance.Fixed_APR_AdditionalInformation = fixedOption.AnnualPercentageRate?.AdditionalInformation;
+
+                            // Tier
+                            finance.Fixed_Tier_Name = tier?.Name;
+                            finance.Fixed_Tier_Unit = tier?.Unit?.ToString();
+                            finance.Fixed_Tier_ApplicationMethod = tier?.ApplicationMethod?.ToString();
+
+                            // Balance Tier
+                            finance.Fixed_Balance_MinAmount = balance?.MinimumTierValue?.Amount;
+                            finance.Fixed_Balance_MinCurrency = balance?.MinimumTierValue?.Currency;
+                            finance.Fixed_Balance_MaxAmount = balance?.MaximumTierValue?.Amount;
+                            finance.Fixed_Balance_MaxCurrency = balance?.MaximumTierValue?.Currency;
+                            finance.Fixed_Balance_TierRate = balance?.TierRate;
+
+                            // LTV Tier
+                            finance.Fixed_LTV_Start = ltv?.LTVStart;
+                            finance.Fixed_LTV_End = ltv?.LTVEnd;
+                            finance.Fixed_LTV_TierRate = ltv?.TierRate;
+
+                            // Rate Range
+                            finance.Fixed_RateRange_MinRate = tier?.RateRange?.MinimumRate;
+                            finance.Fixed_RateRange_MaxRate = tier?.RateRange?.MaximumRate;
+                            finance.Fixed_RateRange_AdditionalInformation =
+                                tier?.RateRange?.AdditionalInformation;
+
+                            // Condition
+                            finance.Fixed_Condition_Field = condition?.Field;
+                            finance.Fixed_Condition_Operator = condition?.Operator;
+                            finance.Fixed_Condition_Value = condition?.Value;
+                            finance.Fixed_Condition_Description = condition?.Description;
+
+                            // Additional Info
+                            finance.Fixed_AddInfo_Type = addInfo?.Type?.ToString();
+                            finance.Fixed_AddInfo_Description = addInfo?.Description;
+
+                            // Notes
+                            finance.Notes = fixedOption.Notes;
+
+                            // Introductory Period
+                            finance.Intro_Period = intro?.Period;
+                            finance.Intro_Indicative_Start = intro?.IndicativeRate?.StartingFrom;
+                            finance.Intro_Indicative_End = intro?.IndicativeRate?.UpTo;
+                            break;
+
+                        case VariableInterestRateOption variableOption:
+                            finance.Variable_Description = variableOption.Description;
+                            finance.Variable_Rate = variableOption.Rate;
+                            finance.Variable_Benchmark = variableOption.BenchMark;
+                            finance.Variable_BenchmarkRate = variableOption.BenchMarkRate;
+                            finance.Variable_Margin = variableOption.Margin;
+
+                            finance.Variable_ReviewFrequency = variableOption.RateReviewFrequency;
+                            finance.Variable_ReviewNextDate = variableOption.RateReviewNextDate;
+                            break;
+
+                        case HybridInterestRateOption hybridOption:
+                            finance.Fixed_Description = hybridOption.FixedRate?.Description;
+                            finance.Variable_Description = hybridOption.VariableRate?.Description;
+                            break;
+                    }
+                    break;
+
+                // ================= PROFIT RATE OPTIONS =================
+                case ProfitRateOptions profitOptions:
+                    var profitOption = profitOptions.RateOptions?.FirstOrDefault();
+
+                    switch (profitOption)
+                    {
+                        case FixedProfitRateOption fixedOption:
+                            finance.Fixed_Description = fixedOption.Description;
+                            finance.Fixed_Rate = fixedOption.Rate;
+                            finance.Fixed_EndDate = fixedOption.FixedRateEndDate;
+                            finance.Fixed_CalculationFrequency = fixedOption.CalculationFrequency?.ToString();
+                            finance.Fixed_ApplicationFrequency = fixedOption.ApplicationFrequency?.ToString();
+                            finance.Fixed_ProfitCalculationMethod = fixedOption.ProfitCalculationMethod?.ToString();
+                            break;
+
+                        case VariableProfitRateOption variableOption:
+                            finance.Variable_Description = variableOption.Description;
+                            finance.Variable_Rate = variableOption.Rate;
+                            finance.Variable_Benchmark = variableOption.BenchMark;
+                            finance.Variable_BenchmarkRate = variableOption.BenchMarkRate;
+                            finance.Variable_Margin = variableOption.Margin;
+                            break;
+
+                        case HybridProfitRateOption hybridOption:
+                            finance.Fixed_Description = hybridOption.FixedRate?.Description;
+                            finance.Variable_Description = hybridOption.VariableRate?.Description;
+                            break;
+                    }
+                    break;
             }
-            // 🔹 VARIABLE
-            else if (rateOption?.VariableRate != null)  
-            {
-                finance.Variable_Description = rateOption.VariableRate.Description;
-                finance.Variable_Rate = rateOption.VariableRate.Rate;
 
-                finance.Variable_CalculationFrequency = rateOption.VariableRate.CalculationFrequency;
-                finance.Variable_ApplicationFrequency = rateOption.VariableRate.ApplicationFrequency;
-                finance.Variable_ProfitCalculationMethod = rateOption.VariableRate.ProfitCalculationMethod;
-                finance.Variable_Benchmark = rateOption.VariableRate.BenchMark;
-                finance.Variable_BenchmarkRate = rateOption.VariableRate.BenchMarkRate;
-                finance.Variable_Margin = rateOption.VariableRate.Margin;
-
-                finance.Variable_APR_StartingFrom = rateOption.VariableRate.AnnualPercentageRate?.StartingFrom?.ToString();
-                finance.Variable_APR_UpTo = rateOption.VariableRate.AnnualPercentageRate?.UpTo;
-                finance.Variable_APR_AdditionalInformation = rateOption?.VariableRate?.AnnualPercentageRate?.AdditionalInformation;
-
-                finance.Variable_Tier_Name = VariableTiers?.Name;
-                finance.Variable_Tier_Unit = VariableTiers?.Unit?.ToString();
-                finance.Variable_Tier_ApplicationMethod = VariableTiers?.ApplicationMethod?.ToString();
-
-                // Balance
-                finance.Variable_Balance_MinAmount = VariablebalanceTier?.MinimumTierValue?.Amount;
-                finance.Variable_Balance_MaxAmount = VariablebalanceTier?.MaximumTierValue?.Amount;
-                finance.Variable_Balance_MinCurrency = balanceTier?.MinimumTierValue?.Currency;
-                finance.Variable_Balance_MaxCurrency = balanceTier?.MaximumTierValue?.Currency;
-                finance.Variable_Balance_TierRate = VariablebalanceTier?.TierRate;
-                // LTVTierDetails
-                finance.Variable_LTV_Start = VariableLvtTier?.LTVStart;
-                finance.Variable_LTV_End = VariableLvtTier?.LTVEnd;
-                finance.Variable_LTV_TierRate = VariableLvtTier?.TierRate;
-
-                finance.Variable_RateRange_MaxRate = VariableTiers?.RateRange?.MaximumRate;
-                finance.Variable_RateRange_MinRate = VariableTiers?.RateRange?.MinimumRate;
-                finance.Variable_RateRange_AdditionalInformation = VariableTiers?.RateRange?.AdditionalInformation;
-                finance.Variable_Condition_Field = Conditions?.Field;
-                finance.Variable_Condition_Description = Conditions?.Description;
-                finance.Variable_Condition_Operator = Conditions?.Operator;
-                finance.Variable_Condition_Value = Conditions?.Value;
-                finance.Notes = rateOption?.Notes;
-                finance.Variable_AddInfo_Type = Additionalinfo?.Type.ToString();
-                finance.Variable_AddInfo_Description = Additionalinfo?.Description;
-                finance.Variable_Term = rateOption?.VariableRate.VariableTerm;
-            }
             return new List<FinanceRates> { finance };
-
         }
+
+        private static void MapBaseFinanceRate(FinanceRates finance, FinanceRateBase baseRate)
+        {
+            var tier = baseRate.Tiers?.FirstOrDefault();
+            var balanceTier = tier?.BalanceTierDetails?.FirstOrDefault();
+            var ltvTier = tier?.LTVTierDetails?.FirstOrDefault();
+            var condition = baseRate.Conditions?.FirstOrDefault();
+            var additionalInfo = baseRate.AdditionalInformation?.FirstOrDefault();
+
+            finance.APR_StartingFrom = baseRate.AnnualPercentageRate?.StartingFrom;
+            finance.APR_UpTo = baseRate.AnnualPercentageRate?.UpTo;
+            finance.APR_AdditionalInformation = baseRate.AnnualPercentageRate?.AdditionalInformation;
+
+            finance.Tier_Name = tier?.Name;
+            finance.Tier_Unit = tier?.Unit?.ToString();
+            finance.Tier_ApplicationMethod = tier?.ApplicationMethod?.ToString();
+
+            finance.Balance_MinAmount = balanceTier?.MinimumTierValue?.Amount;
+            finance.Balance_MinCurrency = balanceTier?.MinimumTierValue?.Currency;
+            finance.Balance_MaxAmount = balanceTier?.MaximumTierValue?.Amount;
+            finance.Balance_MaxCurrency = balanceTier?.MaximumTierValue?.Currency;
+            finance.Balance_TierRate = balanceTier?.TierRate;
+
+            finance.LTV_Start = ltvTier?.LTVStart;
+            finance.LTV_End = ltvTier?.LTVEnd;
+            finance.LTV_TierRate = ltvTier?.TierRate;
+
+            finance.RateRange_MaxRate = tier?.RateRange?.MaximumRate;
+            finance.RateRange_MinRate = tier?.RateRange?.MinimumRate;
+            finance.RateRange_AdditionalInformation = tier?.RateRange?.AdditionalInformation;
+
+            finance.Condition_Field = condition?.Field;
+            finance.Condition_Description = condition?.Description;
+            finance.Condition_Operator = condition?.Operator;
+            finance.Condition_Value = condition?.Value;
+
+            finance.Notes = baseRate.Notes;
+
+            finance.AddInfo_Type = additionalInfo?.Type?.ToString();
+            finance.AddInfo_Description = additionalInfo?.Description;
+        }
+
         public static ICollection<OF.ProductData.Model.EFModel.Products.Tenor> MapTenor(ProductData.Model.CentralBank.Products.Tenor src, long paymentRequestId)
         {
             if (src == null)

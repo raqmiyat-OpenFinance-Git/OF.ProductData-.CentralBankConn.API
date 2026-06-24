@@ -374,8 +374,42 @@ public enum RateType
     VariableInterest,
     VariableProfit
 }
+public enum FinanceRateType
+{
+    FixedInterest,
+    FixedProfit,
+    VariableInterest,
+    VariableProfit,
+    HybridInterest,
+    HybridProfit,
+    InterestRateOptions,
+    ProfitRateOptions
+}
+
+public enum FRCalculationFrequencyType
+{
+    Monthly,
+    Daily,
+    Quarterly,
+    Annually,
+}
+
+public enum FRApplicationFrequencyType
+{
+    Monthly,
+    Daily,
+    Quarterly,
+    Annually,
+}
 
 public enum InterestCalculationMethodType
+{
+    PrincipalBalance,
+    OutstandingBalance,
+    InitialDrawdownAmount
+}
+
+public enum ProfitCalculationMethodType
 {
     PrincipalBalance,
     OutstandingBalance,

@@ -553,194 +553,113 @@ public class ProductDataService : IProductDataService
                     };
 
                     // Applicable optional sections for CreditCard
-                    productDetails.FinanceRates = new FinanceRatesData
+                    productDetails.FinanceRates = new InterestRateOptions
                     {
-                        RateType = RateType.FixedInterest.ToString(),
+                        RateType = FinanceRateType.InterestRateOptions,
 
-                        RateOption = new List<RateOption>
+                        RateOptions = new List<InterestRateOptionBase>
                         {
-                           new RateOption
-                    {
-                    RateType = RateType.FixedInterest,
-                         AnnualPercentageRate = new AnnualPercentageRate
-                        {
-                            StartingFrom = "12.0",
-                            UpTo = 15.0m,
-                            AdditionalInformation = "Fixed period APR"
-                        },
-
-                        Tiers = new List<Tier>
-                        {
-                            new Tier
+                            new FixedInterestRateOption
                             {
-                                Name = "Fixed Tier",
-                                Unit = TierUnitType.Balance,
-                                ApplicationMethod = ApplicationMethodType.PerTier,
+                                RateType = FinanceRateType.FixedInterest,
 
-                                BalanceTierDetails = new List<BalanceTierDetail>
+                                Description = "Introductory purchase rate",
+                                Rate = 0.0m,
+                                FixedRateEndDate = DateTime.UtcNow.AddMonths(6),
+
+                                CalculationFrequency = FRCalculationFrequencyType.Monthly,
+                                ApplicationFrequency = FRApplicationFrequencyType.Monthly,
+                                InterestCalculationMethod = InterestCalculationMethodType.OutstandingBalance,
+
+                                AnnualPercentageRate = new AnnualPercentageRate
                                 {
-                                    new BalanceTierDetail
+                                    StartingFrom = "0.0",
+                                    UpTo = 0.0m,
+                                    AdditionalInformation = "0% introductory APR"
+                                },
+
+                                Tiers = new List<Tier>
+                                {
+                                    new Tier
                                     {
-                                        MinimumTierValue = new MoneyAmount { Amount = "10", Currency = "AED" },
-                                        MaximumTierValue = new MoneyAmount { Amount = "500000", Currency = "AED" },
-                                        TierRate = 13.5m
+                                        Name = "Balance Tier",
+                                        Unit = TierUnitType.Balance,
+                                        ApplicationMethod = ApplicationMethodType.PerTier,
+
+                                        BalanceTierDetails = new List<BalanceTierDetail>
+                                        {
+                                            new BalanceTierDetail
+                                            {
+                                                MinimumTierValue = new MoneyAmount
+                                                {
+                                                    Amount = "1000",
+                                                    Currency = "AED"
+                                                },
+                                                MaximumTierValue = new MoneyAmount
+                                                {
+                                                    Amount = "100000",
+                                                    Currency = "AED"
+                                                },
+                                                TierRate = 0.0m
+                                            }
+                                        },
+
+                                        LTVTierDetails = new List<LTVTierDetail>
+                                        {
+                                            new LTVTierDetail
+                                            {
+                                                LTVStart = 0.20m,
+                                                LTVEnd = 0.80m,
+                                                TierRate = 0.0m
+                                            }
+                                        },
+
+                                        RateRange = new RateRange
+                                        {
+                                            MinimumRate = 0.0m,
+                                            MaximumRate = 5.0m,
+                                            AdditionalInformation = "Promotional range"
+                                        }
                                     }
                                 },
-                                LTVTierDetails=new List<LTVTierDetail>
+
+                                Conditions = new List<Condition>
                                 {
-                                    new LTVTierDetail
+                                    new Condition
                                     {
-                                        LTVStart=0.5m,
-                                        LTVEnd=0.5m,
-                                        TierRate=0.5m
+                                        Field = "CreditScore",
+                                        Operator = ">=",
+                                        Value = "700",
+                                        Description = "Applicable to premium customers"
                                     }
                                 },
-                                RateRange = new RateRange()
+
+                                Notes = "Introductory rate valid for first 6 months",
+
+                                AdditionalInformation = new List<AdditionalInformationItem>
                                 {
-                                    MinimumRate=0.5m,
-                                    MaximumRate=0.5m,
-                                     AdditionalInformation = "Fixed promotional rate for selected customers"
+                                    new AdditionalInformationItem
+                                    {
+                                        Type = AdditionalInformationType.Other,
+                                        Description = "Additional information for introductory rate"
+                                    }
+                                },
+
+                                IntroductoryPeriodOptions = new List<IntroductoryPeriodOptions>
+                                {
+                                    new IntroductoryPeriodOptions
+                                    {
+                                        Period = "P6M",
+
+                                        IndicativeRate = new IndicativeRate
+                                        {
+                                            StartingFrom = 0.0m,
+                                            UpTo = 0.0m
+                                        }
+                                    }
                                 }
                             }
-                        },
-                   // ✅ FIXED RATE
-                    FixedRate = new FixedRateData
-                    {
-                        Description = "Fixed interest for initial period",
-                        Rate = RandomRate(12.0m, 15.0m),
-                        FixedRateEndDate = DateTime.UtcNow.AddYears(2),
-
-                        CalculationFrequency = "Monthly",
-                        ApplicationFrequency = "Monthly",
-                        ProfitCalculationMethod = InterestCalculationMethodType.OutstandingBalance.ToString(),
-
-                        AnnualPercentageRate = new AnnualPercentageRate
-                        {
-                            StartingFrom = "12.0",
-                            UpTo = 15.0m,
-                            AdditionalInformation = "Fixed period APR"
-                        },
-
-                        Tiers = new List<Tier>
-                        {
-                            new Tier
-                            {
-                                Name = "Fixed Tier",
-                                Unit = TierUnitType.Balance,
-                                ApplicationMethod = ApplicationMethodType.PerTier,
-
-                                BalanceTierDetails = new List<BalanceTierDetail>
-                                {
-                                    new BalanceTierDetail
-                                    {
-                                        MinimumTierValue = new MoneyAmount { Amount = "10", Currency = "AED" },
-                                        MaximumTierValue = new MoneyAmount { Amount = "500000", Currency = "AED" },
-                                        TierRate = 13.5m
-                                    }
-                                },
-                                LTVTierDetails=new List<LTVTierDetail>
-                                {
-                                    new LTVTierDetail
-                                    {
-                                        LTVStart=0.5m,
-                                        LTVEnd=0.5m,
-                                        TierRate=0.5m
-                                    }
-                                },
-                                RateRange = new RateRange()
-                                {
-                                    MinimumRate=0.5m,
-                                    MaximumRate=0.5m,
-                                     AdditionalInformation = "Fixed promotional rate for selected customers"
-                                }
-                            }
-                        },
-                        FixedRateEnd= "2028-12-31",
-                    },
-
-                    // ✅ VARIABLE RATE
-                    VariableRate = new VariableRateData
-                    {
-                        Description = "Variable interest after fixed period",
-                        Rate = RandomRate(15.0m, 22.0m),
-                        BenchMark = "EIBOR",
-                        BenchMarkRate = RandomRate(10.0m, 15.0m),
-                        Margin = RandomRate(2.0m, 4.0m),
-
-                        RateReviewFrequency = "P6M",
-                        RateReviewNextDate = DateTime.UtcNow.AddMonths(6),
-
-                        CalculationFrequency = "Monthly",
-                        ApplicationFrequency = "Monthly",
-                        ProfitCalculationMethod = InterestCalculationMethodType.OutstandingBalance.ToString(),
-
-                        AnnualPercentageRate = new AnnualPercentageRate
-                        {
-                            StartingFrom = "12.0",
-                            UpTo = 22.0m,
-                            AdditionalInformation = "Variable APR"
-                        },
-
-                        Tiers = new List<Tier>
-                        {
-                            new Tier
-                            {
-                                Name = "Variable Tier",
-                                Unit = TierUnitType.Balance,
-                                ApplicationMethod = ApplicationMethodType.PerTier,
-
-                                BalanceTierDetails = new List<BalanceTierDetail>
-                                {
-                                    new BalanceTierDetail
-                                    {
-                                        MinimumTierValue = new MoneyAmount { Amount= "10", Currency = "AED" },
-                                        MaximumTierValue = new MoneyAmount { Amount = "500000", Currency = "AED" },
-                                        TierRate = 18.5m
-                                    }
-                                },
-                                 LTVTierDetails=new List<LTVTierDetail>
-                                {
-                                    new LTVTierDetail
-                                    {
-                                        LTVStart=0.5m,
-                                        LTVEnd=0.5m,
-                                        TierRate=0.5m
-                                    }
-                                },
-                                RateRange = new RateRange()
-                                {
-                                    MinimumRate=0.5m,
-                                    MaximumRate=0.5m,
-                                     AdditionalInformation = "Fixed promotional rate for selected customers"
-                                }
-                            }
-                        },
-
-                        VariableTerm = "P2Y3M"
-                    },
-
-                    // ✅ COMMON
-                    Conditions = new List<Condition>
-                    {
-                        new Condition
-                        {
-                            Field = "CreditScore",
-                            Operator = ">=",
-                            Value = "700",
-                            Description = "Better rates for high credit score"
                         }
-                    },
-                    Notes="string",
-                    AdditionalInformation = new List<AdditionalInformationItem>
-                    {
-                        new AdditionalInformationItem
-                        {
-                            Type = AdditionalInformationType.Other,
-                            Description = "Hybrid loan: fixed + variable"
-                        }
-                    }
-        }
-    }
                     };
                     productDetails.Tenor = new List<Tenor> { new Tenor { MinimumTenor = "P1M", MaximumTenor = "P12M", Condition = "Instalment plans available" } };
                     productDetails.RewardsBenefits = new List<RewardsBenefits> { new RewardsBenefits { Name = "Reward Points", Description = "Cashback rewards on every transaction", Type = RewardBenefitType.Points, RewardBasis = new List<string> { "Every AED 1 spent" } } };
@@ -765,79 +684,23 @@ public class ProductDataService : IProductDataService
                     };
 
                     // Applicable optional sections for Finance
-                    productDetails.FinanceRates = new FinanceRatesData
+                    productDetails.FinanceRates = new HybridInterest
                     {
-                        RateType = RateType.FixedInterest.ToString(),
-
-                        RateOption = new List<RateOption>
-                        {
-                           new RateOption
-                    {
-                    RateType = RateType.FixedInterest,
-                         AnnualPercentageRate = new AnnualPercentageRate
-                        {
-                            StartingFrom = "12.0",
-                            UpTo = 15.0m,
-                            AdditionalInformation = "Fixed period APR"
-                        },
-
-                        Tiers = new List<Tier>
-                        {
-                            new Tier
-                            {
-                                Name = "Fixed Tier",
-                                Unit = TierUnitType.Balance,
-                                ApplicationMethod = ApplicationMethodType.PerTier,
-
-                                BalanceTierDetails = new List<BalanceTierDetail>
-                                {
-                                    new BalanceTierDetail
-                                    {
-                                        MinimumTierValue = new MoneyAmount { Amount = "10", Currency = "AED" },
-                                        MaximumTierValue = new MoneyAmount { Amount = "500000", Currency = "AED" },
-                                        TierRate = 13.5m
-                                    }
-                                },
-                                LTVTierDetails=new List<LTVTierDetail>
-                                {
-                                    new LTVTierDetail
-                                    {
-                                        LTVStart=0.5m,
-                                        LTVEnd=0.5m,
-                                        TierRate=0.5m
-                                    }
-                                },
-                                RateRange = new RateRange()
-                                {
-                                    MinimumRate=0.5m,
-                                    MaximumRate=0.5m,
-                                     AdditionalInformation = "Fixed promotional rate for selected customers"
-                                }
-                            }
-                        },
-                   // ✅ FIXED RATE
-                    FixedRate = new FixedRateData
-                    {
-                        Description = "Fixed interest for initial period",
-                        Rate = RandomRate(12.0m, 15.0m),
-                        FixedRateEndDate = DateTime.UtcNow.AddYears(2),
-
-                        CalculationFrequency = "Monthly",
-                        ApplicationFrequency = "Monthly",
-                        ProfitCalculationMethod = InterestCalculationMethodType.OutstandingBalance.ToString(),
+                        RateType = FinanceRateType.HybridInterest,
+                        Notes = "2 years fixed followed by variable interest",
 
                         AnnualPercentageRate = new AnnualPercentageRate
                         {
-                            StartingFrom = "12.0",
-                            UpTo = 15.0m,
-                            AdditionalInformation = "Fixed period APR"
+                            StartingFrom = "12.5",
+                            UpTo = 18.0m,
+                            AdditionalInformation = "Overall hybrid finance rate"
                         },
 
                         Tiers = new List<Tier>
                         {
                             new Tier
                             {
-                                Name = "Fixed Tier",
+                                Name = "Hybrid Tier",
                                 Unit = TierUnitType.Balance,
                                 ApplicationMethod = ApplicationMethodType.PerTier,
 
@@ -845,93 +708,39 @@ public class ProductDataService : IProductDataService
                                 {
                                     new BalanceTierDetail
                                     {
-                                        MinimumTierValue = new MoneyAmount { Amount= "10", Currency = "AED" },
-                                        MaximumTierValue = new MoneyAmount { Amount = "500000", Currency = "AED" },
-                                        TierRate = 13.5m
+                                        MinimumTierValue = new MoneyAmount
+                                        {
+                                            Amount = "10000",
+                                            Currency = "AED"
+                                        },
+                                        MaximumTierValue = new MoneyAmount
+                                        {
+                                            Amount = "1000000",
+                                            Currency = "AED"
+                                        },
+                                        TierRate = 15m
                                     }
                                 },
-                                LTVTierDetails=new List<LTVTierDetail>
+
+                                LTVTierDetails = new List<LTVTierDetail>
                                 {
                                     new LTVTierDetail
                                     {
-                                        LTVStart=0.5m,
-                                        LTVEnd=0.5m,
-                                        TierRate=0.5m
+                                        LTVStart = 0.50m,
+                                        LTVEnd = 0.80m,
+                                        TierRate = 15m
                                     }
                                 },
-                                RateRange = new RateRange()
+
+                                RateRange = new RateRange
                                 {
-                                    MinimumRate=0.5m,
-                                    MaximumRate=0.5m,
-                                     AdditionalInformation = "Fixed promotional rate for selected customers"
-                                }
-                            }
-                        },
-                        FixedRateEnd= "2028-12-31",
-                    },
-
-                    // ✅ VARIABLE RATE
-                    VariableRate = new VariableRateData
-                    {
-                        Description = "Variable interest after fixed period",
-                        Rate = RandomRate(15.0m, 22.0m),
-                        BenchMark = "EIBOR",
-                        BenchMarkRate = RandomRate(10.0m, 15.0m),
-                        Margin = RandomRate(2.0m, 4.0m),
-
-                        RateReviewFrequency = "P6M",
-                        RateReviewNextDate = DateTime.UtcNow.AddMonths(6),
-
-                        CalculationFrequency = "Monthly",
-                        ApplicationFrequency = "Monthly",
-                        ProfitCalculationMethod = InterestCalculationMethodType.OutstandingBalance.ToString(),
-
-                        AnnualPercentageRate = new AnnualPercentageRate
-                        {
-                            StartingFrom = "12.0",
-                            UpTo = 22.0m,
-                            AdditionalInformation = "Variable APR"
-                        },
-
-                        Tiers = new List<Tier>
-                        {
-                            new Tier
-                            {
-                                Name = "Variable Tier",
-                                Unit = TierUnitType.Balance,
-                                ApplicationMethod = ApplicationMethodType.PerTier,
-
-                                BalanceTierDetails = new List<BalanceTierDetail>
-                                {
-                                    new BalanceTierDetail
-                                    {
-                                        MinimumTierValue = new MoneyAmount { Amount = "10", Currency = "AED" },
-                                        MaximumTierValue = new MoneyAmount { Amount = "500000", Currency = "AED" },
-                                        TierRate = 18.5m
-                                    }
-                                },
-                                 LTVTierDetails=new List<LTVTierDetail>
-                                {
-                                    new LTVTierDetail
-                                    {
-                                        LTVStart=0.5m,
-                                        LTVEnd=0.5m,
-                                        TierRate=0.5m
-                                    }
-                                },
-                                RateRange = new RateRange()
-                                {
-                                    MinimumRate=0.5m,
-                                    MaximumRate=0.5m,
-                                     AdditionalInformation = "Fixed promotional rate for selected customers"
+                                    MinimumRate = 12.5m,
+                                    MaximumRate = 18m,
+                                    AdditionalInformation = "Hybrid rate range"
                                 }
                             }
                         },
 
-                        VariableTerm = "P2Y3M"
-                    },
-
-                        // ✅ COMMON
                         Conditions = new List<Condition>
                         {
                             new Condition
@@ -939,20 +748,188 @@ public class ProductDataService : IProductDataService
                                 Field = "CreditScore",
                                 Operator = ">=",
                                 Value = "700",
-                                Description = "Better rates for high credit score"
+                                Description = "Applicable for preferred customers"
                             }
                         },
-                        Notes="string",
+
                         AdditionalInformation = new List<AdditionalInformationItem>
                         {
                             new AdditionalInformationItem
                             {
                                 Type = AdditionalInformationType.Other,
-                                Description = "Hybrid loan: fixed + variable"
+                                Description = "Hybrid product additional information"
+                            }
+                        },
+
+                        FixedRate = new FixedRateInterest
+                        {
+                            Description = "Fixed interest for first 2 years",
+                            Rate = 13.5m,
+                            FixedRateEndDate = DateTime.UtcNow.AddYears(2),
+                            CalculationFrequency = FRCalculationFrequencyType.Monthly,
+                            ApplicationFrequency = FRApplicationFrequencyType.Monthly,
+                            InterestCalculationMethod = InterestCalculationMethodType.OutstandingBalance,
+                            FixedRateEnd = "Moves to variable rate after fixed period",
+
+                            AnnualPercentageRate = new AnnualPercentageRate
+                            {
+                                StartingFrom = "13.0",
+                                UpTo = 14.0m,
+                                AdditionalInformation = "Fixed period APR"
+                            },
+
+                            Tiers = new List<Tier>
+                            {
+                                new Tier
+                                {
+                                    Name = "Fixed Tier",
+                                    Unit = TierUnitType.Balance,
+                                    ApplicationMethod = ApplicationMethodType.PerTier,
+
+                                    BalanceTierDetails = new List<BalanceTierDetail>
+                                    {
+                                        new BalanceTierDetail
+                                        {
+                                            MinimumTierValue = new MoneyAmount
+                                            {
+                                                Amount = "10000",
+                                                Currency = "AED"
+                                            },
+                                            MaximumTierValue = new MoneyAmount
+                                            {
+                                                Amount = "500000",
+                                                Currency = "AED"
+                                            },
+                                            TierRate = 13.5m
+                                        }
+                                    },
+
+                                    LTVTierDetails = new List<LTVTierDetail>
+                                    {
+                                        new LTVTierDetail
+                                        {
+                                            LTVStart = 0.50m,
+                                            LTVEnd = 0.75m,
+                                            TierRate = 13.5m
+                                        }
+                                    },
+
+                                    RateRange = new RateRange
+                                    {
+                                        MinimumRate = 13.0m,
+                                        MaximumRate = 14.0m,
+                                        AdditionalInformation = "Fixed rate range"
+                                    }
+                                }
+                            },
+
+                            Conditions = new List<Condition>
+                            {
+                                new Condition
+                                {
+                                    Field = "Salary",
+                                    Operator = ">=",
+                                    Value = "15000",
+                                    Description = "Salary criteria for fixed period"
+                                }
+                            },
+
+                            AdditionalInformation = new List<AdditionalInformationItem>
+                            {
+                                new AdditionalInformationItem
+                                {
+                                    Type = AdditionalInformationType.Other,
+                                    Description = "Fixed interest additional info"
+                                }
+                            }
+                        },
+
+                        VariableRate = new VariableRateInterest
+                        {
+                            Description = "Variable interest after fixed term",
+                            Rate = 16.5m,
+                            BenchMark = "EIBOR",
+                            BenchMarkRate = 12.0m,
+                            Margin = 4.5m,
+                            RateReviewFrequency = "P6M",
+                            RateReviewNextDate = DateTime.UtcNow.AddMonths(6),
+                            CalculationFrequency = FRCalculationFrequencyType.Monthly,
+                            ApplicationFrequency = FRApplicationFrequencyType.Monthly,
+                            InterestCalculationMethod = InterestCalculationMethodType.OutstandingBalance,
+                            VariableTerm = "P5Y",
+
+                            AnnualPercentageRate = new AnnualPercentageRate
+                            {
+                                StartingFrom = "15.5",
+                                UpTo = 18.0m,
+                                AdditionalInformation = "Variable period APR"
+                            },
+
+                            Tiers = new List<Tier>
+                            {
+                                new Tier
+                                {
+                                    Name = "Variable Tier",
+                                    Unit = TierUnitType.Balance,
+                                    ApplicationMethod = ApplicationMethodType.PerTier,
+
+                                    BalanceTierDetails = new List<BalanceTierDetail>
+                                    {
+                                        new BalanceTierDetail
+                                        {
+                                            MinimumTierValue = new MoneyAmount
+                                            {
+                                                Amount = "10000",
+                                                Currency = "AED"
+                                            },
+                                            MaximumTierValue = new MoneyAmount
+                                            {
+                                                Amount = "1000000",
+                                                Currency = "AED"
+                                            },
+                                            TierRate = 16.5m
+                                        }
+                                    },
+
+                                    LTVTierDetails = new List<LTVTierDetail>
+                                    {
+                                        new LTVTierDetail
+                                        {
+                                            LTVStart = 0.75m,
+                                            LTVEnd = 0.90m,
+                                            TierRate = 16.5m
+                                        }
+                                    },
+
+                                    RateRange = new RateRange
+                                    {
+                                        MinimumRate = 15.5m,
+                                        MaximumRate = 18.0m,
+                                        AdditionalInformation = "Variable rate range"
+                                    }
+                                }
+                            },
+
+                            Conditions = new List<Condition>
+                            {
+                                new Condition
+                                {
+                                    Field = "EmploymentType",
+                                    Operator = "==",
+                                    Value = "Permanent",
+                                    Description = "Variable rate eligibility"
+                                }
+                            },
+
+                            AdditionalInformation = new List<AdditionalInformationItem>
+                            {
+                                new AdditionalInformationItem
+                                {
+                                    Type = AdditionalInformationType.Other,
+                                    Description = "Variable interest additional info"
+                                }
                             }
                         }
-        }
-    }
                     };
                     productDetails.Tenor = new List<Tenor> { new Tenor { MinimumTenor = "P1Y", MaximumTenor = "P5Y", Condition = "Flexible repayment terms" } };
                     productDetails.AssetBacked = new List<AssetBacked>
@@ -1041,73 +1018,21 @@ public class ProductDataService : IProductDataService
                     };
 
                     // Applicable optional sections for Mortgage
-                    productDetails.FinanceRates = new FinanceRatesData
+                    productDetails.FinanceRates = new FixedInterest
                     {
-                        RateType = RateType.FixedInterest.ToString(),
-
-                        RateOption = new List<RateOption>
-                        {
-                           new RateOption
-                    {
-                    RateType = RateType.FixedInterest,
-                         AnnualPercentageRate = new AnnualPercentageRate
-                        {
-                            StartingFrom = "12.0",
-                            UpTo = 15.0m,
-                            AdditionalInformation = "Fixed period APR"
-                        },
-
-                        Tiers = new List<Tier>
-                        {
-                            new Tier
-                            {
-                                Name = "Fixed Tier",
-                                Unit = TierUnitType.Balance,
-                                ApplicationMethod = ApplicationMethodType.PerTier,
-                                BalanceTierDetails = new List<BalanceTierDetail>
-                                {
-                                    new BalanceTierDetail
-                                    {
-                                        MinimumTierValue = new MoneyAmount { Amount = "10", Currency = "AED" },
-                                        MaximumTierValue = new MoneyAmount { Amount = "500000", Currency = "AED" },
-                                        TierRate = 13.9m
-                                    }
-                                },
-                                LTVTierDetails=new List<LTVTierDetail>
-                                {
-                                    new LTVTierDetail
-                                    {
-                                        LTVStart=0.5m,
-                                        LTVEnd=0.5m,
-                                        TierRate=0.5m
-                                    }
-                                },
-                                RateRange = new RateRange()
-                                {
-                                    MinimumRate=0.5m,
-                                    MaximumRate=0.5m,
-                                     AdditionalInformation = "Fixed promotional rate for selected customers"
-                                }
-                            }
-                        },
-                   // ✅ FIXED RATE
-                    FixedRate = new FixedRateData
-                    {
-                        Description = "Fixed interest for initial period",
-                        Rate = RandomRate(12.0m, 15.0m),
-                        FixedRateEndDate = DateTime.UtcNow.AddYears(2),
-
-                        CalculationFrequency = "Monthly",
-                        ApplicationFrequency = "Monthly",
-                        ProfitCalculationMethod = InterestCalculationMethodType.OutstandingBalance.ToString(),
-
+                        RateType = FinanceRateType.FixedInterest,
+                        Description = "Fixed mortgage interest rate",
+                        Rate = 3.49m,
+                        FixedRateEndDate = DateTime.UtcNow.AddYears(5),
+                        CalculationFrequency = FRCalculationFrequencyType.Monthly,
+                        ApplicationFrequency = FRApplicationFrequencyType.Monthly,
+                        InterestCalculationMethod = InterestCalculationMethodType.OutstandingBalance,
                         AnnualPercentageRate = new AnnualPercentageRate
                         {
-                            StartingFrom = "12.0",
-                            UpTo = 15.0m,
-                            AdditionalInformation = "Fixed period APR"
+                            StartingFrom = "3.25",
+                            UpTo = 4.25m,
+                            AdditionalInformation = "Fixed mortgage APR"
                         },
-
                         Tiers = new List<Tier>
                         {
                             new Tier
@@ -1142,103 +1067,25 @@ public class ProductDataService : IProductDataService
                                 }
                             }
                         },
-                        FixedRateEnd= "2028-12-31",
-                        IntroductoryPeriodOptions = new List<IntroductoryPeriodOptions>
+                        Conditions = new List<Condition>
                         {
-                           new IntroductoryPeriodOptions
-                           {
-                                Period = "P2Y3M",
-                                IndicativeRate = new IndicativeRate
-                                {
-                                    StartingFrom = 2.1m,
-                                    UpTo = 3.05m
-                                }
-                           } 
-                        }
-                    },
-                    // ✅ VARIABLE RATE
-                    VariableRate = new VariableRateData
-                    {
-                        Description = "Variable interest after fixed period",
-                        Rate = RandomRate(15.0m, 22.0m),
-                        BenchMark = "EIBOR",
-                        BenchMarkRate = RandomRate(10.0m, 15.0m),
-                        Margin = RandomRate(2.0m, 4.0m),
-
-                        RateReviewFrequency = "P6M",
-                        RateReviewNextDate = DateTime.UtcNow.AddMonths(6),
-
-                        CalculationFrequency = "Monthly",
-                        ApplicationFrequency = "Monthly",
-                        ProfitCalculationMethod = InterestCalculationMethodType.OutstandingBalance.ToString(),
-
-                        AnnualPercentageRate = new AnnualPercentageRate
-                        {
-                            StartingFrom = "12.0",
-                            UpTo = 22.0m,
-                            AdditionalInformation = "Variable APR"
-                        },
-
-                        Tiers = new List<Tier>
-                        {
-                            new Tier
+                            new Condition
                             {
-                                Name = "Variable Tier",
-                                Unit = TierUnitType.Balance,
-                                ApplicationMethod = ApplicationMethodType.PerTier,
-
-                                BalanceTierDetails = new List<BalanceTierDetail>
-                                {
-                                    new BalanceTierDetail
-                                    {
-                                        MinimumTierValue = new MoneyAmount { Amount = "10", Currency = "AED" },
-                                        MaximumTierValue = new MoneyAmount { Amount = "500000", Currency = "AED" },
-                                        TierRate = 18.5m
-                                    }
-                                },
-                                 LTVTierDetails=new List<LTVTierDetail>
-                                {
-                                    new LTVTierDetail
-                                    {
-                                        LTVStart=0.5m,
-                                        LTVEnd=0.5m,
-                                        TierRate=0.5m
-                                    }
-                                },
-                                RateRange = new RateRange()
-                                {
-                                    MinimumRate=0.5m,
-                                    MaximumRate=0.5m,
-                                     AdditionalInformation = "Fixed promotional rate for selected customers"
-                                }
+                                Field = "CreditScore",
+                                Operator = ">=",
+                                Value = "700",
+                                Description = "Better rates for high credit score"
                             }
                         },
-
-                        VariableTerm = "P2Y3M"
-                    },
-
-                   // ✅ COMMON
-                    Conditions = new List<Condition>
-                    {
-                        new Condition
+                        AdditionalInformation = new List<AdditionalInformationItem>
                         {
-                            Field = "CreditScore",
-                            Operator = ">=",
-                            Value = "700",
-                            Description = "Better rates for high credit score"
-                        }
-                    },
-                    Notes="string",
-                    AdditionalInformation = new List<AdditionalInformationItem>
-                    {
-                        new AdditionalInformationItem
-                        {
-                            Type = AdditionalInformationType.Other,
-                            Description = "Hybrid loan: fixed + variable"
-                        }
-                    }
-        }
-    }
+                            new AdditionalInformationItem()
+                            {
+                                Description = "Additional Info : Fixed Interest Rate",
+                                Type = AdditionalInformationType.Other,
+                            }
+                        },
+                        Notes = "5 year fixed mortgage product"
                     };
                     productDetails.Tenor = new List<Tenor> { new Tenor { MinimumTenor = "P5Y", MaximumTenor = "P25Y", Condition = "Subject to approval" } };
                     productDetails.AssetBacked = new List<AssetBacked>
