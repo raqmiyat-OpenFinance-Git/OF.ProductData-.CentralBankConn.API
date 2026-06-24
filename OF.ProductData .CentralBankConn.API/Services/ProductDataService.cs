@@ -366,6 +366,15 @@ public class ProductDataService : IProductDataService
                                         Name = "Monthly Cashback Program",
                                         Description = "Earn cashback on eligible transactions",
                                         Type = RewardBenefitType.Cashback,
+                                        RewardBasis = new List<string> { "TransactionVolume", "Tenure" },
+                                        Balance = new MoneyAmount
+                                        {
+                                             Amount = "100",
+                                             Currency = "SAR"
+                                        },
+                                        FrequencyPaid = FrequencyPaidType.Monthly,
+                                        PointsType = "LoyaltyPoints",
+                                        ExpiryDate = new DateTime(2026, 12, 31)
                                     }
                                 },
                                 

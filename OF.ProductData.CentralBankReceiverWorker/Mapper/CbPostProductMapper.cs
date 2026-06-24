@@ -640,6 +640,11 @@ namespace OF.ServiceInitiation.CentralBankReceiverWorker.Mappers
                         RewardBasis = src.RewardBasis != null && src.RewardBasis.Any()
                         ? string.Join(",", src.RewardBasis)
                         : null,
+                        BalanceAmount = src.Balance?.Amount,
+                        BalanceCurrency = src.Balance?.Currency,
+                        FrequencyPaid = src.FrequencyPaid?.ToString(),
+                        PointsType = src.PointsType,
+                        ExpiryDate = src.ExpiryDate
                     }
             };
 

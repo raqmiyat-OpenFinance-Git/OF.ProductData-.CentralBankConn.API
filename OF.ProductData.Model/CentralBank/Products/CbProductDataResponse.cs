@@ -613,7 +613,11 @@ public class RewardsBenefits
     public string? Description { get; set; }
     public RewardBenefitType? Type { get; set; }
     public List<string>? RewardBasis { get; set; }
-  
+    public MoneyAmount? Balance { get; set; }
+    public FrequencyPaidType? FrequencyPaid { get; set; }
+    public string? PointsType { get; set; }
+    public DateTime? ExpiryDate { get; set; }
+
 }
 
 public class CashbackBalance
