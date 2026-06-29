@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using OF.ProductData.Model.Convertor;
+using System.Text.Json.Serialization;
 
 namespace OF.ProductData.Model.CentralBank.Products;
 public class CbProductDataResponse
@@ -488,15 +489,7 @@ public class TierDetail
     public string? Currency { get; set; }
 }
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "RateType")]
-[JsonDerivedType(typeof(FixedInterest), "FixedInterest")]
-[JsonDerivedType(typeof(FixedProfit), "FixedProfit")]
-[JsonDerivedType(typeof(VariableInterest), "VariableInterest")]
-[JsonDerivedType(typeof(VariableProfit), "VariableProfit")]
-[JsonDerivedType(typeof(HybridInterest), "HybridInterest")]
-[JsonDerivedType(typeof(HybridProfit), "HybridProfit")]
-[JsonDerivedType(typeof(InterestRateOptions), "InterestRateOptions")]
-[JsonDerivedType(typeof(ProfitRateOptions), "ProfitRateOptions")]
+[JsonConverter(typeof(ProductFinanceRateConverter))]
 public abstract class ProductFinanceRate
 {
     public FinanceRateType RateType { get; set; }
@@ -611,10 +604,7 @@ public class VariableRateProfit : VariableRateBase
     public string? VariableTerm { get; set; }
 }
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "RateType")]
-[JsonDerivedType(typeof(FixedInterestRateOption), "FixedInterest")]
-[JsonDerivedType(typeof(VariableInterestRateOption), "VariableInterest")]
-[JsonDerivedType(typeof(HybridInterestRateOption), "HybridInterest")]
+[JsonConverter(typeof(InterestRateOptionBaseConverter))]
 public abstract class InterestRateOptionBase
 {
     public FinanceRateType? RateType { get; set; }
@@ -766,10 +756,7 @@ public class VariableRateInterestOption
     public string? VariableTerm { get; set; }
 }
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "RateType")]
-[JsonDerivedType(typeof(FixedProfitRateOption), "FixedProfit")]
-[JsonDerivedType(typeof(VariableProfitRateOption), "VariableProfit")]
-[JsonDerivedType(typeof(HybridProfitRateOption), "HybridProfit")]
+[JsonConverter(typeof(ProfitRateOptionBaseConverter))]
 public abstract class ProfitRateOptionBase
 {
     public FinanceRateType? RateType { get; set; }
