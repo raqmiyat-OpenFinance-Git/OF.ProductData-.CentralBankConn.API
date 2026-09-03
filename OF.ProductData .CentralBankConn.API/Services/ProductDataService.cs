@@ -402,13 +402,57 @@ public class ProductDataService : IProductDataService
         }
     }
 
-    public CbProductDataResponse ResponseProductDetails(CbsProductResponse cbProductResponse, string category, Logger logger)
+    public CbProductDataResponse ResponseProductDetails(CbsProductResponse cbProductResponse, string? category, Logger logger)
     {
         var random = new Random();
         var response = new CbProductDataResponse();
 
         try
         {
+            if (string.IsNullOrWhiteSpace(category))
+            {
+                var categories = new[]
+                {
+                    "CURRENTACCOUNT",
+                    "SAVINGSACCOUNT",
+                    "CREDITCARD",
+                    "FINANCE",
+                    "MORTGAGE"
+                };
+
+                var allProducts = new List<ProductWrapper>();
+
+                foreach (var productCategory in categories)
+                {
+                    var categoryResponse = ResponseProductDetails(cbProductResponse, productCategory, logger);
+
+                    var products = categoryResponse.Data?
+                        .SelectMany(x => x.Products ?? new List<ProductWrapper>());
+
+                    if (products != null)
+                    {
+                        allProducts.AddRange(products);
+                    }
+                }
+
+                var lfiData = new LFIData
+                {
+                    LFIId = Guid.NewGuid().ToString(),
+                    LFIBrandId = Guid.NewGuid().ToString(),
+                    Products = allProducts
+                };
+
+                return new CbProductDataResponse
+                {
+                    Data = new List<LFIData> { lfiData },
+                    Meta = new LFIMeta
+                    {
+                        TotalPages = 1,
+                        TotalRecords = allProducts.Count
+                    }
+                };
+            }
+
             var lfiDataList = new List<LFIData>();
             var lFIData = new LFIData
             {
@@ -1155,7 +1199,7 @@ public class ProductDataService : IProductDataService
                 
                 default:
                     logger.Warn($"Unknown category: {category}");
-                    return response;
+                    throw new ArgumentException($"Invalid product category: {category}");
             }
 
             product.Product = productDetails;

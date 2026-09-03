@@ -11,7 +11,7 @@ internal class ProfitRateOptionBaseConverter : JsonConverter<ProfitRateOptionBas
         using var jsonDocument = JsonDocument.ParseValue(ref reader);
         var root = jsonDocument.RootElement;
 
-        if (!root.TryGetProperty("RateType", out var rateTypeProperty))
+        if (!root.TryGetPropertyCaseInsensitive("RateType", out var rateTypeProperty))
         {
             throw new JsonException("RateType is required.");
         }

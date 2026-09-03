@@ -122,12 +122,12 @@ public class ProductDataRequestValidator : AbstractValidator<CbProductDataReques
 
 
         //accountId 
-        RuleFor(model => model.ProductCategory)
-           .Cascade(CascadeMode.Stop)
-           .NotNull().WithMessage("ProductCategory cannot be blank")
-           .NotEmpty().WithMessage("ProductCategory cannot be blank")
-           .MaximumLength(100).WithMessage("accountId length should be maximum 100 characters.")
-           .Matches("^[a-zA-Z0-9_-]*$").WithMessage("accountId must not contain special characters.");
+        //RuleFor(model => model.ProductCategory)
+        //   .Cascade(CascadeMode.Stop)
+        //   .NotNull().WithMessage("ProductCategory cannot be blank")
+        //   .NotEmpty().WithMessage("ProductCategory cannot be blank")
+        //   .MaximumLength(100).WithMessage("accountId length should be maximum 100 characters.")
+        //   .Matches("^[a-zA-Z0-9_-]*$").WithMessage("accountId must not contain special characters.");
 
         //Page
         RuleFor(model => model.PageNumber)

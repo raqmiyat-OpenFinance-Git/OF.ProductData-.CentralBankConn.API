@@ -45,7 +45,7 @@ public class ProductDataController : ControllerBase
     [Required][FromHeader(Name = "x-fapi-customer-ip-address")] string xFapiCustomerIpAddress,
 
     // ==== Query Parameters ====
-    [Required][FromQuery(Name = "ProductCategory")] string productCategory, // Enum: SavingsAccount | CurrentAccount | CreditCard | Loan | Mortgage
+    [FromQuery(Name = "ProductCategory")] string? productCategory = null, // Enum: SavingsAccount | CurrentAccount | CreditCard | Loan | Mortgage
     [FromQuery(Name = "IsShariaCompliant")] bool? isShariaCompliant = null,
     [FromQuery(Name = "LastUpdatedDateTime")] DateTime? lastUpdatedDateTime = null,
     [FromQuery(Name = "SortOrder")] string sortOrder = "asc", // Enum: asc | desc
@@ -63,7 +63,7 @@ public class ProductDataController : ControllerBase
         o3CallerInteractionId = o3CallerInteractionId?.Trim();
         o3OzoneInteractionId = o3OzoneInteractionId.Trim();
         xFapiCustomerIpAddress = xFapiCustomerIpAddress.Trim();
-        productCategory = productCategory.Trim();
+        productCategory = productCategory?.Trim();
         sortOrder = sortOrder.Trim().ToLowerInvariant();
         sortField = sortField.Trim();
         isShariaCompliant = isShariaCompliant;
@@ -96,6 +96,27 @@ public class ProductDataController : ControllerBase
             {
                 _logger.Info($"Invalid CorrelationId: {correlationId}");
                 return BadRequest(new ErrorResponse { errorCode = "400", errorMessage = $"Invalid CorrelationId: {correlationId}" });
+            }
+
+            var allowedCategories = new[]
+            {
+                "CURRENTACCOUNT",
+                "SAVINGSACCOUNT",
+                "CREDITCARD",
+                "FINANCE",
+                "MORTGAGE"
+            };
+
+            if (!string.IsNullOrWhiteSpace(productCategory))
+            {
+                if (!allowedCategories.Contains(productCategory, StringComparer.OrdinalIgnoreCase))
+                {
+                    _logger.Warn($"Invalid product category received: {productCategory}");
+
+                    return BadRequest(
+                       new ErrorResponse { errorCode = "400", errorMessage = $"Invalid ProductCategory: {productCategory}" }
+                    );
+                }
             }
 
             CbProductDataRequest centralRequest = MapHeadersToCentralRequest(xFapiCustomerIpAddress,productCategory,isShariaCompliant,lastUpdatedDateTime,page,pageSize,sortOrder,sortField,guid,
