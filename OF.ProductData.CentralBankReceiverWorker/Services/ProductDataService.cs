@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using OF.ProductData.CentralBankReceiverWorker.IServices;
+using OF.ProductData.Common.NLog;
 using OF.ProductData.Model.EFModel.Products;
 
 namespace OF.ProductData.CentralBankReceiverWorker.Services;
@@ -14,28 +15,32 @@ public class ProductDataService : IProductDataService
         _context = context;
         _dbConnection = dbConnection;
     }
-    public async Task AddProductAsync(EFProductRequest productRequest, Logger logger)
+    public async Task AddProductAsync(EFProductRequest productRequest, BaseLogger logger)
     {
+        string logPrefix = string.Empty;
+        logPrefix = $"RequestId: {productRequest.RequestId} || ";
         try
         {
             _context.ProductRequest!.Add(productRequest);
             await _context.SaveChangesAsync();
-            logger.Info($"AddProductAsync is done. RequestId: {productRequest.RequestId}");
+            logger.Info($"{logPrefix}AddProductAsync is done. RequestId: {productRequest.RequestId}");
         }
         catch (DbUpdateException dbEx)
         {
-            logger.Error(dbEx, "Database update error occurred while saving AddProductAsync.");
+            logger.Error(dbEx, $"{logPrefix}Database update error occurred while saving AddProductAsync.");
             throw;
         }
         catch (Exception ex)
         {
-            logger.Error(ex, $"RequestId: {productRequest.RequestId} || An error occurred while saving AddProductAsync.");
+            logger.Error(ex, $"{logPrefix}An error occurred while saving AddProductAsync.");
             throw;
         }
     }
 
-    public async Task AddProductResponseAsync(long id, Guid CorrelationId, List<EFProductResponse> ProductResponse, Logger logger)
+    public async Task AddProductResponseAsync(long id, Guid CorrelationId, List<EFProductResponse> ProductResponse, BaseLogger logger)
     {
+        string logPrefix = string.Empty;
+        logPrefix = $"CorrelationId: {CorrelationId} || ";
         try
         {
             if (ProductResponse == null || !ProductResponse.Any())
@@ -224,22 +229,24 @@ public class ProductDataService : IProductDataService
                 }
             }
 
-            logger.Info($"AddProductResponseAsync is done. ProductId: {ProductResponse.FirstOrDefault()!.ProductId}");
+            logger.Info($"{logPrefix}AddProductResponseAsync is done. ProductId: {ProductResponse.FirstOrDefault()!.ProductId}");
         }
         catch (DbUpdateException dbEx)
         {
-            logger.Error(dbEx, "Database update error occurred while saving AddProductResponseAsync.");
-            throw; 
+            logger.Error(dbEx, $"{logPrefix}Database update error occurred while saving AddProductResponseAsync.");
+            throw;
         }
         catch (Exception ex)
         {
-            logger.Error(ex, $"RequestId: {ProductResponse.FirstOrDefault()!.RequestId} || An error occurred while saving AddProductResponseAsync.");
+            logger.Error(ex, $"{logPrefix}RequestId: {ProductResponse.FirstOrDefault()!.RequestId} || An error occurred while saving AddProductResponseAsync.");
             throw;
         }
     }
 
-    public async Task<long> GetPostProductIdAsync(Guid correlationId, Logger logger)
+    public async Task<long> GetPostProductIdAsync(Guid correlationId, BaseLogger logger)
     {
+        string logPrefix = string.Empty;
+        logPrefix = $"CorrelationId: {correlationId} || ";
         long result = 0; // Default return value
 
         try
@@ -255,27 +262,29 @@ public class ProductDataService : IProductDataService
                 transaction: null
             );
 
-            result = dbResult ?? 0; 
+            result = dbResult ?? 0;
 
-            logger.Info($"GetPostPaymentRequestsIdAsync is done. CorrelationId: {correlationId}, Result: {result}");
+            logger.Info($"{logPrefix}GetPostPaymentRequestsIdAsync is done. Result: {result}");
         }
         catch (Exception ex)
         {
-            logger.Error(ex, $"CorrelationId: {correlationId} || An error occurred while executing GetPostPaymentRequestsIdAsync.");
+            logger.Error(ex, $"{logPrefix}An error occurred while executing GetPostPaymentRequestsIdAsync.");
             throw;
         }
         return result;
     }
 
-    public async Task<bool> UpdateProductRequestStatusAsync(long id, Guid correlationId, Logger logger)
+    public async Task<bool> UpdateProductRequestStatusAsync(long id, Guid correlationId, BaseLogger logger)
     {
+        string logPrefix = string.Empty;
+        logPrefix = $"CorrelationId: {correlationId} || ";
         try
         {
             var parameters = new DynamicParameters();
             parameters.Add("@Id", id, DbType.Int64);
             parameters.Add("@Status", "PROCESSED", DbType.String);
 
-            logger.Info($"Calling OF_UpdateProductRequests with Product: Id={id}, Status={"PROCESSED"}");
+            logger.Info($"{logPrefix}Calling OF_UpdateProductRequests with Product: Id={id}, Status={"PROCESSED"}");
 
             await _dbConnection.ExecuteAsync(
                 "OF_UpdateProductRequests",
@@ -284,12 +293,12 @@ public class ProductDataService : IProductDataService
                 commandTimeout: 1200,
                 transaction: null);
 
-            logger.Info($"Payment request updated successfully with Transaction. CorrelationId: {correlationId}, Id={id}, Status={"PROCESSED"}");
+            logger.Info($"{logPrefix}Payment request updated successfully with Transaction. Id={id}, Status={"PROCESSED"}");
             return true;
         }
         catch (Exception ex)
         {
-            logger.Error(ex, $"Error updating payment request. CorrelationId: {correlationId}, Id={id}, Status={"PROCESSED"}");
+            logger.Error(ex, $"{logPrefix}Error updating payment request. Id={id}, Status={"PROCESSED"}");
             throw;
         }
     }

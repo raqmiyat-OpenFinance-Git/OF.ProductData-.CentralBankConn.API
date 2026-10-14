@@ -12,6 +12,7 @@ using OF.ProductData.Model.CoreBank.Products;
 using System.Net;
 
 namespace OF.ProductData.CoreBankConn.API.Controllers;
+
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
@@ -36,9 +37,11 @@ public class ProductDataController : ControllerBase
     [Route("warmup")]
     public async Task<IActionResult> WarmUp()
     {
+        string logPrefix = string.Empty;
+        logPrefix = $"CorrelationId: {HttpContext.Items["X-Correlation-ID"]?.ToString() ?? "N/A"} || ";
         try
         {
-            var response = await _Service.WarmUp(_warmUpLogger.Log);
+            var response = await _Service.WarmUp(_warmUpLogger);
 
             if (response == HttpStatusCode.OK)
             {
@@ -49,7 +52,7 @@ public class ProductDataController : ControllerBase
         }
         catch (Exception ex)
         {
-            _warmUpLogger.Error(ex, $"An error occurred during the warm-up process. Exception details: {ex}");
+            _warmUpLogger.Error(ex, $"{logPrefix}An error occurred during the warm-up process. Exception details: {ex}");
             return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred during warm-up.");
         }
     }
@@ -58,6 +61,9 @@ public class ProductDataController : ControllerBase
     [Route("GetProductData")]
     public async Task<IActionResult> GetProductData(CbsProductRequest coreBankProductRequest)
     {
+        string logPrefix = string.Empty;
+        logPrefix = $"CorrelationId: {coreBankProductRequest?.CorrelationId.ToString() ?? "N/A"} || ";
+        _Logger.Info($"{logPrefix}GetProductData API Initiated.");
         var coreBankproductResponse = new ApiResult<CbsProductResponse>
         {
             Success = false,
@@ -80,7 +86,7 @@ public class ProductDataController : ControllerBase
                 {
                     await PrepareEnquiryRequest(coreBankProductRequest);
 
-                    result = await _Service.PostOnlineEnquiryAsync(coreBankProductRequest!, _Logger.Log);
+                    result = await _Service.PostOnlineEnquiryAsync(coreBankProductRequest!, _Logger);
 
                     if (!result.Success)
                     {
@@ -122,16 +128,18 @@ public class ProductDataController : ControllerBase
         }
         catch (Exception ex)
         {
-            _Logger.Error(ex);
+            _Logger.Error(ex, $"{logPrefix}An unexpected error occurred in GetProductData.");
             return BadRequest(ApiResultFactory.Failure<CbsProductResponse>("An unexpected error occurred."));
         }
     }
 
     private async Task PrepareEnquiryRequest(CbsProductRequest coreBankProductRequest)
     {
+        string logPrefix = string.Empty;
+        logPrefix = $"CorrelationId: {coreBankProductRequest?.CorrelationId.ToString() ?? "N/A"} || ";
         try
         {
-       
+
 
             coreBankProductRequest.ExternalRefNbr = await _repository
                 .GetNextSequenceNoAsync("PRODUCTENQ", coreBankProductRequest!.ExternalRefNbr, _Logger.Log);
@@ -139,7 +147,7 @@ public class ProductDataController : ControllerBase
         }
         catch (Exception ex)
         {
-            _Logger.Error(ex, $"An error occurred while preparing the enquiry request. Exception details: {ex}");
+            _Logger.Error(ex, $"{logPrefix}An error occurred while preparing the enquiry request. Exception details: {ex}");
         }
     }
 

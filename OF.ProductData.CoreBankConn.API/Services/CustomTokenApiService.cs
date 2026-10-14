@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using NLog;
+using OF.ProductData.Common.NLog;
 using OF.ProductData.Model.Common;
 using System.Net.Http.Headers;
 
@@ -10,15 +11,18 @@ namespace ConsentCoreBankAPI.Services
     public class CustomTokenApiService(HttpClient httpClient, IOptions<ApiHeaderParams> apiHeaderParams) : ICustomTokenApiService
     {
         private readonly ApiHeaderParams _apiHeaderParam = apiHeaderParams.Value;
-        public async Task<CommonResponse> PostTokenAsync(string IPPReferenceNbr, string endPoint, Logger logger)
+        public async Task<CommonResponse> PostTokenAsync(string IPPReferenceNbr, string endPoint, BaseLogger logger)
         {
+            string logPrefix = string.Empty;
+            logPrefix = $"ReferenceNo: {IPPReferenceNbr} || ";
+
             CommonResponse? dynamicTokenResponse = new CommonResponse();
             dynamicTokenResponse.ResponseCode = "9999999";
             try
             {
                 if (_apiHeaderParam.DynamicTokenEnabled)
                 {
-                    logger.Debug($" ReferenceNo: {IPPReferenceNbr} || Calling core token system.");
+                    logger.Debug($"{logPrefix}Calling core token system.");
                     var requestData = new FormUrlEncodedContent(new[]
                     {
                         new KeyValuePair<string, string>("grant_type", _apiHeaderParam.grant_type!),
@@ -31,10 +35,10 @@ namespace ConsentCoreBankAPI.Services
                     };
                     request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
                     var response = await httpClient.SendAsync(request);
-                    logger.Debug($" ReferenceNo: {IPPReferenceNbr} || Sent request to token system.");
-                    logger.Debug($" ReferenceNo: {IPPReferenceNbr} || Recieved Response data :{JsonConvert.SerializeObject(response)}");
+                    logger.Debug($"{logPrefix}Sent request to token system.");
+                    logger.Debug($"{logPrefix}Recieved Response data :{JsonConvert.SerializeObject(response)}");
                     var responseBody = await response.Content.ReadAsStringAsync();
-                    logger.Debug($" IPPReferenceNo: {IPPReferenceNbr} || ReadAsStringAsync String Content: {responseBody}.");
+                    logger.Debug($"{logPrefix}ReadAsStringAsync String Content: {responseBody}.");
                     if (response.IsSuccessStatusCode)
                     {
                         dynamicTokenResponse = JsonConvert.DeserializeObject<CommonResponse>(responseBody)!;
@@ -50,7 +54,7 @@ namespace ConsentCoreBankAPI.Services
                     }
                     else
                     {
-                        logger.Error($" ReferenceNo: {IPPReferenceNbr} || Failed to fetch token. Status code: {response.StatusCode}, Reason: {response.ReasonPhrase}");
+                        logger.Error($"{logPrefix}Failed to fetch token. Status code: {response.StatusCode}, Reason: {response.ReasonPhrase}");
                         dynamicTokenResponse.ResponseContent = $"Failed to fetch token. Status code: {response.StatusCode}, Reason: {response.ReasonPhrase}";
                     }
                 }
@@ -63,7 +67,7 @@ namespace ConsentCoreBankAPI.Services
             }
             catch (Exception ex)
             {
-                logger.Error(ex, $" ReferenceNo: {IPPReferenceNbr} || An error occurred while fetching the token:  {ex.Message}");
+                logger.Error(ex, $"{logPrefix}An error occurred while fetching the token:  {ex.Message}");
                 dynamicTokenResponse.ResponseContent = ex.Message;
             }
             return dynamicTokenResponse;
@@ -71,6 +75,6 @@ namespace ConsentCoreBankAPI.Services
     }
     public interface ICustomTokenApiService
     {
-        Task<CommonResponse> PostTokenAsync(string IPPReferenceNbr, string endPoint, Logger logger);
+        Task<CommonResponse> PostTokenAsync(string IPPReferenceNbr, string endPoint, BaseLogger logger);
     }
 }

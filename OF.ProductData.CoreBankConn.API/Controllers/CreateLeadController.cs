@@ -12,6 +12,7 @@ using OF.ProductData.Model.CoreBank.Products;
 using System.Net;
 
 namespace OF.ProductData.CoreBankConn.API.Controllers;
+
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
@@ -36,9 +37,14 @@ public class CreateLeadController : ControllerBase
     [Route("warmup")]
     public async Task<IActionResult> WarmUp()
     {
+        string logPrefix = string.Empty;
+        var correlationId = HttpContext.Items["X-Correlation-ID"]?.ToString();
+        if (!string.IsNullOrWhiteSpace(correlationId))
+            logPrefix = $"CorrelationId: {correlationId} || ";
+
         try
         {
-            var response = await _Service.WarmUp(_warmUpLogger.Log);
+            var response = await _Service.WarmUp(_warmUpLogger);
 
             if (response == HttpStatusCode.OK)
             {
@@ -49,7 +55,7 @@ public class CreateLeadController : ControllerBase
         }
         catch (Exception ex)
         {
-            _warmUpLogger.Error(ex, $"An error occurred during the warm-up process. Exception details: {ex}");
+            _warmUpLogger.Error(ex, $"{logPrefix}An error occurred during the warm-up process. Exception details: {ex}");
             return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred during warm-up.");
         }
     }
@@ -58,6 +64,10 @@ public class CreateLeadController : ControllerBase
     [Route("CreateLead")]
     public async Task<IActionResult> CreateLead(CbsCreateLeadRequest coreBankProductRequest)
     {
+        string logPrefix = string.Empty;
+        if (coreBankProductRequest != null)
+            logPrefix = $"CorrelationId: {coreBankProductRequest.CorrelationId} || ";
+
         var coreBankproductResponse = new ApiResult<CbsCreateLeadResponse>
         {
             Success = false,
@@ -80,7 +90,7 @@ public class CreateLeadController : ControllerBase
                 {
                     await PrepareEnquiryRequest(coreBankProductRequest);
 
-                    result = await _Service.PostOnlineEnquiryAsync(coreBankProductRequest!, _Logger.Log);
+                    result = await _Service.PostOnlineEnquiryAsync(coreBankProductRequest!, _Logger);
 
                     if (!result.Success)
                     {
@@ -122,16 +132,20 @@ public class CreateLeadController : ControllerBase
         }
         catch (Exception ex)
         {
-            _Logger.Error(ex);
+            _Logger.Error(ex, $"{logPrefix}An unexpected error occurred in CreateLead.");
             return BadRequest(ApiResultFactory.Failure<CbsCreateLeadResponse>("An unexpected error occurred."));
         }
     }
 
     private async Task PrepareEnquiryRequest(CbsCreateLeadRequest coreBankProductRequest)
     {
+        string logPrefix = string.Empty;
+        if (coreBankProductRequest != null)
+            logPrefix = $"CorrelationId: {coreBankProductRequest.CorrelationId} || ";
+
         try
         {
-       
+
 
             coreBankProductRequest.ExternalRefNbr = await _repository
                 .GetNextSequenceNoAsync("PRODUCTENQ", coreBankProductRequest!.ExternalRefNbr, _Logger.Log);
@@ -139,7 +153,7 @@ public class CreateLeadController : ControllerBase
         }
         catch (Exception ex)
         {
-            _Logger.Error(ex, $"An error occurred while preparing the enquiry request. Exception details: {ex}");
+            _Logger.Error(ex, $"{logPrefix}An error occurred while preparing the enquiry request. Exception details: {ex}");
         }
     }
 

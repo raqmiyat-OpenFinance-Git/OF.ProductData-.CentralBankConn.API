@@ -73,7 +73,7 @@ public class CentralBankProductDataRequestConsumer : IConsumer<CbProductDataRequ
                 RequestJson = request.RequestJson ?? string.Empty
             };
 
-            await _Service.AddProductAsync(productRequest, _logger.Log);
+            await _Service.AddProductAsync(productRequest, _logger);
         }
         catch (Exception ex)
         {

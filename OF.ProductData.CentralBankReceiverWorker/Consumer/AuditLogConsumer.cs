@@ -36,7 +36,7 @@ public class AuditLogConsumer : IConsumer<AuditLog>
     {
         try
         {
-            await _auditLogger.LogAsync(auditLog, _logger.Log);
+            await _auditLogger.LogAsync(auditLog, _logger);
             _logger.Info($"Received AuditLog - CorrelationId: {auditLog.CorrelationId}");
         }
         catch (Exception ex)

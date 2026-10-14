@@ -52,12 +52,12 @@ public class CentralBankProductDataResponseConsumer : IConsumer<CbProductRespons
             ArgumentNullException.ThrowIfNull(centralBankProductResponseWrapper);
             var response = centralBankProductResponseWrapper.centralBankProductResponse;
             CbProductDataResponse productModel = new();
-            long productRequestId = await _productService.GetPostProductIdAsync(centralBankProductResponseWrapper.CorrelationId, _logger.Log);
+            long productRequestId = await _productService.GetPostProductIdAsync(centralBankProductResponseWrapper.CorrelationId, _logger);
             var productResponse = CbPostProductMapper.MapCbPostProductResponsetToEF(centralBankProductResponseWrapper, productRequestId);
             //await Task.Delay(9000);
             await Task.Delay(3000);
-            await _productService.AddProductResponseAsync(productRequestId, centralBankProductResponseWrapper.CorrelationId, productResponse, _logger.Log);
-            await _productService.UpdateProductRequestStatusAsync(productRequestId, centralBankProductResponseWrapper.CorrelationId, _logger.Log);
+            await _productService.AddProductResponseAsync(productRequestId, centralBankProductResponseWrapper.CorrelationId, productResponse, _logger);
+            await _productService.UpdateProductRequestStatusAsync(productRequestId, centralBankProductResponseWrapper.CorrelationId, _logger    );
 
         }
         catch (Exception ex)

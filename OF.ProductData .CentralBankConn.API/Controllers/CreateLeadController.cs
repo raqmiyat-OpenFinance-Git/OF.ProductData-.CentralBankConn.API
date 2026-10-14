@@ -64,31 +64,34 @@ public class CreateLeadController : ControllerBase
             return BadRequest(new ErrorResponse { errorMessage = "Request body cannot be null." });
 
 
+        string logPrefix = string.Empty;
         string? correlationId = string.Empty;
         string requestJson = string.Empty;
         string responseJson = string.Empty;
         string endPointUrl = string.Empty;
         Guid guid = Guid.Empty;
 
+        logPrefix = $"CorrelationId: {HttpContext.Items["X-Correlation-ID"]} || ";
         if (!ModelState.IsValid)
         {
             var errors = string.Join(" | ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
-            _logger.Error($"Request validation failed: {errors}");
+            _logger.Error($"{logPrefix}Request validation failed: {errors}");
             return BadRequest(new ErrorResponse { errorCode = "401", errorMessage = $"Invalid request: {errors}" });
         }
 
         try
         {
-            _logger.Info("RetrieveProduct invoked.");
+            _logger.Info($"{logPrefix}RetrieveProduct invoked.");
 
-            _logger.Info("------------------------------------------------------------------------");
+            _logger.Info($"{logPrefix}------------------------------------------------------------------------");
 
 
             endPointUrl = UrlHelper.CombineUrl(_coreBankApis.Value.BaseUrl!, _coreBankApis.Value.LeadServiceUrl!.GetLeadUrl!);
             correlationId = HttpContext.Items["X-Correlation-ID"]?.ToString();
+            logPrefix = $"CorrelationId: {correlationId} || ";
             if (!Guid.TryParse(correlationId, out guid))
             {
-                _logger.Info($"Invalid CorrelationId: {correlationId}");
+                _logger.Info($"{logPrefix}Invalid CorrelationId: {correlationId}");
                 return BadRequest(new ErrorResponse { errorCode = "400", errorMessage = $"Invalid CorrelationId: {correlationId}" });
             }
 
@@ -107,11 +110,11 @@ public class CreateLeadController : ControllerBase
 
             requestJson = JsonConvert.SerializeObject(cbRequestDto, Formatting.Indented);
 
-            _logger.Info($"Request received:\n{requestJson}");
+            _logger.Info($"{logPrefix}Request received:\n{requestJson}");
 
             await _sendPointInitialize.PostLeadRequest!.Send(cbRequestDto);
 
-            _logger.Info($"Request send:\n{requestJson}");
+            _logger.Info($"{logPrefix}Request send:\n{requestJson}");
 
             CbsCreateLeadRequest coreRequest = new()
             {
@@ -120,10 +123,10 @@ public class CreateLeadController : ControllerBase
 
             // call internal API
 
-            _logger.Info($"CoreBank Request Received: {JsonConvert.SerializeObject(coreRequest)}");
-            var apiResult = await _service.PostCreateLeadFromCoreBankAsync(coreRequest);
+            _logger.Info($"{logPrefix}CoreBank Request Received: {JsonConvert.SerializeObject(coreRequest)}");
+            var apiResult = await _service.PostCreateLeadFromCoreBankAsync(coreRequest, _logger);
 
-            _logger.Info($"CoreBank Request send: {JsonConvert.SerializeObject(coreRequest)}");
+            _logger.Info($"{logPrefix}CoreBank Request send: {JsonConvert.SerializeObject(coreRequest)}");
 
 
             if (apiResult == null)
@@ -136,14 +139,14 @@ public class CreateLeadController : ControllerBase
             if (apiResult.Success)
             {
                 //cbResponse = _service.GetCentralBankCreateLeadResponse(apiResult.Data!, _logger.Log);
-                cbResponse = _service.GetCreateLeadResponse(apiResult.Data!, requestBody, _logger.Log);
+                cbResponse = _service.GetCreateLeadResponse(apiResult.Data!, requestBody, _logger);
                 centralBankLeadResponseWrapper.centralBankCreateLeadResponse = cbResponse;
                 //await Task.Delay(5000);
                 await _sendPointInitialize.PostLeadResponse!.Send(centralBankLeadResponseWrapper);
 
                 var response = await GetResponseObject(cbResponse);
 
-                _logger.Info("Sending response:\n" + response.ToString());
+                _logger.Info($"{logPrefix}Sending response:\n" + response.ToString());
 
                 responseJson = response.ToString();
                 stopwatch.Stop();
@@ -186,7 +189,7 @@ public class CreateLeadController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.Error(ex);
+            _logger.Error(ex, $"{logPrefix}CreateLead failed: {ex.Message}");
 
             var log = AuditLogFactory.CreateAuditLog(correlationId: guid,
                 sourceSystem: "CentralBankAPI",
@@ -213,6 +216,8 @@ public class CreateLeadController : ControllerBase
 
     private Task<JObject> GetResponseObject(CbPostCreateLeadResponse centralBankProductResponse)
     {
+        string logPrefix = string.Empty;
+        logPrefix = $"CorrelationId: {HttpContext.Items["X-Correlation-ID"]} || ";
         try
         {
             var response = JObject.FromObject(centralBankProductResponse, new Newtonsoft.Json.JsonSerializer
@@ -225,7 +230,7 @@ public class CreateLeadController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.Error(ex, "Error occurred in GetResponseObject()");
+            _logger.Error(ex, $"{logPrefix}Error occurred in GetResponseObject()");
             return Task.FromResult(new JObject());
         }
     }
@@ -238,7 +243,7 @@ public class CreateLeadController : ControllerBase
      string o3ApiOperation,
      string? o3CallerInteractionId,
      string o3OzoneInteractionId,
-     string customerIpAddress,Guid correlationId
+     string customerIpAddress, Guid correlationId
 
  )
     {
@@ -253,7 +258,7 @@ public class CreateLeadController : ControllerBase
             O3ApiOperation = o3ApiOperation.Trim(),
             O3CallerInteractionId = o3CallerInteractionId?.Trim(),
             O3OzoneInteractionId = o3OzoneInteractionId.Trim(),
-            XFapiCustomerIpAddress= customerIpAddress.Trim()
+            XFapiCustomerIpAddress = customerIpAddress.Trim()
         };
     }
 

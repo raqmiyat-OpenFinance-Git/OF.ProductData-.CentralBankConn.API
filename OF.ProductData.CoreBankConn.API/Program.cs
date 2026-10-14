@@ -207,7 +207,11 @@ public static class Program
         services.AddTransient<IProductDataService, ProductDataService>();
         services.AddTransient<ICreateLeadService, CreateLeadService>();
         services.AddTransient<ICoreBankRepository, CoreBankRepository>();
-       
+        services.AddTransient<Logger>(sp =>
+        {
+            return LogManager.GetLogger("OF.ProductData.CoreBankConn.API.Logger");
+        });
+
     }
 
     private static void RegisterSingletonServices(IServiceCollection services)

@@ -34,23 +34,25 @@ public class CreateLeadService : ICreateLeadService
     }
 
 
-    public async Task<ApiResult<CbsCreateLeadResponse>> PostCreateLeadFromCoreBankAsync(CbsCreateLeadRequest cbcreateLeadRequest)
+    public async Task<ApiResult<CbsCreateLeadResponse>> PostCreateLeadFromCoreBankAsync(CbsCreateLeadRequest cbcreateLeadRequest, BaseLogger logger)
     {
+        string logPrefix = string.Empty;
+        logPrefix = $"CorrelationId: {cbcreateLeadRequest.CorrelationId} || ";
         ApiResult<CbsCreateLeadResponse>? apiResult = null;
 
         try
         {
 
-            _logger.Info($"GetProductFromCoreBankAsync is invoked");
+            _logger.Info($"{logPrefix}GetProductFromCoreBankAsync is invoked");
             string jsonData = JsonConvert.SerializeObject(cbcreateLeadRequest, Formatting.Indented);
 
-            _logger.Info($"CorrelationId: {cbcreateLeadRequest.CorrelationId} || JsonRequestBody: {PciDssSecurity.MaskCardInDynamicJson(jsonData, _logger.Log)}");
+            _logger.Info($"{logPrefix}JsonRequestBody: {PciDssSecurity.MaskCardInDynamicJson(jsonData, _logger.Log)}");
 
 
 
             var url = UrlHelper.CombineUrl(_coreBankApis.Value.BaseUrl!, _coreBankApis.Value.LeadServiceUrl!.GetLeadUrl!);
 
-            _logger.Info($"Request Url: {url}");
+            _logger.Info($"{logPrefix}Request Url: {url}");
 
             if (string.IsNullOrWhiteSpace(url))
             {
@@ -60,7 +62,7 @@ public class CreateLeadService : ICreateLeadService
             var content = GetStringContent(jsonData, cbcreateLeadRequest.CorrelationId.ToString());
 
             _httpClient.Timeout = TimeSpan.FromSeconds(30); // or pull from config
-            _logger.Info($"CorrelationId: {cbcreateLeadRequest.CorrelationId} || Calling CoreBank API URL: {url}");
+            _logger.Info($"{logPrefix}Calling CoreBank API URL: {url}");
 
 
             var request = new HttpRequestMessage(HttpMethod.Post, url)
@@ -68,7 +70,7 @@ public class CreateLeadService : ICreateLeadService
                 Content = content
             };
             var TokenapiUrl = _coreBankApis.Value.TokenUrl?.ToString();
-            _logger.Info($"CorrelationId: {cbcreateLeadRequest?.CorrelationId} || Calling Token API URL: {TokenapiUrl}");
+            _logger.Info($"{logPrefix}Calling Token API URL: {TokenapiUrl}");
             var dynamicToken = await _Custom.PostTokenAsync(cbcreateLeadRequest?.CorrelationId.ToString()!, TokenapiUrl!, _apiHeaderParams, _logger.Log);
             request.Headers.Add("X-Correlation-ID", cbcreateLeadRequest?.CorrelationId.ToString());
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", dynamicToken.access_token);
@@ -76,11 +78,11 @@ public class CreateLeadService : ICreateLeadService
 
             HttpResponseMessage apiResponse = await _httpClient.SendAsync(request);
 
-            _logger.Info($"StatusCode: {apiResponse.StatusCode}");
+            _logger.Info($"{logPrefix}StatusCode: {apiResponse.StatusCode}");
 
             string apiResponseBody = await apiResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-            _logger.Info($"RawResponse: {apiResponseBody}");
+            _logger.Info($"{logPrefix}RawResponse: {apiResponseBody}");
 
             if (string.IsNullOrWhiteSpace(apiResponseBody))
             {
@@ -88,18 +90,18 @@ public class CreateLeadService : ICreateLeadService
             }
 
 
-            _logger.Info($"CorrelationId: {cbcreateLeadRequest!.CorrelationId} || Receiving Response data: {PciDssSecurity.MaskCardInDynamicJson(apiResponseBody, _logger.Log)}");
+            _logger.Info($"{logPrefix}Receiving Response data: {PciDssSecurity.MaskCardInDynamicJson(apiResponseBody, _logger.Log)}");
 
             if (apiResponse.IsSuccessStatusCode)
             {
-                _logger.Info($"CorrelationId: {cbcreateLeadRequest!.CorrelationId} || API Response: SUCCESS");
+                _logger.Info($"{logPrefix}API Response: SUCCESS");
 
                 var coreBankCreateLeadResponse = JsonConvert.DeserializeObject<CbsCreateLeadResponse>(apiResponseBody) ?? throw new InvalidOperationException("Deserialized coreBankCreateLeadResponse is null.");
                 apiResult = ApiResultFactory.Success(data: coreBankCreateLeadResponse!, apiResponseBody, "200");
             }
             else
             {
-                _logger.Warn($"CorrelationId: {cbcreateLeadRequest!.CorrelationId}|| ExternalRefNbr: {cbcreateLeadRequest.ExternalRefNbr} || API FAILED with status {(int)apiResponse.StatusCode} - {apiResponse.ReasonPhrase}");
+                _logger.Warn($"{logPrefix}ExternalRefNbr: {cbcreateLeadRequest.ExternalRefNbr} || API FAILED with status {(int)apiResponse.StatusCode} - {apiResponse.ReasonPhrase}");
 
                 apiResult = ApiResultFactory.Failure<CbsCreateLeadResponse>(apiResponseBody, ((int)apiResponse.StatusCode).ToString());
             }
@@ -108,7 +110,7 @@ public class CreateLeadService : ICreateLeadService
         catch (HttpRequestException ex) when (ex.StatusCode.HasValue)
         {
             _logger.Error(ex,
-            $"Method: GetProductFromCoreBankAsync || CorrelationId: {cbcreateLeadRequest.CorrelationId.ToString() ?? "N/A"} || " +
+            $"{logPrefix}Method: GetProductFromCoreBankAsync || " +
             $"HTTP error. StatusCode: {(int)(ex.StatusCode ?? 0)} - {ex.StatusCode} || Message: {ex.Message}");
 
             return ApiResultFactory.Failure<CbsCreateLeadResponse>("Internal server error", "502");
@@ -116,15 +118,16 @@ public class CreateLeadService : ICreateLeadService
 
         catch (Exception ex)
         {
-            _logger.Error(ex, $"Unhandled exception: {ex.Message}");
+            _logger.Error(ex, $"{logPrefix}Unhandled exception: {ex.Message}");
             return ApiResultFactory.Failure<CbsCreateLeadResponse>("Internal server error", "500");
         }
 
         return apiResult!;
     }
 
-    public CbPostCreateLeadResponse GetCentralBankCreateLeadResponse(CbsCreateLeadResponse cbProductResponse, Logger logger)
+    public CbPostCreateLeadResponse GetCentralBankCreateLeadResponse(CbsCreateLeadResponse cbProductResponse, BaseLogger logger)
     {
+        string logPrefix = string.Empty;
         var random = new Random();
 
         try
@@ -169,13 +172,14 @@ public class CreateLeadService : ICreateLeadService
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Error occurred in GetCentralBankCreateLeadResponse()");
+            logger.Error(ex, $"{logPrefix}Error occurred in GetCentralBankCreateLeadResponse()");
             throw;
         }
     }
 
-    public CbPostCreateLeadResponse GetCreateLeadResponse(CbsCreateLeadResponse cbProductResponse, CbPostCreateLeadRequest leadRequest, Logger logger)
+    public CbPostCreateLeadResponse GetCreateLeadResponse(CbsCreateLeadResponse cbProductResponse, CbPostCreateLeadRequest leadRequest, BaseLogger logger)
     {
+        string logPrefix = string.Empty;
         var random = new Random();
 
         try
@@ -222,7 +226,7 @@ public class CreateLeadService : ICreateLeadService
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Error occurred in GetCentralBankCreateLeadResponse()");
+            logger.Error(ex, $"{logPrefix}Error occurred in GetCentralBankCreateLeadResponse()");
             throw;
         }
     }

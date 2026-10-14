@@ -53,11 +53,11 @@ public class CentralBankCreateLeadResponseConsumer : IConsumer<CbCreateLeadRespo
             ArgumentNullException.ThrowIfNull(centralBankLeadResponseWrapper);
             var response = centralBankLeadResponseWrapper.centralBankCreateLeadResponse;
             CbsCreateLeadResponse Model = new();
-            long RequestId = await _leadService.GetPostCreateLeadIdAsync(centralBankLeadResponseWrapper.CorrelationId, _logger.Log);
+            long RequestId = await _leadService.GetPostCreateLeadIdAsync(centralBankLeadResponseWrapper.CorrelationId, _logger);
             var LeadResponse = CbPostCreateLeadMapper.MapCbPostCreateLeadResponseToEF(centralBankLeadResponseWrapper, RequestId);
             await Task.Delay(5000);
-            await _leadService.AddCreateLeadResponseAsync(RequestId, centralBankLeadResponseWrapper.CorrelationId, LeadResponse, _logger.Log);
-            await _leadService.UpdateCreateLeadRequestStatusAsync(RequestId, centralBankLeadResponseWrapper.CorrelationId, _logger.Log);
+            await _leadService.AddCreateLeadResponseAsync(RequestId, centralBankLeadResponseWrapper.CorrelationId, LeadResponse, _logger);
+            await _leadService.UpdateCreateLeadRequestStatusAsync(RequestId, centralBankLeadResponseWrapper.CorrelationId, _logger);
            
         }
         catch (Exception ex)

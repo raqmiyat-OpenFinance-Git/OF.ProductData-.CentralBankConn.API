@@ -67,12 +67,13 @@ public class ProductDataController : ControllerBase
         sortOrder = sortOrder.Trim().ToLowerInvariant();
         sortField = sortField.Trim();
         isShariaCompliant = isShariaCompliant;
-        lastUpdatedDateTime=lastUpdatedDateTime;
+        lastUpdatedDateTime = lastUpdatedDateTime;
         pageSize = pageSize;
         page = page;
 
 
         string? correlationId = string.Empty;
+        string logPrefix = string.Empty;
         string requestJson = string.Empty;
         string responseJson = string.Empty;
         string endPointUrl = string.Empty;
@@ -81,20 +82,21 @@ public class ProductDataController : ControllerBase
         if (!ModelState.IsValid)
         {
             var errors = string.Join(" | ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
-            _logger.Error($"Request validation failed: {errors}");
+            _logger.Error($"{logPrefix}Request validation failed: {errors}");
             return BadRequest(new ErrorResponse { errorCode = "401", errorMessage = $"Invalid request: {errors}" });
         }
 
         try
         {
-            _logger.Info("RetrieveProduct invoked.");
-            _logger.Info("------------------------------------------------------------------------");
+            _logger.Info($"{logPrefix}RetrieveProduct invoked.");
+            _logger.Info($"{logPrefix}------------------------------------------------------------------------");
 
             endPointUrl = UrlHelper.CombineUrl(_coreBankApis.Value.BaseUrl!, _coreBankApis.Value.ProductServiceUrl!.GetProductUrl!);
             correlationId = HttpContext.Items["X-Correlation-ID"]?.ToString();
+            logPrefix = $"CorrelationId: {correlationId} || ";
             if (!Guid.TryParse(correlationId, out guid))
             {
-                _logger.Info($"Invalid CorrelationId: {correlationId}");
+                _logger.Info($"{logPrefix}Invalid CorrelationId: {correlationId}");
                 return BadRequest(new ErrorResponse { errorCode = "400", errorMessage = $"Invalid CorrelationId: {correlationId}" });
             }
 
@@ -111,7 +113,7 @@ public class ProductDataController : ControllerBase
             {
                 if (!allowedCategories.Contains(productCategory, StringComparer.OrdinalIgnoreCase))
                 {
-                    _logger.Warn($"Invalid product category received: {productCategory}");
+                    _logger.Warn($"{logPrefix}Invalid product category received: {productCategory}");
 
                     return BadRequest(
                        new ErrorResponse { errorCode = "400", errorMessage = $"Invalid ProductCategory: {productCategory}" }
@@ -119,16 +121,16 @@ public class ProductDataController : ControllerBase
                 }
             }
 
-            CbProductDataRequest centralRequest = MapHeadersToCentralRequest(xFapiCustomerIpAddress,productCategory,isShariaCompliant,lastUpdatedDateTime,page,pageSize,sortOrder,sortField,guid,
-            o3ProviderId,o3CallerOrgId,o3CallerClientId,o3CallerSoftwareStatementId,o3ApiUri,o3ApiOperation,o3CallerInteractionId,o3OzoneInteractionId);
+            CbProductDataRequest centralRequest = MapHeadersToCentralRequest(xFapiCustomerIpAddress, productCategory, isShariaCompliant, lastUpdatedDateTime, page, pageSize, sortOrder, sortField, guid,
+            o3ProviderId, o3CallerOrgId, o3CallerClientId, o3CallerSoftwareStatementId, o3ApiUri, o3ApiOperation, o3CallerInteractionId, o3OzoneInteractionId);
 
             requestJson = JsonConvert.SerializeObject(centralRequest, Formatting.Indented);
 
-            _logger.Info($"Request received:\n{requestJson}");
+            _logger.Info($"{logPrefix}Request received:\n{requestJson}");
 
             await _sendPointInitialize.GetProductDataRequest!.Send(centralRequest);
 
-            _logger.Info($"Request send:\n{requestJson}");
+            _logger.Info($"{logPrefix}Request send:\n{requestJson}");
 
             CbsProductRequest coreRequest = new()
             {
@@ -137,10 +139,10 @@ public class ProductDataController : ControllerBase
 
             // call internal API
 
-            _logger.Info($"CoreBank Request Received: {JsonConvert.SerializeObject(coreRequest)}");
-            var apiResult = await _service.GetProductFromCoreBankAsync(coreRequest);
+            _logger.Info($"{logPrefix}CoreBank Request Received: {JsonConvert.SerializeObject(coreRequest)}");
+            var apiResult = await _service.GetProductFromCoreBankAsync(coreRequest, _logger);
 
-            _logger.Info($"CoreBank Request send: {JsonConvert.SerializeObject(coreRequest)}");
+            _logger.Info($"{logPrefix}CoreBank Request send: {JsonConvert.SerializeObject(coreRequest)}");
 
 
             if (apiResult == null)
@@ -153,14 +155,14 @@ public class ProductDataController : ControllerBase
             if (apiResult.Success)
             {
                 //cbResponse = _service.GetCentralBankProductByIdResponse(apiResult.Data!, _logger.Log);
-                cbResponse = _service.ResponseProductDetails(apiResult.Data!, productCategory, _logger.Log);
+                cbResponse = _service.ResponseProductDetails(apiResult.Data!, productCategory, _logger);
                 centralBankProductResponseWrapper.centralBankProductResponse = cbResponse;
                 //await Task.Delay(5000);
                 await _sendPointInitialize.GetProductDataResponse!.Send(centralBankProductResponseWrapper);
 
                 var response = await GetResponseObject(cbResponse);
 
-                _logger.Info("Sending response:\n" + response.ToString());
+                _logger.Info($"{logPrefix}Sending response:\n" + response.ToString());
 
                 responseJson = response.ToString();
                 stopwatch.Stop();
@@ -200,7 +202,7 @@ public class ProductDataController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.Error(ex);
+            _logger.Error(ex, $"{logPrefix}RetrieveProduct failed: {ex.Message}");
 
             var log = AuditLogFactory.CreateAuditLog(correlationId: guid,
                 sourceSystem: "CentralBankAPI",
@@ -225,6 +227,7 @@ public class ProductDataController : ControllerBase
 
     private Task<JObject> GetResponseObject(CbProductDataResponse centralBankProductResponse)
     {
+        string logPrefix = string.Empty;
         try
         {
             var response = JObject.FromObject(centralBankProductResponse, new Newtonsoft.Json.JsonSerializer
@@ -237,17 +240,17 @@ public class ProductDataController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.Error(ex, "Error occurred in GetResponseObject()");
+            _logger.Error(ex, $"{logPrefix}Error occurred in GetResponseObject()");
             return Task.FromResult(new JObject());
         }
     }
-    private CbProductDataRequest MapHeadersToCentralRequest(string customerIpAddress,string? productCategory,bool? isShariaCompliant, DateTime? lastUpdatedDateTime,int pageNumber, int pageSize,string sortOrder,string sortField,Guid correlationId,
-     string o3ProviderId, string o3CallerOrgId, string o3CallerClientId,string o3CallerSoftwareStatementId,string o3ApiUri, string o3ApiOperation,string? o3CallerInteractionId, string o3OzoneInteractionId
+    private CbProductDataRequest MapHeadersToCentralRequest(string customerIpAddress, string? productCategory, bool? isShariaCompliant, DateTime? lastUpdatedDateTime, int pageNumber, int pageSize, string sortOrder, string sortField, Guid correlationId,
+     string o3ProviderId, string o3CallerOrgId, string o3CallerClientId, string o3CallerSoftwareStatementId, string o3ApiUri, string o3ApiOperation, string? o3CallerInteractionId, string o3OzoneInteractionId
   )
     {
         return new CbProductDataRequest
         {
-         
+
             CustomerIpAddress = customerIpAddress,
             ProductCategory = productCategory,
             IsShariaCompliant = isShariaCompliant,

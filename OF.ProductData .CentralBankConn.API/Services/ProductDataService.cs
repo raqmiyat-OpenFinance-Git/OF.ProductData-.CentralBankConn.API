@@ -32,23 +32,25 @@ public class ProductDataService : IProductDataService
         _logger = logger;
     }
 
-    public async Task<ApiResult<CbsProductResponse>> GetProductFromCoreBankAsync(CbsProductRequest cbProductRequest)
+    public async Task<ApiResult<CbsProductResponse>> GetProductFromCoreBankAsync(CbsProductRequest cbProductRequest, BaseLogger logger)
     {
+        string logPrefix = string.Empty;
+        logPrefix = $"CorrelationId: {cbProductRequest.CorrelationId} || ";
         ApiResult<CbsProductResponse>? apiResult = null;
 
         try
         {
 
-            _logger.Info($"GetProductFromCoreBankAsync is invoked");
+            _logger.Info($"{logPrefix}GetProductFromCoreBankAsync is invoked");
             string jsonData = JsonConvert.SerializeObject(cbProductRequest, Formatting.Indented);
 
-            _logger.Info($"CorrelationId: {cbProductRequest.CorrelationId} || JsonRequestBody: {PciDssSecurity.MaskCardInDynamicJson(jsonData, _logger.Log)}");
+            _logger.Info($"{logPrefix}JsonRequestBody: {PciDssSecurity.MaskCardInDynamicJson(jsonData, _logger.Log)}");
 
 
 
             var url = UrlHelper.CombineUrl(_coreBankApis.Value.BaseUrl!, _coreBankApis.Value.ProductServiceUrl!.GetProductUrl!);
 
-            _logger.Info($"Request Url: {url}");
+            _logger.Info($"{logPrefix}Request Url: {url}");
 
             if (string.IsNullOrWhiteSpace(url))
             {
@@ -58,7 +60,7 @@ public class ProductDataService : IProductDataService
             var content = GetStringContent(jsonData, cbProductRequest.CorrelationId.ToString());
 
             _httpClient.Timeout = TimeSpan.FromSeconds(30); // or pull from config
-            _logger.Info($"CorrelationId: {cbProductRequest.CorrelationId} || Calling CoreBank API URL: {url}");
+            _logger.Info($"{logPrefix}Calling CoreBank API URL: {url}");
 
 
             var request = new HttpRequestMessage(HttpMethod.Post, url)
@@ -66,7 +68,7 @@ public class ProductDataService : IProductDataService
                 Content = content
             };
             var TokenapiUrl = _coreBankApis.Value.TokenUrl?.ToString();
-            _logger.Info($"CorrelationId: {cbProductRequest?.CorrelationId} || Calling Token API URL: {TokenapiUrl}");
+            _logger.Info($"{logPrefix}Calling Token API URL: {TokenapiUrl}");
             var dynamicToken = await _Custom.PostTokenAsync(cbProductRequest?.CorrelationId.ToString()!, TokenapiUrl!, _apiHeaderParams, _logger.Log);
             request.Headers.Add("X-Correlation-ID", cbProductRequest?.CorrelationId.ToString());
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", dynamicToken.access_token);
@@ -75,11 +77,11 @@ public class ProductDataService : IProductDataService
             HttpResponseMessage apiResponse = await _httpClient.SendAsync(request);
 
 
-            _logger.Info($"StatusCode: {apiResponse.StatusCode}");
+            _logger.Info($"{logPrefix}StatusCode: {apiResponse.StatusCode}");
 
             string apiResponseBody = await apiResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-            _logger.Info($"RawResponse: {apiResponseBody}");
+            _logger.Info($"{logPrefix}RawResponse: {apiResponseBody}");
 
             if (string.IsNullOrWhiteSpace(apiResponseBody))
             {
@@ -87,11 +89,11 @@ public class ProductDataService : IProductDataService
             }
 
 
-            _logger.Info($"CorrelationId: {cbProductRequest!.CorrelationId} || Receiving Response data: {PciDssSecurity.MaskCardInDynamicJson(apiResponseBody, _logger.Log)}");
+            _logger.Info($"{logPrefix}Receiving Response data: {PciDssSecurity.MaskCardInDynamicJson(apiResponseBody, _logger.Log)}");
 
             if (apiResponse.IsSuccessStatusCode)
             {
-                _logger.Info($"CorrelationId: {cbProductRequest!.CorrelationId} || API Response: SUCCESS");
+                _logger.Info($"{logPrefix}API Response: SUCCESS");
 
                 var json = JObject.Parse(apiResponseBody);
                 var coreBankProductResponse = json["data"]?.ToObject<CbsProductResponse>() ?? throw new InvalidOperationException("Deserialized coreBankProductResponse is null.");
@@ -99,7 +101,7 @@ public class ProductDataService : IProductDataService
             }
             else
             {
-                _logger.Warn($"CorrelationId: {cbProductRequest!.CorrelationId}|| ExternalRefNbr: {cbProductRequest.ExternalRefNbr} || API FAILED with status {(int)apiResponse.StatusCode} - {apiResponse.ReasonPhrase}");
+                _logger.Warn($"{logPrefix}ExternalRefNbr: {cbProductRequest.ExternalRefNbr} || API FAILED with status {(int)apiResponse.StatusCode} - {apiResponse.ReasonPhrase}");
 
                 apiResult = ApiResultFactory.Failure<CbsProductResponse>(apiResponseBody, ((int)apiResponse.StatusCode).ToString());
             }
@@ -108,7 +110,7 @@ public class ProductDataService : IProductDataService
         catch (HttpRequestException ex) when (ex.StatusCode.HasValue)
         {
             _logger.Error(ex,
-            $"Method: GetProductFromCoreBankAsync || CorrelationId: {cbProductRequest.CorrelationId.ToString() ?? "N/A"} || " +
+            $"{logPrefix}Method: GetProductFromCoreBankAsync || " +
             $"HTTP error. StatusCode: {(int)(ex.StatusCode ?? 0)} - {ex.StatusCode} || Message: {ex.Message}");
 
             return ApiResultFactory.Failure<CbsProductResponse>("Internal server error", "502");
@@ -116,15 +118,16 @@ public class ProductDataService : IProductDataService
 
         catch (Exception ex)
         {
-            _logger.Error(ex, $"Unhandled exception: {ex.Message}");
+            _logger.Error(ex, $"{logPrefix}Unhandled exception: {ex.Message}");
             return ApiResultFactory.Failure<CbsProductResponse>("Internal server error", "500");
         }
 
         return apiResult!;
     }
 
-    public CbProductDataResponse GetCentralBankProductByIdResponse(CbsProductResponse cbProductResponse, Logger logger)
+    public CbProductDataResponse GetCentralBankProductByIdResponse(CbsProductResponse cbProductResponse, BaseLogger logger)
     {
+        string logPrefix = string.Empty;
         var random = new Random();
 
         try
@@ -217,7 +220,7 @@ public class ProductDataService : IProductDataService
                                 CreditCard = new CreditCardData
                                 {
                                     Type = CreditCardType.Visa,
-                                   
+
                                     Documentation = new List<Document>
                                     {
                                         new Document { Type = DocumentType.ApplicationForm, Description = "Fill application form" }
@@ -305,7 +308,7 @@ public class ProductDataService : IProductDataService
                                         }
                                     }
                                 },
-                               
+
                                 Tenor = new List<Tenor>
                                 {
                                     new Tenor
@@ -377,9 +380,9 @@ public class ProductDataService : IProductDataService
                                         ExpiryDate = new DateTime(2026, 12, 31)
                                     }
                                 },
-                                
 
-                               
+
+
                             },
                             DenominationCurrency="AED"
 
@@ -397,13 +400,14 @@ public class ProductDataService : IProductDataService
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Error occurred in GetCentralBankProductByIdResponse()");
+            logger.Error(ex, $"{logPrefix}Error occurred in GetCentralBankProductByIdResponse()");
             throw;
         }
     }
 
-    public CbProductDataResponse ResponseProductDetails(CbsProductResponse cbProductResponse, string? category, Logger logger)
+    public CbProductDataResponse ResponseProductDetails(CbsProductResponse cbProductResponse, string? category, BaseLogger logger)
     {
+        string logPrefix = string.Empty;
         var random = new Random();
         var response = new CbProductDataResponse();
 
@@ -461,7 +465,7 @@ public class ProductDataService : IProductDataService
                 Products = new List<ProductWrapper>()
             };
 
-            logger.Info($"Category: {category}");
+            logger.Info($"{logPrefix}Category: {category}");
 
             // Helper functions
             string RandomAmount(int min, int max) => random.Next(min, max).ToString("N2");
@@ -514,7 +518,7 @@ public class ProductDataService : IProductDataService
                 Eligibility = commonEligibility,
                 DenominationCurrency = "AED",
             };
-           
+
 
             var productDetails = new ProductDetails();
 
@@ -547,7 +551,7 @@ public class ProductDataService : IProductDataService
                             EffectiveDate = new DateTime(1970, 1, 1),
                             ExpiryDate = new DateTime(1970, 1, 1), CalculationMethod = CalculationMethodType.AverageDailyBalance, CalculationFrequency = CalculationFrequencyType.Monthly, ApplicationFrequency = ApplicationFrequencyType.Monthly, Notes = "Competitive interest rate" } }
                     };
-                    productDetails.RewardsBenefits = new List<RewardsBenefits> { new RewardsBenefits { Name = "Cashback Rewards", Description = "Cashback rewards on every transaction", Type = RewardBenefitType.Cashback, RewardBasis = new List<string> { "Card spend" }} };
+                    productDetails.RewardsBenefits = new List<RewardsBenefits> { new RewardsBenefits { Name = "Cashback Rewards", Description = "Cashback rewards on every transaction", Type = RewardBenefitType.Cashback, RewardBasis = new List<string> { "Card spend" } } };
                     break;
 
                 case "SAVINGSACCOUNT":
@@ -576,7 +580,7 @@ public class ProductDataService : IProductDataService
                             EffectiveDate = new DateTime(1970, 1, 1),
                             ExpiryDate = new DateTime(1970, 1, 1), CalculationMethod = CalculationMethodType.AverageDailyBalance, CalculationFrequency = CalculationFrequencyType.Monthly, ApplicationFrequency = ApplicationFrequencyType.Monthly, Notes = "Competitive interest rate" } }
                     };
-                    productDetails.RewardsBenefits = new List<RewardsBenefits> { new RewardsBenefits { Name = "Welcome Bonus", Description = "Cashback rewards on every transaction", Type = RewardBenefitType.Cashback, RewardBasis = new List<string> { "First deposit" }} };
+                    productDetails.RewardsBenefits = new List<RewardsBenefits> { new RewardsBenefits { Name = "Welcome Bonus", Description = "Cashback rewards on every transaction", Type = RewardBenefitType.Cashback, RewardBasis = new List<string> { "First deposit" } } };
                     break;
 
                 case "CREDITCARD":
@@ -1196,7 +1200,7 @@ public class ProductDataService : IProductDataService
                             }
                     };
                     break;
-                
+
                 default:
                     logger.Warn($"Unknown category: {category}");
                     throw new ArgumentException($"Invalid product category: {category}");

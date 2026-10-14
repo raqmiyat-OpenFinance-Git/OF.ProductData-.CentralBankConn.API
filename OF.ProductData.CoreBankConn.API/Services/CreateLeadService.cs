@@ -4,6 +4,7 @@ using NLog;
 using OF.ProductData.Common.AES;
 using OF.ProductData.Common.Custom;
 using OF.ProductData.Common.Helpers;
+using OF.ProductData.Common.NLog;
 using OF.ProductData.CoreBankConn.API.EFModel;
 using OF.ProductData.CoreBankConn.API.IServices;
 using OF.ProductData.CoreBankConn.API.Repositories;
@@ -32,7 +33,7 @@ public class CreateLeadService : ICreateLeadService
         _repository = repository;
     }
 
-    public async Task<ApiResult<CbsCreateLeadResponse>> PostOnlineEnquiryAsync(CbsCreateLeadRequest request, Logger logger)
+    public async Task<ApiResult<CbsCreateLeadResponse>> PostOnlineEnquiryAsync(CbsCreateLeadRequest request, BaseLogger logger)
     {
         bool isSuccessful = false;
         CbsCreateLeadResponse response = new();
@@ -42,6 +43,8 @@ public class CreateLeadService : ICreateLeadService
         string responsePayload = string.Empty;
         DateTime messageSentAt = DateTime.Now;
         DateTime messageReceivedAt;
+        string logPrefix = string.Empty;
+        logPrefix = $"CorrelationId: {request.CorrelationId} || ";
         try
         {
             requestPayload = JsonConvert.SerializeObject(request, Formatting.Indented);
@@ -58,7 +61,7 @@ public class CreateLeadService : ICreateLeadService
 
             responsePayload = await apiResponse.Content.ReadAsStringAsync();
 
-            logger.Debug($"CorrelationId: {request.CorrelationId}, IsSuccessStatusCode:{apiResponse.IsSuccessStatusCode}");
+            logger.Debug($"{logPrefix}IsSuccessStatusCode:{apiResponse.IsSuccessStatusCode}");
 
             if (apiResponse.IsSuccessStatusCode)
             {
@@ -67,7 +70,7 @@ public class CreateLeadService : ICreateLeadService
                 if (response == null)
                 {
 
-                    logger.Error($"CorrelationId: {request.CorrelationId} || Failed to deserialize Lead response.");
+                    logger.Error($"{logPrefix}Failed to deserialize Lead response.");
                     postStatus = PostStatus.ERROR;
                     enquiry = CreateCoreBankEnquiry(request.CorrelationId, request.ExternalRefNbr!, Utils.GetStatus(postStatus), "500", "Failed to process response.", messageSentAt, messageReceivedAt, requestPayload, responsePayload, logger);
                 }
@@ -84,7 +87,7 @@ public class CreateLeadService : ICreateLeadService
                 postStatus = PostStatus.ERROR;
                 enquiry = CreateCoreBankEnquiry(request.CorrelationId, request.ExternalRefNbr!, Utils.GetStatus(postStatus), statusCode, "API Response: FAILED", messageSentAt, messageReceivedAt, requestPayload, responsePayload, logger);
 
-                logger.Debug($"CorrelationId: {request.CorrelationId} || API Response: FAILED");
+                logger.Debug($"{logPrefix}API Response: FAILED");
             }
 
 
@@ -95,7 +98,7 @@ public class CreateLeadService : ICreateLeadService
             postStatus = PostStatus.TIMEOUT;
             enquiry = CreateCoreBankEnquiry(request.CorrelationId, request.ExternalRefNbr!, Utils.GetStatus(postStatus), "504", "Request is Timeout", messageSentAt, messageReceivedAt, requestPayload, ex.Message, logger);
 
-            logger.Error(ex, $"CorrelationId: {request.CorrelationId!} || TimeoutException: {ex.Message}");
+            logger.Error(ex, $"{logPrefix}TimeoutException: {ex.Message}");
         }
         catch (HttpRequestException ex)
         {
@@ -103,7 +106,7 @@ public class CreateLeadService : ICreateLeadService
             postStatus = PostStatus.HOST_ERROR;
             enquiry = CreateCoreBankEnquiry(request.CorrelationId, request.ExternalRefNbr!, Utils.GetStatus(postStatus), "502", "Connection failed: " + ex.Message, messageSentAt, messageReceivedAt, requestPayload, ex.Message, logger);
 
-            logger.Error(ex, $"CorrelationId: {request.CorrelationId!} || Network error or server unreachable.");
+            logger.Error(ex, $"{logPrefix}Network error or server unreachable.");
 
         }
         catch (Exception ex)
@@ -112,11 +115,11 @@ public class CreateLeadService : ICreateLeadService
             postStatus = PostStatus.ERROR;
             enquiry = CreateCoreBankEnquiry(request.CorrelationId, request.ExternalRefNbr!, Utils.GetStatus(PostStatus.ERROR), "500", "n unexpected error occurred. Contact support. " + ex.Message, messageSentAt, messageReceivedAt, requestPayload, ex.Message, logger);
 
-            logger.Error(ex, $"CorrelationId: {request.CorrelationId!} || Exception: {ex.Message}");
+            logger.Error(ex, $"{logPrefix}Exception: {ex.Message}");
         }
-        enquiry.Id = await _repository.SaveCoreBankEnquiryAsync(enquiry, logger);
+        enquiry.Id = await _repository.SaveCoreBankEnquiryAsync(enquiry, logger.Log);
 
-        logger.Info(WirteLog(logger, enquiry));
+        logger.Info($"{logPrefix}{WirteLog(logger.Log, enquiry)}");
         if (isSuccessful)
         {
             return ApiResultFactory.Success(data: response!, enquiry.ResponsePayload!, "200");
@@ -129,6 +132,7 @@ public class CreateLeadService : ICreateLeadService
     }
     private string WirteLog(Logger logger, CoreBankEnquiry enquiry)
     {
+        string logPrefix = string.Empty;
         return $@"
                     ====== CoreBankEnquiry Log ======
                     EnquiryId        : {enquiry.Id}
@@ -154,32 +158,34 @@ public class CreateLeadService : ICreateLeadService
                     ===============================";
     }
 
-    public async Task<HttpStatusCode> WarmUp(Logger logger)
+    public async Task<HttpStatusCode> WarmUp(BaseLogger logger)
     {
+        string logPrefix = string.Empty;
         try
         {
-            logger.Trace("Starting WarmUp() method.");
+            logger.Trace($"{logPrefix}Starting WarmUp() method.");
 
             HttpResponseMessage apiResponse = await _httpClient.GetAsync(_coreBankApis.Value.BaseUrl);
-            logger.Trace($"API response received with status code: {apiResponse.StatusCode}");
+            logger.Trace($"{logPrefix}API response received with status code: {apiResponse.StatusCode}");
 
             return apiResponse.StatusCode;
         }
         catch (Exception ex)
         {
-            logger.Error(ex, $"An error occurred in WarmUp(). Exception details: {ex}");
+            logger.Error(ex, $"{logPrefix}An error occurred in WarmUp(). Exception details: {ex}");
             return HttpStatusCode.InternalServerError;
         }
     }
 
-    private StringContent GetStringContent(string jsonContent, string externalRefNbr, Logger logger)
+    private StringContent GetStringContent(string jsonContent, string externalRefNbr, BaseLogger logger)
     {
+        string logPrefix = string.Empty;
         try
         {
             if (_securityParameters.IsEncrypted)
             {
-                jsonContent = _aesCbcGenericService.Encrypt(jsonContent, _securityParameters.KeyValue!, _securityParameters.InitVector!, logger);
-                logger.Debug($"ExternalRefNbr: {externalRefNbr} || Encrypted String: {jsonContent}");
+                jsonContent = _aesCbcGenericService.Encrypt(jsonContent, _securityParameters.KeyValue!, _securityParameters.InitVector!, logger.Log);
+                logger.Debug($"{logPrefix}ExternalRefNbr: {externalRefNbr} || Encrypted String: {jsonContent}");
             }
             var content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
 
@@ -191,15 +197,16 @@ public class CreateLeadService : ICreateLeadService
         }
     }
 
-    private string GetResponseString(string jsonResponse, string externalRefNbr, Logger logger)
+    private string GetResponseString(string jsonResponse, string externalRefNbr, BaseLogger logger)
     {
+        string logPrefix = string.Empty;
         try
         {
             if (_securityParameters.IsEncrypted)
             {
-                jsonResponse = _aesCbcGenericService.Decrypt(jsonResponse, _securityParameters.KeyValue!, _securityParameters.InitVector!, logger);
+                jsonResponse = _aesCbcGenericService.Decrypt(jsonResponse, _securityParameters.KeyValue!, _securityParameters.InitVector!, logger.Log);
             }
-            logger.Debug($" ExternalRefNbr: {externalRefNbr} || Core Response data: {jsonResponse}");
+            logger.Debug($"{logPrefix} ExternalRefNbr: {externalRefNbr} || Core Response data: {jsonResponse}");
 
             return jsonResponse;
         }
@@ -209,9 +216,11 @@ public class CreateLeadService : ICreateLeadService
         }
     }
 
-    private CoreBankEnquiry CreateCoreBankEnquiry(Guid correlationId, string externalRefNbr, string status, string returnCode, string returnDescription, DateTime messageSentAt, DateTime messageReceivedAt, string requestPayload, string responsePayload, Logger logger)
+    private CoreBankEnquiry CreateCoreBankEnquiry(Guid correlationId, string externalRefNbr, string status, string returnCode, string returnDescription, DateTime messageSentAt, DateTime messageReceivedAt, string requestPayload, string responsePayload, BaseLogger logger)
     {
         CoreBankEnquiry coreBankEnquiry = new();
+        string logPrefix = string.Empty;
+        logPrefix = $"CorrelationId: {correlationId} || ";
         try
         {
 
@@ -238,7 +247,7 @@ public class CreateLeadService : ICreateLeadService
         }
         catch (Exception ex)
         {
-            logger.Error(ex, $"[CreateCoreBankEnquiry] CorrelationId: {correlationId} || Error: {ex.Message}");
+            logger.Error(ex, $"{logPrefix}[CreateCoreBankEnquiry] Error: {ex.Message}");
         }
         return coreBankEnquiry;
     }
